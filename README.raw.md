@@ -2,7 +2,7 @@
 
 Runtime type validator for vanilla JS without dependencies
 
-<!-- [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator) -->
+[![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 
 ## Get started
 
