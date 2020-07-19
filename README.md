@@ -18,93 +18,44 @@ yarn add garn-validator
 ### Use
 
 
-```jsx
-import typed from 'typed-component';
-import Component from './component';
+```js
+import check from 'garn-validator';
+const obj = {
+  a: 1,
+  b: 2
+}
 
-// check constructor
-const MyTypedComponent = typed({
-     onClick: Function
-})(Component)
+check({a:Number,b:Number})(obj);  // not throw, all ok
 
-
-```
-
-```jsx
-// check enums
-const MyTypedComponent = typed({
-     id: [Number, String]   // id could be a number or string
-})(Component)
+check({c:1})(obj);  // will throw
 
 ```
-
-```jsx
-// check enums
-const MyTypedComponent = typed({
-     id: [undefined, String]   // optional prop
-})(Component)
-
-```
-
-
-```jsx
-// check primitives
-const MyTypedComponent = typed({
-     genre: ['male', 'female']
-})(Component)
-
-```
-
-
-
-```jsx
-// check with custom logic
-const MyTypedComponent = typed({
-     age: age => age > 18
-})(Component)
-```
-
-
-```jsx
-// check string with regex
-const MyTypedComponent = typed({
-     url:  /^((https?):\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
-})(Component)
-```
-
-
 
 ## Roadmap
-- [x] check type by constructor
+- [x] check value by constructor
 - [x] enum type (oneOf & oneOfType)
 - [x] shape type
-- [x] default props
-- [x] optional prop ([undefined, String])
 - [x] custom prop validation with a function (value, propName, allProps)
 - [x] Check RegEx
-- [x] Match prop name by RegEx
+- [x] Match object key by RegEx
 - [x] arrayOf & objectOf examples
-- [ ] optional prop width ? { a?: Number}
-- [ ] instanceof
 - [ ] global and local settings to change how to warn invalid prop (throw error , log error or custom log)
-- [ ] support to handle static propTypes and static defaultProps
 
 
 
 ## All it can do
 
 ```jsx
-import check from './index';
+import check from "./index";
 
-describe('check strings', () => {
-  test('check with constructor', () => {
-
+describe("check strings", () => {
+  test("check with constructor", () => {
     expect(() => {
-      check(String)('a string');
+      check(String)("a string");
     }).not.toThrow();
 
     expect(() => {
-      check(String)('');
+      check(String)("");
     }).not.toThrow();
 
     expect(() => {
@@ -116,41 +67,48 @@ describe('check strings', () => {
     }).not.toThrow();
 
     expect(() => {
-      check(Number)('a string');
+      check(Number)("a string");
     }).toThrow();
   });
-  test('check with Regex', () => {
-
+  test("check with primitives", () => {
     expect(() => {
-      check(/string/)('a string');
+      check("a string")("a string");
     }).not.toThrow();
 
     expect(() => {
-      check(/(string)$/)('a string');
+      check("a string")("a string");
     }).not.toThrow();
 
     expect(() => {
-      check(/^(string)/)('a string');
+      check("not")("a string");
     }).toThrow();
-
   });
-  test('check with custom validator', () => {
-
+  test("check with Regex", () => {
     expect(() => {
-      check(val => val.length === 8)('a string');
+      check(/string/)("a string");
     }).not.toThrow();
 
     expect(() => {
-      check(val => val.length === 5)('a string');
+      check(/(string)$/)("a string");
+    }).not.toThrow();
+
+    expect(() => {
+      check(/^(string)/)("a string");
     }).toThrow();
-
-
   });
-})
+  test("check with custom validator", () => {
+    expect(() => {
+      check((val) => val.length === 8)("a string");
+    }).not.toThrow();
 
-describe('check numbers', () => {
-  test('check with constructor', () => {
+    expect(() => {
+      check((val) => val.includes("str"))("a string");
+    }).not.toThrow();
+  });
+});
 
+describe("check numbers", () => {
+  test("check with constructor", () => {
     expect(() => {
       check(String)(33);
     }).toThrow();
@@ -158,28 +116,109 @@ describe('check numbers', () => {
     expect(() => {
       check(Number)(33);
     }).not.toThrow();
-  });
-  test('check with custom validator', () => {
-
     expect(() => {
-      check(val => val > 0)(33);
+      check(Number)(NaN);
+    }).not.toThrow();
+    expect(() => {
+      check(Number)(Infinity);
+    }).not.toThrow();
+    expect(() => {
+      check(Number.isNaN)(NaN);
+    }).not.toThrow();
+    expect(() => {
+      check(Number.isNaN)(1);
+    }).toThrow();
+  });
+  test("check with custom validator", () => {
+    expect(() => {
+      check((val) => val > 0)(33);
     }).not.toThrow();
 
     expect(() => {
-      check(val => val < 0)(33);
+      check((val) => val < 0)(33);
     }).toThrow();
   });
-})
+});
 
-describe('check falsy', () => {
-  test('check', () => {
+describe("check with enums", () => {
+  test("optional", () => {
+    expect(() => {
+      check([undefined, 0])(undefined);
+    }).not.toThrow();
+    expect(() => {
+      check([undefined, 0])(0);
+    }).not.toThrow();
+    expect(() => {
+      check([undefined, 0])(null);
+    }).toThrow();
+  });
+  test("constructors", () => {
+    expect(() => {
+      check([String, Number])("12");
+    }).not.toThrow();
+    expect(() => {
+      check([String, Number])(12);
+    }).not.toThrow();
+     expect(() => {
+       check([String, Number])(true);
+     }).toThrow();
+  });
+});
+describe("check objects", () => {
+  const value = {
+    a: 1,
+  };
+  test("check with constructor", () => {
+    expect(() => {
+      check({ a: Number })(value); // not throw, all ok
+    }).not.toThrow();
 
+    expect(() => {
+      check({ a: Number, c: Number })(value);
+    }).toThrow();
+    expect(() => {
+      check({ a: Number, c: undefined })(value);
+    }).not.toThrow();
+  });
+
+  test("check with primitives", () => {
+    expect(() => {
+      check({ a: 2 })(value);
+    }).toThrow();
+    expect(() => {
+      check({ a: 1 })(value);
+    }).not.toThrow();
+  });
+  test("check with custom function", () => {
+    expect(() => {
+      check({ a: (val) => val < 0 })(value);
+    }).toThrow();
+    expect(() => {
+      check({ a: (val) => val > 0 })(value);
+    }).not.toThrow();
+  });
+  test("match key with regex", () => {
+    expect(() => {
+      check({ [/[a-z]/]: Number })(value);
+    }).not.toThrow();
+    expect(() => {
+      check({ [/[a-z]/]: 0 })(value);
+    }).toThrow();
+    expect(() => {
+      // only throws if the key is matched
+      check({ [/[A-Z]/]: Number })(value);
+    }).not.toThrow();
+  });
+});
+
+describe("check falsy", () => {
+  test("check", () => {
     expect(() => {
       check(null)(null);
     }).not.toThrow();
 
     expect(() => {
-      check(null)('null');
+      check(null)("null");
     }).toThrow();
 
     expect(() => {
@@ -187,10 +226,9 @@ describe('check falsy', () => {
     }).not.toThrow();
 
     expect(() => {
-      check(undefined)('undefined');
+      check(undefined)("undefined");
     }).toThrow();
   });
-
-})
+});
 
 ```
