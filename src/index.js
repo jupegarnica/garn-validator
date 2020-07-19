@@ -26,7 +26,7 @@ const checkObject = (whatToDo, types, props) => {
   const regExpToCheck = Object.keys(types).filter(isRegExp);
 
   const untestedReceivedProps = Object.keys(props).filter(
-    (propName) => !propsTypes.includes(propName)
+    (key) => !propsTypes.includes(key)
   );
   let allValids = [];
 
@@ -48,7 +48,7 @@ const checkObject = (whatToDo, types, props) => {
 export const checkShape = (types, props) =>
   checkObject(isValidType, types, props);
 
-export const isValidType = (type, value) => {
+export const isValidType = (type, value, rootValue, keyName) => {
   if (isType(RegExp)(type)) {
     return checkRegExp(type, value);
   } else if (isPrimitive(type)) {
@@ -56,11 +56,11 @@ export const isValidType = (type, value) => {
   } else if (isConstructor(type)) {
     return isType(type)(value);
   } else if (isType(Array)(type)) {
-    return type.some((_type) => isValidType(_type, value));
+    return type.some((_type) => isValidType(_type, value, rootValue, keyName));
   } else if (isType(Object)(type) && value instanceof Object) {
     return checkShape(type, value);
   } else if (isNormalFunction(type)) {
-    return type(value);
+    return type(value, rootValue, keyName);
   }
   return false;
 };

@@ -108,7 +108,7 @@ export default isValidOrThrow;
 
 ```jsx
 import check from "./index";
-import {setOnError} from "./index";
+import { setOnError } from "./index";
 
 describe("check strings", () => {
   test("check with constructor", () => {
@@ -226,6 +226,7 @@ describe("check with enums", () => {
     }).toThrow();
   });
 });
+
 describe("check objects", () => {
   const value = {
     a: 1,
@@ -268,6 +269,49 @@ describe("check objects", () => {
       check({ a: (val) => val > 0 })(value);
     }).not.toThrow();
   });
+  test("check with custom function", () => {
+    let obj = { x: "x", y: "x" };
+    expect(() => {
+      check({ x: (val, rootObject) => rootObject.y === val })(obj);
+    }).not.toThrow();
+
+    expect(() => {
+      check({
+        max: (val, rootObject) => val > rootObject.min,
+        min: (val, rootObject) => val < rootObject.max,
+      })({
+        max: 1,
+        min: -1,
+      });
+    }).not.toThrow();
+    expect(() => {
+      check({
+        max: (val, rootObject) => val > rootObject.min,
+        min: (val, rootObject) => val < rootObject.max,
+      })({
+        max: 1,
+        min: 10,
+      });
+    }).toThrow();
+
+    expect(() => {
+       check({
+         '/./': (val,_,keyName) => keyName === val,
+       })({
+         x: 'x',
+         y: 'y',
+       });
+    }).not.toThrow();
+    expect(() => {
+      check({
+        "/./": (val, _, keyName) => keyName === val,
+      })({
+        x: "x",
+        y: "x",
+      });
+    }).toThrow();
+
+  });
   test("match key with regex", () => {
     expect(() => {
       check({ [/[a-z]/]: Number })(value);
@@ -280,7 +324,7 @@ describe("check objects", () => {
       check({ [/[A-Z]/]: Number })(value);
     }).not.toThrow();
     expect(() => {
-      check({ [/[a-z]/]: Number, a:1 })(value); // not throw, all lowercase keys are numbers
+      check({ [/[a-z]/]: Number, a: 1 })(value); // not throw, all lowercase keys are numbers
     }).not.toThrow();
     expect(() => {
       check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
@@ -290,19 +334,17 @@ describe("check objects", () => {
 
 describe("composable", () => {
   test("isValidNumber", () => {
-    const isValidNumber = check(Number)
+    const isValidNumber = check(Number);
     expect(() => {
       isValidNumber(2);
     }).not.toThrow();
 
-   expect(() => {
-     isValidNumber('2');
-   }).toThrow();
-
-
+    expect(() => {
+      isValidNumber("2");
+    }).toThrow();
   });
   test("isPositive", () => {
-    const isPositive = check(v => v > 0);
+    const isPositive = check((v) => v > 0);
     expect(() => {
       isPositive(2);
     }).not.toThrow();
@@ -313,16 +355,15 @@ describe("composable", () => {
   });
 });
 
-describe('set on error', () => {
-  const isValid = setOnError(() =>  false)
+describe("set on error to isValid", () => {
+  const isValid = setOnError(() => false);
 
-  test('should return true if valid', () => {
-      expect(isValid(Number)(2)).toBe(true);
-  })
-   test("should return false if valid", () => {
-     expect(isValid(String)(2)).toBe(false);
-   });
-
+  test("should return true if valid", () => {
+    expect(isValid(Number)(2)).toBe(true);
+  });
+  test("should return false if valid", () => {
+    expect(isValid(String)(2)).toBe(false);
+  });
 });
 describe("set on error  to log error", () => {
   beforeAll(() => {
@@ -337,11 +378,10 @@ describe("set on error  to log error", () => {
     checkOrLog(Number)(2);
     expect(global.console.error).not.toHaveBeenCalled();
   });
-   test("should not log error", () => {
-     checkOrLog(String)(2);
-     expect(global.console.error).toHaveBeenCalled();
-   });
-
+  test("should not log error", () => {
+    checkOrLog(String)(2);
+    expect(global.console.error).toHaveBeenCalled();
+  });
 });
 
 ```
