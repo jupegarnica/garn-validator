@@ -20,14 +20,34 @@ yarn add garn-validator
 
 ```js
 import check from 'garn-validator';
+
+//check primitives with built in constructors
+check(Number)(2)  // not throw, all ok
+check(String)(2)  // will throw
+
+
+// check with regex
+check(/[a-z]/)('a')  // not throw, all ok
+check(/[A-Z]/)('a')  // will throw
+
+// check with custom function
+check(val => val > 0)(33)  // not throw, all ok
+check(val => val > 0)(-1)  // wil throw
+check(Number.isNaN)(NaN)  // not throw, all ok
+
+// check objects
 const obj = {
   a: 1,
   b: 2
 }
+const schema = { a:Number, b:Number }
+check(schema)(obj)  // not throw, all ok
 
-check({a:Number,b:Number})(obj);  // not throw, all ok
+check({a:1})(obj)  // not throw, all keys on the schema are valid
+check({c:1})(obj) // will throw (c is missing)
 
-check({c:1})(obj);  // will throw
+check({[/[a-z]/]:Number})({x:1,y:2,z:3, CONSTANT: 'foo'})  // not throw, all lowercase keys are numbers
+
 
 ```
 
@@ -159,14 +179,15 @@ describe("check with enums", () => {
     expect(() => {
       check([String, Number])(12);
     }).not.toThrow();
-     expect(() => {
-       check([String, Number])(true);
-     }).toThrow();
+    expect(() => {
+      check([String, Number])(true);
+    }).toThrow();
   });
 });
 describe("check objects", () => {
   const value = {
     a: 1,
+    b: 2,
   };
   test("check with constructor", () => {
     expect(() => {
@@ -179,6 +200,14 @@ describe("check objects", () => {
     expect(() => {
       check({ a: Number, c: undefined })(value);
     }).not.toThrow();
+  });
+  test("keys on the schema are required", () => {
+    expect(() => {
+      check({ a: 1 })({ a: 1, b: 2 });
+    }).not.toThrow();
+    expect(() => {
+      check({ c: 1 })({ a: 1, b: 2 });
+    }).toThrow();
   });
 
   test("check with primitives", () => {
@@ -208,6 +237,12 @@ describe("check objects", () => {
       // only throws if the key is matched
       check({ [/[A-Z]/]: Number })(value);
     }).not.toThrow();
+    expect(() => {
+      check({ [/[a-z]/]: Number, a:1 })(value); // not throw, all lowercase keys are numbers
+    }).not.toThrow();
+    expect(() => {
+      check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+    }).toThrow();
   });
 });
 

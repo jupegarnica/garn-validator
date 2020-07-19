@@ -111,14 +111,15 @@ describe("check with enums", () => {
     expect(() => {
       check([String, Number])(12);
     }).not.toThrow();
-     expect(() => {
-       check([String, Number])(true);
-     }).toThrow();
+    expect(() => {
+      check([String, Number])(true);
+    }).toThrow();
   });
 });
 describe("check objects", () => {
   const value = {
     a: 1,
+    b: 2,
   };
   test("check with constructor", () => {
     expect(() => {
@@ -131,6 +132,14 @@ describe("check objects", () => {
     expect(() => {
       check({ a: Number, c: undefined })(value);
     }).not.toThrow();
+  });
+  test("keys on the schema are required", () => {
+    expect(() => {
+      check({ a: 1 })({ a: 1, b: 2 });
+    }).not.toThrow();
+    expect(() => {
+      check({ c: 1 })({ a: 1, b: 2 });
+    }).toThrow();
   });
 
   test("check with primitives", () => {
@@ -160,6 +169,12 @@ describe("check objects", () => {
       // only throws if the key is matched
       check({ [/[A-Z]/]: Number })(value);
     }).not.toThrow();
+    expect(() => {
+      check({ [/[a-z]/]: Number, a:1 })(value); // not throw, all lowercase keys are numbers
+    }).not.toThrow();
+    expect(() => {
+      check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+    }).toThrow();
   });
 });
 
