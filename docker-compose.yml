@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  node:
+    image: node:current-alpine
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: /bin/sh -c "npm i && npm test"
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t

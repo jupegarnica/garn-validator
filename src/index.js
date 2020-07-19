@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const isType = type => val =>
   ![undefined, null].includes(val) && val.constructor === type;
 
@@ -16,6 +14,7 @@ export function isConstructor(f) {
   try {
     new f();
   } catch (err) {
+
     return false;
   }
   return true;
@@ -63,7 +62,7 @@ const checkObject = (whatToDo, types, props) => {
 export const checkShape = (types, props) =>
   checkObject(isValidType, types, props);
 
-export const isValidType = (type, value, props, propName) => {
+export const isValidType = (type, value) => {
   if (isType(RegExp)(type)) {
     return checkRegExp(type, value);
   } else if (isPrimitive(type)) {
@@ -75,33 +74,36 @@ export const isValidType = (type, value, props, propName) => {
   } else if (isType(Object)(type) && value instanceof Object) {
     return checkShape(type, value);
   } else if (isNormalFunction(type)) {
-    return type(value, props, propName);
+    return type(value);
   }
   return false;
 };
 
 const toString = JSON.stringify;
 
-const checkTypeOrWarn = (type, value, props, propName) => {
-  try {
-    return (
-      isValidType(type, value, props, propName) ||
-      error(
-        `prop ${propName} with value ${toString(
-          value,
-        )} do not match type ${toString(type)}`,
-      )
-    );
-  } catch (error) {
-    return error(error);
-  }
-};
-
-const error = (...args) => {
-  console.error(...args);
-};
-
 const checkRegExp = (regExp, value) => regExp.test(value);
 const stringToRegExp = string => new RegExp(eval(string));
 const isRegExp = value => value && /^\/.+\/$/.test(value);
 const notIsRegExp = value => !isRegExp(value);
+
+const onError = (err) => {
+  // console.error(err);
+  throw err;
+};
+const check = (type, error = onError) => (value) => {
+  try {
+    return (
+      isValidType(type, value) ||
+      error(
+        `value ${toString(
+          value,
+        )} do not match type ${(type)}`,
+      )
+    );
+  } catch (err) {
+    return error(err);
+  }
+};
+
+
+export default check;

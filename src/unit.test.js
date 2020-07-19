@@ -55,10 +55,10 @@ describe('test type by constructor', () => {
   });
 
   test('should recognize instance of classes', () => {
-    class Car {}
+    class Car { }
     expect(isType(Car)(new Car())).toBe(true);
 
-    class Porsche extends Car {}
+    class Porsche extends Car { }
 
     expect(isType(Car)(new Porsche())).toBe(false);
 
@@ -78,7 +78,7 @@ describe('isPrimitive', () => {
 
     expect(isPrimitive({})).toBe(false);
     expect(isPrimitive(/regex/)).toBe(false);
-    expect(isPrimitive(() => {})).toBe(false);
+    expect(isPrimitive(() => { })).toBe(false);
     expect(isPrimitive([])).toBe(false);
   });
 });
@@ -89,9 +89,9 @@ describe('isConstructor', () => {
     expect(isConstructor(Array)).toBe(true);
     expect(isConstructor(console)).toBe(false);
     expect(isConstructor(12)).toBe(false);
-    expect(isConstructor(() => {})).toBe(false);
-    expect(isConstructor(function name() {})).toBe(false);
-    const fn = () => {};
+    expect(isConstructor(() => { })).toBe(false);
+    expect(isConstructor(function name() { })).toBe(false);
+    const fn = () => { };
     expect(isConstructor(fn)).toBe(false);
   });
 });
@@ -99,9 +99,9 @@ describe('isConstructor', () => {
 describe('is normal function', () => {
   test('should detect if a function is anonymous or his name starts with lowercase (not a class)', () => {
     expect(isNormalFunction(Object)).toBe(false);
-    expect(isNormalFunction(() => {})).toBe(true);
-    expect(isNormalFunction(function name() {})).toBe(true);
-    expect(isNormalFunction(function() {})).toBe(true);
+    expect(isNormalFunction(() => { })).toBe(true);
+    expect(isNormalFunction(function name() { })).toBe(true);
+    expect(isNormalFunction(function () { })).toBe(true);
     expect(isNormalFunction('asdasd')).toBe(false);
     expect(isNormalFunction(1)).toBe(false);
   });

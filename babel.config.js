@@ -8,7 +8,7 @@ module.exports = function (api) {
         node: 'current',
       },
     },
-  ], '@babel/preset-react'];
+  ]];
   const plugins = ['@babel/plugin-proposal-class-properties'];
 
   return {
