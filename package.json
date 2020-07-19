@@ -1,7 +1,6 @@
 {
   "name": "typed-component",
   "version": "1.0.30",
-  "type": "module",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -24,7 +23,7 @@
     "postdeploy": "npm run publi",
     "publi": "#npm publish",
     "prepubli": "npm whoami || npm login",
-    "inject": "node insertUseTestIntoReadme.js",
+    "inject": "node makeReadme.js",
     "commit": "git add . && git commit -m 'build done'",
     "precommit": "npm run inject"
   },
