@@ -179,22 +179,27 @@ describe("check objects", () => {
   });
 });
 
-describe("check falsy", () => {
-  test("check", () => {
+describe("composable", () => {
+  test("isValidNumber", () => {
+    const isValidNumber = check(Number)
     expect(() => {
-      check(null)(null);
+      isValidNumber(2);
+    }).not.toThrow();
+
+   expect(() => {
+     isValidNumber('2');
+   }).toThrow();
+
+
+  });
+  test("isPositive", () => {
+    const isPositive = check(v => v > 0);
+    expect(() => {
+      isPositive(2);
     }).not.toThrow();
 
     expect(() => {
-      check(null)("null");
-    }).toThrow();
-
-    expect(() => {
-      check(undefined)(undefined);
-    }).not.toThrow();
-
-    expect(() => {
-      check(undefined)("undefined");
+      isPositive(-1);
     }).toThrow();
   });
 });

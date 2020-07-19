@@ -98,7 +98,7 @@ export const setOnError = (onError) => check(onError);
 
 export const isValid = setOnError(() => false);
 
-export const checkOrLog = setOnError((err) => console.error(err));
+export const isValidOrLog = setOnError((err) => console.error(err));
 
 export const isValidOrThrow = setOnError(throwOnError);
 
