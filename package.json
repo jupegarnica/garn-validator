@@ -1,5 +1,5 @@
 {
-  "name": "typed-component",
+  "name": "check-type",
   "version": "1.0.31",
   "description": "",
   "main": "dist/index.js",
@@ -51,13 +51,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jupegarnica/typed-component.git"
+    "url": "git+https://github.com/jupegarnica/check-type.git"
   },
   "keywords": [],
   "author": "jupegarnica",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jupegarnica/typed-component/issues"
+    "url": "https://github.com/jupegarnica/check-type/issues"
   },
-  "homepage": "https://github.com/jupegarnica/typed-component#readme"
+  "homepage": "https://github.com/jupegarnica/check-type#readme"
 }

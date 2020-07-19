@@ -94,5 +94,5 @@ const MyTypedComponent = typed({
 ## All it can do
 
 ```jsx
-// import(use.test.jsx)
+// import(use.test.js)
 ```
