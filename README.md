@@ -1,17 +1,17 @@
-# check-type
+# garn-validator
 
 Runtime type validator for vanilla JS without dependencies
 
-<!-- [![npm version](https://badge.fury.io/js/check-type.svg)](https://www.npmjs.com/package/check-type) -->
+<!-- [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator) -->
 
 ## Get started
 
 ```bash
-npm install check-type
+npm install garn-validator
 
 # or
 
-yarn add check-type
+yarn add garn-validator
 
 ```
 
