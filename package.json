@@ -1,6 +1,6 @@
 {
-  "name": "check-type",
-  "version": "1.0.31",
+  "name": "garn-validator",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -22,7 +22,7 @@
     "predeploy": "npm run build",
     "deploy": "npm run commit && git push origin master",
     "postdeploy": "npm run publi",
-    "publi": "#npm publish",
+    "publi": "npm publish",
     "prepubli": "npm whoami || npm login",
     "inject": "node makeReadme.js",
     "commit": "git add . && git commit -m 'build done'",
@@ -51,13 +51,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jupegarnica/check-type.git"
+    "url": "git+https://github.com/jupegarnica/garn-validator.git"
   },
   "keywords": [],
   "author": "jupegarnica",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jupegarnica/check-type/issues"
+    "url": "https://github.com/jupegarnica/garn-validator/issues"
   },
-  "homepage": "https://github.com/jupegarnica/check-type#readme"
+  "homepage": "https://github.com/jupegarnica/garn-validator#readme"
 }
