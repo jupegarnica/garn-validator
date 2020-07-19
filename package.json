@@ -1,0 +1,72 @@
+{
+  "name": "typed-component",
+  "version": "1.0.30",
+  "type": "module",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "npm run test:watch",
+    "test:dist": "jest dist",
+    "test:watch": "jest src --watchAll",
+    "postbuild": "npm run test:dist",
+    "patch": "npm version patch",
+    "postpatch": "git push origin master --tags",
+    "prebuild": "npm run patch",
+    "build": "npm run _build",
+    "env": "NODE_ENV=production || set NODE_ENV=production",
+    "_build": "rimraf dist && npm run env && babel src   --out-dir dist --source-maps",
+    "predeploy": "npm run build",
+    "deploy": "npm run commit && git push origin master",
+    "postdeploy": "npm run publi",
+    "publi": "#npm publish",
+    "prepubli": "npm whoami || npm login",
+    "inject": "node insertUseTestIntoReadme.js",
+    "commit": "git add . && git commit -m 'build done'",
+    "precommit": "npm run inject"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "rimraf": "^3.0.0",
+    "jest": "^24.9.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "storybook": "^5.1.11"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jupegarnica/typed-component.git"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "webComponents",
+    "storybook"
+  ],
+  "author": "jupegarnica",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jupegarnica/typed-component/issues"
+  },
+  "homepage": "https://github.com/jupegarnica/typed-component#readme"
+}
