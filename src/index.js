@@ -1,11 +1,10 @@
-export const isType = type => val =>
+export const isType = (type) => (val) =>
   ![undefined, null].includes(val) && val.constructor === type;
 
-export const isInstanceOf = type => val => val instanceof type;
+export const isInstanceOf = (type) => (val) => val instanceof type;
 
-export const isNormalFunction = f =>
-  typeof f === 'function' &&
-  (!f.name || f.name[0] === f.name[0].toLowerCase());
+export const isNormalFunction = (f) =>
+  typeof f === "function" && (!f.name || f.name[0] === f.name[0].toLowerCase());
 
 export function isConstructor(f) {
   // detect is a normal function (anonymous or its name starts with lowercase)
@@ -14,13 +13,12 @@ export function isConstructor(f) {
   try {
     new f();
   } catch (err) {
-
     return false;
   }
   return true;
 }
 
-export const isPrimitive = value => !(value instanceof Object);
+export const isPrimitive = (value) => !(value instanceof Object);
 // export const isPrimitive = value => Object(value) !== value;
 
 const checkObject = (whatToDo, types, props) => {
@@ -28,30 +26,18 @@ const checkObject = (whatToDo, types, props) => {
   const regExpToCheck = Object.keys(types).filter(isRegExp);
 
   const untestedReceivedProps = Object.keys(props).filter(
-    propName => !propsTypes.includes(propName),
+    (propName) => !propsTypes.includes(propName)
   );
   let allValids = [];
 
-  propsTypes.forEach(propName => {
-    allValids.push(
-      whatToDo(
-        types[propName],
-        props[propName],
-        props,
-        propName,
-      ),
-    );
+  propsTypes.forEach((propName) => {
+    allValids.push(whatToDo(types[propName], props[propName], props, propName));
   });
-  regExpToCheck.forEach(regexpString => {
-    untestedReceivedProps.forEach(propName => {
+  regExpToCheck.forEach((regexpString) => {
+    untestedReceivedProps.forEach((propName) => {
       if (stringToRegExp(regexpString).test(propName)) {
         allValids.push(
-          whatToDo(
-            types[regexpString],
-            props[propName],
-            props,
-            propName,
-          ),
+          whatToDo(types[regexpString], props[propName], props, propName)
         );
       }
     });
@@ -70,7 +56,7 @@ export const isValidType = (type, value) => {
   } else if (isConstructor(type)) {
     return isType(type)(value);
   } else if (isType(Array)(type)) {
-    return type.some(_type => isValidType(_type, value));
+    return type.some((_type) => isValidType(_type, value));
   } else if (isType(Object)(type) && value instanceof Object) {
     return checkShape(type, value);
   } else if (isNormalFunction(type)) {
@@ -82,28 +68,38 @@ export const isValidType = (type, value) => {
 const toString = JSON.stringify;
 
 const checkRegExp = (regExp, value) => regExp.test(value);
-const stringToRegExp = string => new RegExp(eval(string));
-const isRegExp = value => value && /^\/.+\/$/.test(value);
-const notIsRegExp = value => !isRegExp(value);
+const stringToRegExp = (string) => new RegExp(eval(string));
+const isRegExp = (value) => value && /^\/.+\/$/.test(value);
+const notIsRegExp = (value) => !isRegExp(value);
 
-const onError = (err) => {
+export class InvalidType extends Error {
+  constructor(...args) {
+    super(...args);
+  }
+  name = InvalidType;
+}
+
+const throwOnError = (err) => {
   // console.error(err);
-  throw err;
+  throw new InvalidType(err);
 };
-const check = (type, error = onError) => (value) => {
+const check = (error) => (type) => (value) => {
   try {
     return (
       isValidType(type, value) ||
-      error(
-        `value ${toString(
-          value,
-        )} do not match type ${(type)}`,
-      )
+      error(`value ${toString(value)} do not match type ${type}`)
     );
   } catch (err) {
     return error(err);
   }
 };
 
+export const setOnError = (onError) => check(onError);
 
-export default check;
+export const isValid = setOnError(() => false);
+
+export const checkOrLog = setOnError((err) => console.error(err));
+
+export const isValidOrThrow = setOnError(throwOnError);
+
+export default isValidOrThrow;
