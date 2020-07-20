@@ -107,9 +107,150 @@ export default isValidOrThrow;
 ## All it can do
 
 ```jsx
-import check, { setOnError, isValidOrLog } from "./index";
+import check, { setOnError } from "./index";
 
+describe("check with constructors", () => {
+  test("should work", () => {
+    expect(() => {
+      check(String)("a string");
+    }).not.toThrow();
 
+    expect(() => {
+      check(Number)(1);
+    }).not.toThrow();
+
+    expect(() => {
+      check(Boolean)(true);
+    }).not.toThrow();
+
+    expect(() => {
+      check(RegExp)(/\s/);
+    }).not.toThrow();
+
+    expect(() => {
+      check(Array)([]);
+    }).not.toThrow();
+
+    expect(() => {
+      check(Error)(new Error());
+    }).not.toThrow();
+    expect(() => {
+      check(RangeError)(new RangeError());
+    }).not.toThrow();
+    expect(() => {
+      check(Object)({});
+    }).not.toThrow();
+    expect(() => {
+      check(Date)(new Date());
+    }).not.toThrow();
+
+    expect(() => {
+      check(Map)(new Map());
+    }).not.toThrow();
+    expect(() => {
+      check(Set)(new Set());
+    }).not.toThrow();
+    expect(() => {
+      check(Symbol)(Symbol("my symbol"));
+    }).not.toThrow();
+    expect(() => {
+      class MyClass {}
+      check(MyClass)(new MyClass());
+    }).not.toThrow();
+  });
+  test("should throw", () => {
+    expect(() => {
+      check(String)(1);
+    }).toThrow();
+
+    expect(() => {
+      check(Number)("1");
+    }).toThrow();
+
+    expect(() => {
+      check(Boolean)(null);
+    }).toThrow();
+
+    expect(() => {
+      check(RegExp)("/s/");
+    }).toThrow();
+
+    expect(() => {
+      check(Array)({});
+    }).toThrow();
+
+    expect(() => {
+      check(Error)(new RangeError());
+    }).toThrow();
+    expect(() => {
+      check(Object)([]);
+    }).toThrow();
+    expect(() => {
+      check(Object)(null);
+    }).toThrow();
+
+    expect(() => {
+      check(Map)(new WeakMap());
+    }).toThrow();
+    expect(() => {
+      check(Set)(new WeakSet());
+    }).toThrow();
+  });
+});
+
+describe("check with custom validator", () => {
+  test("can return true or false ", () => {
+    expect(() => {
+      check(() => true)(33);
+    }).not.toThrow();
+    expect(() => {
+      check(() => false)(33);
+    }).toThrow();
+  });
+  test("can throw a custom error", () => {
+    expect(() => {
+      check(() => {
+        throw "ups";
+      })(33);
+    }).toThrow("ups");
+  });
+  test("by default throws TypeError", () => {
+    expect(() => {
+      check(Boolean)(33);
+    }).toThrow(TypeError);
+  });
+  test("can throw a custom type of error", () => {
+    expect(() => {
+      check((v) => {
+        if (v > 10) throw new RangeError("ups");
+      })(33);
+    }).toThrow(RangeError);
+  });
+});
+describe("check with enums", () => {
+  test("optional", () => {
+    expect(() => {
+      check([undefined, 0])(undefined);
+    }).not.toThrow();
+    expect(() => {
+      check([undefined, 0])(0);
+    }).not.toThrow();
+    expect(() => {
+      check([undefined, 0])(null);
+    }).toThrow();
+  });
+  test("constructors", () => {
+    expect(() => {
+      check([String, Number])("12");
+    }).not.toThrow();
+    expect(() => {
+      check([String, Number])(12);
+    }).not.toThrow();
+    expect(() => {
+      check([String, Number])(true);
+    }).toThrow();
+  });
+});
 describe("check strings", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -168,7 +309,6 @@ describe("check strings", () => {
     }).not.toThrow();
   });
 });
-
 describe("check numbers", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -201,61 +341,6 @@ describe("check numbers", () => {
     }).toThrow();
   });
 });
-describe("check with custom validator", ()=> {
-  test('can return true or false ', () => {
-    expect(() => {
-      check(() => true)(33);
-    }).not.toThrow();
-    expect(() => {
-      check(() => false)(33);
-    }).toThrow();
-  });
-  test("can throw a custom error", () => {
-    expect(() => {
-      check(() => {throw 'ups'})(33);
-    }).toThrow('ups');
-
-  });
-  test("by default throws TypeError", () => {
-    expect(() => {
-      check(Boolean)(33);
-    }).toThrow(TypeError);
-  });
-  test("can throw a custom type of error", () => {
-    expect(() => {
-      check((v) => {
-        if (v > 10) throw new RangeError("ups");
-      })(33);
-    }).toThrow(RangeError);
-  });
-
-
-})
-describe("check with enums", () => {
-  test("optional", () => {
-    expect(() => {
-      check([undefined, 0])(undefined);
-    }).not.toThrow();
-    expect(() => {
-      check([undefined, 0])(0);
-    }).not.toThrow();
-    expect(() => {
-      check([undefined, 0])(null);
-    }).toThrow();
-  });
-  test("constructors", () => {
-    expect(() => {
-      check([String, Number])("12");
-    }).not.toThrow();
-    expect(() => {
-      check([String, Number])(12);
-    }).not.toThrow();
-    expect(() => {
-      check([String, Number])(true);
-    }).toThrow();
-  });
-});
-
 describe("check objects", () => {
   const value = {
     a: 1,
@@ -356,6 +441,25 @@ describe("check objects", () => {
     }).not.toThrow();
     expect(() => {
       check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+    }).toThrow();
+  });
+});
+describe("ArrayOf ans objectOf", () => {
+
+  test("ArrayOf", () => {
+    expect(() => {
+      check({ [/\d/]: Number })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      check({ [/\d/]: 0 })([1, 2]);
+    }).toThrow();
+  });
+  test("objectOf", () => {
+    expect(() => {
+      check({ [/\w/]: Number })({a:1});
+    }).not.toThrow();
+    expect(() => {
+      check({ [/\w/]: 0 })({a:1});
     }).toThrow();
   });
 });
