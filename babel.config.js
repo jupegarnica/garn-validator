@@ -14,8 +14,8 @@ module.exports = function (api) {
   return {
     presets,
     plugins,
-    // exclude: ['**/*stories.js', '**/*stories.jsx'],
     minified: true,
     comments: false,
+    sourceMaps:false,
   };
 };

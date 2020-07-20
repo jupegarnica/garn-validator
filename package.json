@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "start": "docker-compose run node",
-    "test": "npm run test:watch",
-    "test:dist": "jest dist",
+    "test": "cd src && npm run test:watch",
+
     "test:watch": "jest src --watchAll",
     "postbuild": "npm run test:dist",
     "patch": "npm version patch",
@@ -18,7 +18,7 @@
     "prebuild": "npm run patch",
     "build": "npm run _build",
     "env": "NODE_ENV=production || set NODE_ENV=production",
-    "_build": "rimraf dist && npm run env && babel src   --out-dir dist --source-maps",
+    "_build": "rimraf dist && npm run env && babel src --out-dir dist --ignore \"src/*.test.js\"",
     "predeploy": "npm run build",
     "deploy": "npm run commit && git push origin master",
     "postdeploy": "npm run publi",
