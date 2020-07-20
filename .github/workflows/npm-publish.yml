@@ -21,7 +21,9 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm test
+      - run: npm run _build
+      - run: npm run test:prod
+      - run: npm run test:prod:dom
 
   publish-npm:
     needs: build
