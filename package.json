@@ -1,25 +1,25 @@
 {
   "name": "garn-validator",
   "version": "1.0.8",
-  "description": "",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "description": "Runtime type validator for vanilla JS without dependencies",
+  "main": "commonjs/index.js",
+  "module": "src/index.js",
   "files": [
-    "dist"
+    "commonjs","src"
   ],
   "scripts": {
     "start": "docker-compose run node",
     "test": "cd src && npm run test:watch",
     "test:watch": "jest src --watchAll",
-    "test:prod": "jest tests",
-    "test:prod:dom": "jest tests --config=jest.config.dom.js",
-    "#postbuild": "npm run test:prod",
+    "test:commonjs": "jest tests",
+    "test:commonjs:dom": "jest tests --config=jest.config.dom.js",
+    "#postbuild": "npm run test:commonjs",
     "release": "npm version patch",
     "postrelease": "git push origin master --tags",
     "#prebuild": "npm run release",
     "build": "npm run _build",
     "env": "NODE_ENV=production || set NODE_ENV=production",
-    "_build": "rimraf dist && npm run env && babel src --out-dir dist --ignore \"src/*.test.js\"",
+    "_build": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
     "_build:tests": "rimraf tests && npm run env && babel src --out-dir tests",
     "#predeploy": "npm run build",
     "deploy": "npm run commit && git push origin master",

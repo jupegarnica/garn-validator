@@ -1,4 +1,4 @@
-# garn-validator
+# Garn-validator
 
 Runtime type validator for vanilla JS without dependencies
 

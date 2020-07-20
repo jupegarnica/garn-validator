@@ -22,8 +22,8 @@ jobs:
           node-version: 12
       - run: npm ci
       - run: npm run _build:tests
-      - run: npm run test:prod
-      - run: npm run test:prod:dom
+      - run: npm run test:commonjs
+      - run: npm run test:commonjs:dom
 
   publish-npm:
     runs-on: ubuntu-latest
