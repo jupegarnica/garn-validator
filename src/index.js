@@ -72,23 +72,21 @@ const stringToRegExp = (string) => new RegExp(eval(string));
 const isRegExp = (value) => value && /^\/.+\/$/.test(value);
 const notIsRegExp = (value) => !isRegExp(value);
 
-export class InvalidType extends Error {
-  constructor(...args) {
-    super(...args);
-  }
-  name = InvalidType;
-}
 
+
+const isError = (e) => e && e.stack && e.message;
 const throwOnError = (err) => {
-  // console.error(err);
-  throw new InvalidType(err);
+  if (isError(err)) throw err;
+  throw new TypeError(err);
 };
 const check = (error) => (type) => (value) => {
   try {
-    return (
-      isValidType(type, value) ||
-      error(`value ${toString(value)} do not match type ${type}`)
-    );
+    let valid = isValidType(type, value);
+
+    if (valid) return valid;
+
+
+    throw (`value ${toString(value)} do not match type ${type}`);
   } catch (err) {
     return error(err);
   }
