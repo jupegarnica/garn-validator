@@ -1,22 +1,22 @@
-import check, { setOnError, isValidOrLog } from "./index";
+import check, { setOnError } from "./index";
 
 
-describe("check strings", () => {
-  test("check with constructor", () => {
+describe("check with constructors", () => {
+  test("check with vanilla constructors", () => {
     expect(() => {
       check(String)("a string");
     }).not.toThrow();
 
     expect(() => {
-      check(String)("");
+      check(Number)(1);
     }).not.toThrow();
 
     expect(() => {
-      check(String)("");
+      check(Boolean)(true);
     }).not.toThrow();
 
     expect(() => {
-      check(String)(``);
+      check(RegExp)(/\s/);
     }).not.toThrow();
 
     expect(() => {

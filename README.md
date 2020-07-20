@@ -21,7 +21,7 @@ yarn add garn-validator
 ```js
 import check from 'garn-validator';
 
-//check primitives with built in constructors
+//check primitives with built-in constructors
 check(Number)(2)  // not throw, all ok
 check(String)(2)  // will throw
 
@@ -79,7 +79,7 @@ isValidOrSendReport(Number)('3') // will send error
 
 ```
 
-### Built in behaviors
+### built-in behaviors
 
 There are 3 behaviors you can import
 

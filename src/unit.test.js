@@ -41,7 +41,7 @@ describe('test type by constructor', () => {
     // expect(isType(BigInt)(2n)).toBe(true);
   });
 
-  test('should return false for built in types', () => {
+  test('should return false for built-in types', () => {
     expect(isType(Object)('{ a: 1 }')).toBe(false);
 
     expect(isType(Boolean)('true')).toBe(false);
