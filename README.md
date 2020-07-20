@@ -295,12 +295,12 @@ describe("check objects", () => {
     }).toThrow();
 
     expect(() => {
-       check({
-         '/./': (val,_,keyName) => keyName === val,
-       })({
-         x: 'x',
-         y: 'y',
-       });
+      check({
+        "/./": (val, _, keyName) => keyName === val,
+      })({
+        x: "x",
+        y: "y",
+      });
     }).not.toThrow();
     expect(() => {
       check({
@@ -310,7 +310,6 @@ describe("check objects", () => {
         y: "x",
       });
     }).toThrow();
-
   });
   test("match key with regex", () => {
     expect(() => {
@@ -329,6 +328,49 @@ describe("check objects", () => {
     expect(() => {
       check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
     }).toThrow();
+  });
+});
+describe("check objects recursively", () => {
+  const obj = {
+    a: 1,
+    deep: {
+      x: "x",
+      deeper: {
+        y: "y",
+        method: (v) => console.log(v),
+        user: {
+          name: "garn",
+          city: {
+            name: "narnia",
+            cp: 46001,
+            country: "ESP",
+          },
+        },
+      },
+    },
+  };
+  const schema = {
+    a: Number,
+    deep: {
+      x: (val, root, key) => key === val,
+      deeper: {
+        y: "y",
+        method: Function,
+        user: {
+          name: String,
+          city: {
+            name: (v) => v.length > 3,
+            cp: [Number, String],
+            country: ["ESP", "UK"],
+          },
+        },
+      },
+    },
+  };
+  test("check big object", () => {
+    expect(() => {
+      check(schema)(obj); // not throw, all ok
+    }).not.toThrow();
   });
 });
 
