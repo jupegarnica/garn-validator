@@ -15,6 +15,7 @@
     "test:commonjs": "jest tests",
     "test:commonjs:dom": "jest tests --config=jest.config.dom.js",
     "#postbuild": "npm run test:commonjs",
+    "prerelease": "npm run readme",
     "release": "npm version patch",
     "postrelease": "git push origin master --tags",
     "#prebuild": "npm run release",
@@ -27,7 +28,8 @@
     "#postdeploy": "npm run publi",
     "publi": "npm publish",
     "#prepubli": "npm whoami || npm login",
-    "inject": "node makeReadme.js",
+    "readme": "node makeReadme.js",
+    "postreadme": "git add README.md && git commit -m 'readme updated'",
     "commit": "git add . && git commit -m 'build done'",
     "#precommit": "npm run inject"
   },

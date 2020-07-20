@@ -336,11 +336,11 @@ describe("set on error  to log error", () => {
   });
   const checkOrLog = setOnError((err) => console.error(err));
 
-  test("should log error", () => {
+  test("should not log error", () => {
     checkOrLog(Number)(2);
     expect(global.console.error).not.toHaveBeenCalled();
   });
-  test("should not log error", () => {
+  test("should log error", () => {
     checkOrLog(String)(2);
     expect(global.console.error).toHaveBeenCalled();
   });
