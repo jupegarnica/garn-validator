@@ -1,11 +1,12 @@
 {
   "name": "garn-validator",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Runtime type validator for vanilla JS without dependencies",
   "main": "commonjs/index.js",
   "module": "src/index.js",
   "files": [
-    "commonjs","src"
+    "commonjs",
+    "src"
   ],
   "scripts": {
     "start": "docker-compose run node",
