@@ -11,7 +11,7 @@
   "scripts": {
     "start": "docker-compose run node",
     "test": "cd src && npm run test:watch",
-    "test:watch": "jest src --watchAll",
+    "test:watch": "jest src --watch",
     "test:commonjs": "jest tests",
     "test:commonjs:dom": "jest tests --config=jest.config.dom.js",
     "#postbuild": "npm run test:commonjs",

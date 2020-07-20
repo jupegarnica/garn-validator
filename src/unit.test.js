@@ -30,6 +30,9 @@ describe('test type by constructor', () => {
 
     expect(isType(Array)([1, 2])).toBe(true);
     expect(isType(Array)(new Array(1, 2))).toBe(true);
+    expect(isType(ArrayBuffer)(new ArrayBuffer(8))).toBe(true);
+
+    expect(isType(Symbol)( Symbol())).toBe(true);
 
     expect(isType(Map)(new Map())).toBe(true);
     expect(isType(WeakMap)(new WeakMap())).toBe(true);
@@ -75,6 +78,8 @@ describe('isPrimitive', () => {
 
     expect(isPrimitive(undefined)).toBe(true);
     expect(isPrimitive(null)).toBe(true);
+
+    expect(isPrimitive(Symbol())).toBe(true);
 
     expect(isPrimitive({})).toBe(false);
     expect(isPrimitive(/regex/)).toBe(false);

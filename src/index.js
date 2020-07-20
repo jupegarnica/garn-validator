@@ -1,7 +1,7 @@
 export const isType = (type) => (val) =>
   ![undefined, null].includes(val) && val.constructor === type;
 
-export const isInstanceOf = (type) => (val) => val instanceof type;
+// export const isInstanceOf = (type) => (val) => val instanceof type;
 
 export const isNormalFunction = (f) =>
   typeof f === "function" && (!f.name || f.name[0] === f.name[0].toLowerCase());
@@ -9,13 +9,14 @@ export const isNormalFunction = (f) =>
 export function isConstructor(f) {
   // detect is a normal function (anonymous or its name starts with lowercase)
   if (isNormalFunction(f)) return false;
-
+  // symbols doesn't be created with new
+  if (f.name === 'Symbol') return true;
   try {
     new f();
+    return true;
   } catch (err) {
     return false;
   }
-  return true;
 }
 
 export const isPrimitive = (value) => !(value instanceof Object);
