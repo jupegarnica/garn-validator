@@ -22,5 +22,6 @@ jobs:
         npm i
         npm run _build:tests
         npm run test:prod
+        npm run test:prod:dom
       env:
         CI: true

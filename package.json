@@ -12,6 +12,7 @@
     "test": "cd src && npm run test:watch",
     "test:watch": "jest src --watchAll",
     "test:prod": "jest tests",
+    "test:prod:dom": "jest tests --config=jest.config.dom.js",
     "postbuild": "npm run test:prod",
     "patch": "npm version patch",
     "postpatch": "git push origin master --tags",
