@@ -90,7 +90,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check massive object", delta);
-      expect(delta).toBeLessThan(700);
+      expect(delta).toBeLessThan(1000);
     });
   });
 });
