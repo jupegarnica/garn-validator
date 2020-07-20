@@ -1,6 +1,6 @@
 {
   "name": "garn-validator",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -11,7 +11,6 @@
     "start": "docker-compose run node",
     "test": "cd src && npm run test:watch",
     "test:watch": "jest src --watchAll",
-    "postbuild": "npm run test:dist",
     "patch": "npm version patch",
     "postpatch": "git push origin master --tags",
     "prebuild": "npm run patch",
