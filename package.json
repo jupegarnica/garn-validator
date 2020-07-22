@@ -2,7 +2,7 @@
   "name": "garn-validator",
   "version": "1.0.14",
   "description": "Runtime type validator for vanilla JS without dependencies",
-  "main": "commonjs/index.js",
+  "main": "src/index.js",
   "module": "src/index.js",
   "browser": "commonjs/index.js",
   "files": [

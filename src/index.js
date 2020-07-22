@@ -9,7 +9,7 @@ export const isNormalFunction = (f) =>
 export function isConstructor(f) {
   // detect is a normal function (anonymous or its name starts with lowercase)
   if (isNormalFunction(f)) return false;
-  // symbols doesn't be created with new
+  // symbols are not created with new
   if (f.name === 'Symbol') return true;
   try {
     new f();
