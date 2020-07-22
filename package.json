@@ -24,18 +24,17 @@
     "build:commonjs": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
     "env": "NODE_ENV=production || set NODE_ENV=production",
 
-    "#predeploy": "npm run build",
-    "deploy": "npm run commit && git push origin master",
+    "commit": "git add commonjs && git commit -m 'build done'",
+    "predeploy": "npm run build:commonjs && npm run commit",
+    "deploy": "git push origin master",
     "#postdeploy": "npm run publi",
 
     "readme": "node makeReadme.js",
     "postreadme": "git add README.md && git commit -m 'readme updated'",
 
-    "#prepubli": "npm whoami || npm login",
-    "publi": "npm publish",
+    "prepubli": "npm whoami || npm login",
+    "publi": "npm publish"
 
-    "commit": "git add . && git commit -m 'build done'",
-    "#precommit": "npm run inject"
   },
   "devDependencies": {
     "garn-validator": "file:./",
