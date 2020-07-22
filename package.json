@@ -4,36 +4,41 @@
   "description": "Runtime type validator for vanilla JS without dependencies",
   "main": "commonjs/index.js",
   "module": "src/index.js",
+  "browser": "src/index.js",
   "files": [
-    "commonjs",
     "src"
   ],
   "scripts": {
-    "start": "docker-compose run node",
+    "run:docker": "docker-compose run node",
+
     "test": "cd src && npm run test:watch",
-    "test:watch": "jest src --watch",
-    "test:commonjs": "jest tests",
-    "test:commonjs:dom": "jest tests --config=jest.config.dom.js",
-    "#postbuild": "npm run test:commonjs",
+    "test:watch": "jest tests --watch",
+    "test:prod": "jest tests",
+    "test:prod:dom": "jest tests --config=jest.config.dom.js",
+
     "prerelease": "npm run readme",
     "release": "npm version patch",
     "postrelease": "git push origin master --tags",
-    "#prebuild": "npm run release",
-    "build": "npm run _build",
+
+    "build": "npm run build:commonjs",
+    "build:commonjs": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
     "env": "NODE_ENV=production || set NODE_ENV=production",
-    "_build": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
-    "_build:tests": "rimraf tests && npm run env && babel src --out-dir tests",
+
     "#predeploy": "npm run build",
     "deploy": "npm run commit && git push origin master",
     "#postdeploy": "npm run publi",
-    "publi": "npm publish",
-    "#prepubli": "npm whoami || npm login",
+
     "readme": "node makeReadme.js",
     "postreadme": "git add README.md && git commit -m 'readme updated'",
+
+    "#prepubli": "npm whoami || npm login",
+    "publi": "npm publish",
+
     "commit": "git add . && git commit -m 'build done'",
     "#precommit": "npm run inject"
   },
   "devDependencies": {
+    "garn-validator": "file:./",
     "@babel/cli": "^7.6.2",
     "@babel/core": "^7.6.2",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
@@ -58,7 +63,12 @@
     "type": "git",
     "url": "git+https://github.com/jupegarnica/garn-validator.git"
   },
-  "keywords": [],
+  "keywords": [
+    "type",
+    "validator",
+    "schema",
+    "type-checker"
+  ],
   "author": "jupegarnica",
   "license": "ISC",
   "bugs": {

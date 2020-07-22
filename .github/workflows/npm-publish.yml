@@ -21,9 +21,9 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm run _build:tests
-      - run: npm run test:commonjs
-      - run: npm run test:commonjs:dom
+      - run: npm run build:commonjs:tests
+      - run: npm run test:prod
+      - run: npm run test:prod:dom
 
   publish-npm:
     runs-on: ubuntu-latest
@@ -34,7 +34,7 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npm run _build
+      - run: npm run build:commonjs
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
@@ -48,7 +48,7 @@ jobs:
   #         node-version: 12
   #         registry-url: https://npm.pkg.github.com/
   #     - run: npm ci
-  #     - run: npm run _build
+  #     - run: npm run build:commonjs
   #     - run: npm publish
   #       env:
   #         NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

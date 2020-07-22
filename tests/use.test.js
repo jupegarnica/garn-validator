@@ -1,4 +1,4 @@
-import check, { setOnError } from "./index";
+import check, { setOnError } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {

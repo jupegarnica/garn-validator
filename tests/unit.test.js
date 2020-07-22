@@ -4,7 +4,7 @@ import {
   isConstructor,
   isValidType,
   isNormalFunction,
-} from './index';
+}  from "garn-validator";
 
 describe('test type by constructor', () => {
   test('should return true for basic JS types', () => {

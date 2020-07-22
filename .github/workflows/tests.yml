@@ -20,8 +20,8 @@ jobs:
     - name: build and test
       run: |
         npm i
-        npm run _build:tests
-        npm run test:commonjs
-        npm run test:commonjs:dom
+        npm run build:commonjs:tests
+        npm run test:prod
+        npm run test:prod:dom
       env:
         CI: true

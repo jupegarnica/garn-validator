@@ -1,4 +1,4 @@
-import check from "./index";
+import check from "garn-validator";
 import massiveObj1Mb from '../data/data.js';
 
 describe("speed tests", () => {
