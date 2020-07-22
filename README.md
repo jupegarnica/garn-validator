@@ -1,24 +1,52 @@
 # Garn-validator
 
-Runtime type validator for vanilla JS without dependencies
+Ultra fast runtime type validator for vanilla JS without dependencies.
 
 [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 
-## Get started
+# Features
+
+- Ultra light and fast: 3kB unzip && none dependencies
+- Support for checking primitives values and objects with schemas
+- Simple use and learn
+- Custom behaviors (3 built-in)
+- Works with ESModules or CommonJS from node 8.x to latests
+
+# Get started
+
+## Node.js
+
+The library is tested in node 8.x to 14.x
+
+### Install
 
 ```bash
 npm install garn-validator
+# or yarn add garn-validator
+```
+#### Import with ES Modules
 
-# or
-
-yarn add garn-validator
+```js
+import isValidOrThrow from 'garn-validator'; // default export is isValidOrThrow
+// or use named exports
+import { isValidOrLog } from 'garn-validator';
 
 ```
 
-### Use
+#### Require with CommonJs
 
 ```js
-import check from 'garn-validator';
+
+const { isValidOrThrow } = require('garn-validator/commonjs');
+// or use de default export
+const isValidOrThrow = require('garn-validator/commonjs').default;
+
+```
+
+### Usage
+
+```js
+import check from 'garn-validator'; // default export is isValidOrThrow
 
 //check primitives with built-in constructors
 check(Number)(2)  // not throw, all ok
@@ -78,7 +106,7 @@ isValidOrSendReport(Number)('3') // will send error
 
 ```
 
-### built-in behaviors
+### Built-in behaviors
 
 There are 3 behaviors you can import
 
@@ -90,8 +118,25 @@ export default isValidOrThrow;
 
 ```
 
+```js
+import { isValid } from 'garn-validator';
+
+isValid(/[a-z]/)('g'); // returns true
+isValid(/[a-z]/)('G'); // returns false, not throws
+
+```
+
+```js
+import { isValidOrLog } from 'garn-validator';
+
+isValidOrLog(/[a-z]/)('g'); // do nothing (but also returns true)
+isValidOrLog(/[a-z]/)('G'); // logs error
+
+```
+
 
 ## Roadmap
+
 - [x] check value by constructor
 - [x] enum type (oneOf & oneOfType)
 - [x] shape type
@@ -99,8 +144,8 @@ export default isValidOrThrow;
 - [x] Check RegEx
 - [x] Match object key by RegEx
 - [x] setting to change behavior (throw error , log error or custom log)
-- [ ] arrayOf & objectOf examples
-
+- [x] arrayOf & objectOf examples
+- [ ] multiples validations `isValid(Number, val => val > 2)(2)`
 
 
 ## All it can do
