@@ -1,9 +1,7 @@
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
+      - 'v*'
 name: Create Release
 
 jobs:
@@ -13,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - run: npm ci
+      - run: npm run build
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

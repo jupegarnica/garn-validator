@@ -20,7 +20,7 @@ jobs:
     - name: build and test
       run: |
         npm i
-        npm run build:commonjs:tests
+        npm run build
         npm run test:prod
         npm run test:prod:dom
       env:
