@@ -3,11 +3,12 @@
   "version": "1.0.15",
   "description": "Runtime type validator for vanilla JS without dependencies",
   "main": "src/index.js",
+  "type": "commonjs",
   "module": "src/index.js",
   "browser": "commonjs/index.js",
   "files": [
-    "src",
-    "commonjs"
+    "src/index.js",
+    "commonjs(index.js"
   ],
   "scripts": {
     "run:docker": "docker-compose run node",
