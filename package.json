@@ -1,6 +1,6 @@
 {
   "name": "garn-validator",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Runtime type validator for vanilla JS without dependencies",
   "main": "commonjs/index.js",
   "module": "src/index.js",
@@ -10,31 +10,24 @@
   ],
   "scripts": {
     "run:docker": "docker-compose run node",
-
     "test": "cd src && npm run test:watch",
     "test:watch": "jest tests --watch",
     "test:prod": "jest tests",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
-
     "prerelease": "npm run readme",
     "release": "npm version patch",
     "postrelease": "git push origin master --tags",
-
     "build": "npm run build:commonjs",
     "build:commonjs": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
     "env": "NODE_ENV=production || set NODE_ENV=production",
-
     "postbuild:commonjs": "git add commonjs && git commit -m 'build done'",
     "predeploy": "npm run build:commonjs && npm run commit",
     "deploy": "git push origin master",
     "#postdeploy": "npm run publi",
-
     "readme": "node makeReadme.js",
     "postreadme": "git add README.md && git commit -m 'readme updated' || exit 0",
-
     "prepubli": "npm whoami || npm login",
     "publi": "npm publish"
-
   },
   "devDependencies": {
     "garn-validator": "file:./",
