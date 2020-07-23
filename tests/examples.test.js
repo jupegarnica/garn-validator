@@ -1,4 +1,4 @@
-import check, { setOnError } from "garn-validator";
+import check, { setOnError, isValid } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
@@ -305,7 +305,7 @@ describe("composable", () => {
 });
 
 describe("set on error to isValid", () => {
-  const isValid = setOnError(() => false);
+  // const isValid = setOnError(() => false); // import named isValid
 
   test("should return true if valid", () => {
     expect(isValid(Number)(2)).toBe(true);
@@ -322,7 +322,7 @@ describe("set on error  to log error", () => {
       log: jest.fn(),
     };
   });
-  const checkOrLog = setOnError((err) => console.error(err));
+  const checkOrLog = setOnError((err) => console.error(err)); // same as isValidOrLog
 
   test("should not log error", () => {
     checkOrLog(Number)(2);
