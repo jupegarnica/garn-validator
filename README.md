@@ -159,14 +159,6 @@ describe("check with constructors", () => {
     }).not.toThrow();
 
     expect(() => {
-      check(Number)(1);
-    }).not.toThrow();
-
-    expect(() => {
-      check(Boolean)(true);
-    }).not.toThrow();
-
-    expect(() => {
       check(RegExp)(/\s/);
     }).not.toThrow();
 
@@ -175,82 +167,46 @@ describe("check with constructors", () => {
     }).not.toThrow();
 
     expect(() => {
-      check(Error)(new Error());
-    }).not.toThrow();
-    expect(() => {
       check(RangeError)(new RangeError());
-    }).not.toThrow();
-    expect(() => {
-      check(Object)({});
-    }).not.toThrow();
-    expect(() => {
-      check(Date)(new Date());
     }).not.toThrow();
 
     expect(() => {
-      check(Map)(new Map());
+      check(Object)({});
     }).not.toThrow();
-    expect(() => {
-      check(Set)(new Set());
-    }).not.toThrow();
-    expect(() => {
-      check(Symbol)(Symbol("my symbol"));
-    }).not.toThrow();
+
     expect(() => {
       class MyClass {}
       check(MyClass)(new MyClass());
     }).not.toThrow();
   });
-  test("should throw", () => {
+});
+describe("check with primitives values", () => {
+  test("should work", () => {
     expect(() => {
-      check(String)(1);
-    }).toThrow();
+      check("a string")("a string");
+    }).not.toThrow();
 
     expect(() => {
-      check(Number)("1");
-    }).toThrow();
+      check(2)(2);
+    }).not.toThrow();
 
     expect(() => {
-      check(Boolean)(null);
-    }).toThrow();
-
-    expect(() => {
-      check(RegExp)("/s/");
-    }).toThrow();
-
-    expect(() => {
-      check(Array)({});
-    }).toThrow();
-
-    expect(() => {
-      check(Error)(new RangeError());
-    }).toThrow();
-    expect(() => {
-      check(Object)([]);
-    }).toThrow();
-    expect(() => {
-      check(Object)(null);
-    }).toThrow();
-
-    expect(() => {
-      check(Map)(new WeakMap());
-    }).toThrow();
-    expect(() => {
-      check(Set)(new WeakSet());
+      check(1)(2);
     }).toThrow();
   });
 });
 
 describe("check with custom validator", () => {
-  test("can return true or false ", () => {
+  test("can return true or false", () => {
     expect(() => {
       check(() => true)(33);
     }).not.toThrow();
+
     expect(() => {
       check(() => false)(33);
     }).toThrow();
   });
-  test("can throw a custom error", () => {
+  test("can throw a custom message", () => {
     expect(() => {
       check(() => {
         throw "ups";
@@ -273,195 +229,88 @@ describe("check with custom validator", () => {
 describe("check with enums", () => {
   test("optional", () => {
     expect(() => {
-      check([undefined, 0])(undefined);
+      check([1, 0])(1);
     }).not.toThrow();
+
     expect(() => {
-      check([undefined, 0])(0);
+      check([Number, String])(0);
     }).not.toThrow();
+
     expect(() => {
       check([undefined, 0])(null);
     }).toThrow();
   });
-  test("constructors", () => {
-    expect(() => {
-      check([String, Number])("12");
-    }).not.toThrow();
-    expect(() => {
-      check([String, Number])(12);
-    }).not.toThrow();
-    expect(() => {
-      check([String, Number])(true);
-    }).toThrow();
-  });
 });
-describe("check strings", () => {
+
+describe("check objects against a schema", () => {
   test("check with constructor", () => {
     expect(() => {
-      check(String)("a string");
+      check({ a: Number })({
+        a: 1,
+        b: 2,
+      }); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      check(String)("");
-    }).not.toThrow();
-
-    expect(() => {
-      check(String)("");
-    }).not.toThrow();
-
-    expect(() => {
-      check(String)(``);
-    }).not.toThrow();
-
-    expect(() => {
-      check(Number)("a string");
-    }).toThrow();
-  });
-  test("check with primitives", () => {
-    expect(() => {
-      check("a string")("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check("a string")("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check("not")("a string");
-    }).toThrow();
-  });
-  test("check with Regex", () => {
-    expect(() => {
-      check(/string/)("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check(/(string)$/)("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check(/^(string)/)("a string");
-    }).toThrow();
-  });
-  test("check with custom validator", () => {
-    expect(() => {
-      check((val) => val.length === 8)("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check((val) => val.includes("str"))("a string");
-    }).not.toThrow();
-  });
-});
-describe("check numbers", () => {
-  test("check with constructor", () => {
-    expect(() => {
-      check(String)(33);
+      check({ a: Number, c: Number })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
 
     expect(() => {
-      check(Number)(33);
-    }).not.toThrow();
-    expect(() => {
-      check(Number)(NaN);
-    }).not.toThrow();
-    expect(() => {
-      check(Number)(Infinity);
-    }).not.toThrow();
-    expect(() => {
-      check(Number.isNaN)(NaN);
-    }).not.toThrow();
-    expect(() => {
-      check(Number.isNaN)(1);
-    }).toThrow();
-  });
-  test("check with custom validator", () => {
-    expect(() => {
-      check((val) => val > 0)(33);
-    }).not.toThrow();
-
-    expect(() => {
-      check((val) => val < 0)(33);
-    }).toThrow();
-  });
-});
-describe("check objects", () => {
-  const value = {
-    a: 1,
-    b: 2,
-  };
-  test("check with constructor", () => {
-    expect(() => {
-      check({ a: Number })(value); // not throw, all ok
-    }).not.toThrow();
-
-    expect(() => {
-      check({ a: Number, c: Number })(value);
-    }).toThrow();
-    expect(() => {
-      check({ a: Number, c: undefined })(value);
+      check({ a: Number, c: undefined })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
   });
   test("keys on the schema are required", () => {
     expect(() => {
       check({ a: 1 })({ a: 1, b: 2 });
     }).not.toThrow();
+
     expect(() => {
       check({ c: 1 })({ a: 1, b: 2 });
     }).toThrow();
   });
 
-  test("check with primitives", () => {
-    expect(() => {
-      check({ a: 2 })(value);
-    }).toThrow();
-    expect(() => {
-      check({ a: 1 })(value);
-    }).not.toThrow();
-  });
+
   test("check with custom function", () => {
     expect(() => {
-      check({ a: (val) => val < 0 })(value);
+      check({ a: (val) => val < 0 })({
+        a: 1,
+      });
     }).toThrow();
-    expect(() => {
-      check({ a: (val) => val > 0 })(value);
-    }).not.toThrow();
   });
-  test("check with custom function", () => {
-    let obj = { x: "x", y: "x" };
+  test("check with custom function against the root object", () => {
+
     expect(() => {
-      check({ x: (val, rootObject) => rootObject.y === val })(obj);
+      check({ x: (val, rootObject, keyName) => rootObject.y === val })({ x: "x", y: "x" });
     }).not.toThrow();
 
     expect(() => {
       check({
-        max: (val, rootObject) => val > rootObject.min,
-        min: (val, rootObject) => val < rootObject.max,
+        max: (val, rootObject,keyName) => val > rootObject.min,
+        min: (val, rootObject,keyName) => val < rootObject.max,
       })({
         max: 1,
         min: -1,
       });
     }).not.toThrow();
-    expect(() => {
-      check({
-        max: (val, rootObject) => val > rootObject.min,
-        min: (val, rootObject) => val < rootObject.max,
-      })({
-        max: 1,
-        min: 10,
-      });
-    }).toThrow();
 
     expect(() => {
       check({
-        "/./": (val, _, keyName) => keyName === val,
+        "/./": (val, root, keyName) => keyName === val,
       })({
         x: "x",
         y: "y",
       });
     }).not.toThrow();
+
     expect(() => {
       check({
-        "/./": (val, _, keyName) => keyName === val,
+        "/./": (val, root, keyName) => keyName === val,
       })({
         x: "x",
         y: "x",
@@ -470,40 +319,52 @@ describe("check objects", () => {
   });
   test("match key with regex", () => {
     expect(() => {
-      check({ [/[a-z]/]: Number })(value);
+      check({ [/[a-z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
+
     expect(() => {
-      check({ [/[a-z]/]: 0 })(value);
+      check({ [/[a-z]/]: 0 })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
+
     expect(() => {
       // only throws if the key is matched
-      check({ [/[A-Z]/]: Number })(value);
+      check({ [/[A-Z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
+
     expect(() => {
-      check({ [/[a-z]/]: Number, a: 1 })(value); // not throw, all lowercase keys are numbers
+      check({ [/[a-z]/]: Number, a: 1 })({
+        a: 1,
+        b: 2,
+      }); // not throw, all lowercase keys are numbers
     }).not.toThrow();
+
     expect(() => {
-      check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+      check({ [/[a-z]/]: Number, a: 2 })({
+        a: 1,
+        b: 2,
+      }); // will throw (a is not 2)
     }).toThrow();
   });
 });
-describe("ArrayOf ans objectOf", () => {
-
+describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
       check({ [/\d/]: Number })([1, 2]);
     }).not.toThrow();
-    expect(() => {
-      check({ [/\d/]: 0 })([1, 2]);
-    }).toThrow();
   });
   test("objectOf", () => {
     expect(() => {
-      check({ [/\w/]: Number })({a:1});
+      check({ [/\w/]: Number })({ a: 1 });
     }).not.toThrow();
-    expect(() => {
-      check({ [/\w/]: 0 })({a:1});
-    }).toThrow();
   });
 });
 describe("check objects recursively", () => {
@@ -553,23 +414,17 @@ describe("check objects recursively", () => {
 describe("composable", () => {
   test("isValidNumber", () => {
     const isValidNumber = check(Number);
+
     expect(() => {
       isValidNumber(2);
     }).not.toThrow();
-
-    expect(() => {
-      isValidNumber("2");
-    }).toThrow();
   });
   test("isPositive", () => {
     const isPositive = check((v) => v > 0);
+
     expect(() => {
       isPositive(2);
     }).not.toThrow();
-
-    expect(() => {
-      isPositive(-1);
-    }).toThrow();
   });
 });
 
@@ -583,6 +438,7 @@ describe("set on error to isValid", () => {
     expect(isValid(String)(2)).toBe(false);
   });
 });
+
 describe("set on error  to log error", () => {
   beforeAll(() => {
     global.console = {
@@ -594,10 +450,12 @@ describe("set on error  to log error", () => {
 
   test("should not log error", () => {
     checkOrLog(Number)(2);
+
     expect(global.console.error).not.toHaveBeenCalled();
   });
   test("should log error", () => {
     checkOrLog(String)(2);
+
     expect(global.console.error).toHaveBeenCalled();
   });
 });
