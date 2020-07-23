@@ -65,6 +65,7 @@
   ],
   "author": "jupegarnica",
   "license": "ISC",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "bugs": {
     "url": "https://github.com/jupegarnica/garn-validator/issues"
   },
