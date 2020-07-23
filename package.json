@@ -1,6 +1,6 @@
 {
   "name": "garn-validator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Runtime type validator for vanilla JS without dependencies",
   "main": "src/index.js",
   "type": "commonjs",
@@ -66,7 +66,9 @@
   ],
   "author": "jupegarnica",
   "license": "ISC",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "bugs": {
     "url": "https://github.com/jupegarnica/garn-validator/issues"
   },
