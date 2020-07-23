@@ -66,7 +66,24 @@ export const isValidType = (type, value, rootValue, keyName) => {
   return false;
 };
 
-const toString = JSON.stringify;
+const parser = () => {
+  const seen = new WeakMap();
+  return (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        const oldKey = seen.get(value)
+        return `[circular reference] -> ${oldKey || 'rootObject'}`;
+      }
+      seen.set(value,key);
+    }
+    if ((typeof value === 'function' ) ) {
+      return  value.toString() ;
+    }
+    return  value ;
+
+  };
+};
+export const stringify = (val) => JSON.stringify(val, parser());
 
 const checkRegExp = (regExp, value) => regExp.test(value);
 const stringToRegExp = (string) => new RegExp(eval(string));
@@ -83,11 +100,8 @@ const throwOnError = (err) => {
 const check = (error) => (type) => (value) => {
   try {
     let valid = isValidType(type, value);
-
     if (valid) return valid;
-
-
-    throw (`value ${toString(value)} do not match type ${type}`);
+    throw (`value ${stringify(value)} do not match type ${stringify(type)}`);
   } catch (err) {
     return error(err);
   }
