@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "run:docker": "docker-compose run node",
-    "test": "cd src && npm run test:watch",
+    "test": "npm run test:watch",
     "test:watch": "jest tests --watch",
     "test:prod": "jest tests",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
