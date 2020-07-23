@@ -15,6 +15,7 @@
     "test": "npm run test:watch",
     "test:watch": "jest tests --watch",
     "test:prod": "jest tests",
+    "test:coverage": "jest tests --coverage",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
     "prerelease": "npm run readme",
     "release": "npm version patch",
