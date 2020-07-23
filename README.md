@@ -153,7 +153,7 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 
 ## All it can do
 ```js
-import check, { setOnError } from "garn-validator";
+import check, { setOnError, isValid } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
@@ -320,42 +320,51 @@ describe("check objects against a schema", () => {
       });
     }).toThrow();
   });
-  test("match key with regex", () => {
-    expect(() => {
-      check({ [/[a-z]/]: Number })({
-        a: 1,
-        b: 2,
-      });
-    }).not.toThrow();
+  describe("match key with regex", () => {
+    test('should match all keys matching the regex', () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number })({
+          a: 1,
+          b: 2,
+        });
+      }).not.toThrow();
+    });
 
-    expect(() => {
-      check({ [/[a-z]/]: 0 })({
-        a: 1,
-        b: 2,
-      });
-    }).toThrow();
+    test('should throw', () => {
+      expect(() => {
+        check({ [/[a-z]/]: 0 })({
+          a: 1,
+          b: 2,
+        });
+      }).toThrow();
+    });
 
-    expect(() => {
-      // only throws if the key is matched
-      check({ [/[A-Z]/]: Number })({
-        a: 1,
-        b: 2,
-      });
-    }).not.toThrow();
+    test('should throw only if the key is matched', () => {
+      expect(() => {
+        check({ [/[A-Z]/]: Number })({
+          a: 1,
+          b: 2,
+        });
+      }).not.toThrow();
+    });
 
+  test('not throws, all lowercase keys are numbers', () => {
     expect(() => {
       check({ [/[a-z]/]: Number, a: 1 })({
         a: 1,
         b: 2,
-      }); // not throw, all lowercase keys are numbers
+      }); //
     }).not.toThrow();
+  });
 
-    expect(() => {
-      check({ [/[a-z]/]: Number, a: 2 })({
-        a: 1,
-        b: 2,
-      }); // will throw (a is not 2)
-    }).toThrow();
+    test('should throw (a is not 2) ', () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number, a: 2 })({
+          a: 1,
+          b: 2,
+        });
+      }).toThrow();
+    });
   });
 });
 
@@ -460,7 +469,7 @@ describe("composable", () => {
 });
 
 describe("set on error to isValid", () => {
-  const isValid = setOnError(() => false);
+  // const isValid = setOnError(() => false); // import named isValid
 
   test("should return true if valid", () => {
     expect(isValid(Number)(2)).toBe(true);
@@ -477,7 +486,7 @@ describe("set on error  to log error", () => {
       log: jest.fn(),
     };
   });
-  const checkOrLog = setOnError((err) => console.error(err));
+  const checkOrLog = setOnError((err) => console.error(err)); // same as isValidOrLog
 
   test("should not log error", () => {
     checkOrLog(Number)(2);
