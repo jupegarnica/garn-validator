@@ -9,7 +9,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check with constructor", delta);
-      expect(delta).toBeLessThanOrEqual(0);
+      expect(delta).toBeLessThanOrEqual(2);
     });
     test("check with regex", () => {
       const start = Date.now();
@@ -17,7 +17,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with regex", delta);
-      expect(delta).toBeLessThanOrEqual(0);
+      expect(delta).toBeLessThanOrEqual(2);
     });
     test("check with custom validator", () => {
       const start = Date.now();
@@ -25,7 +25,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with custom validator", delta);
-      expect(delta).toBeLessThanOrEqual(0);
+      expect(delta).toBeLessThanOrEqual(2);
     });
   });
 
@@ -73,7 +73,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check big object", delta);
-      expect(delta).toBeLessThanOrEqual(0);
+      expect(delta).toBeLessThanOrEqual(2);
     });
     test("check massive object with a valid schema", () => {
       const schema = {
