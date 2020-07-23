@@ -43,7 +43,7 @@ const isValidOrThrow = require('garn-validator/commonjs').default;
 
 ```
 
-### Usage
+### Basic Use
 
 ```js
 import check from 'garn-validator'; // default export is isValidOrThrow
