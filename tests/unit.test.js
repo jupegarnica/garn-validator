@@ -5,6 +5,7 @@ import {
   isValidType,
   isNormalFunction,
   stringify,
+  isInstanceOf,
 } from "garn-validator";
 
 describe("test type by constructor", () => {
@@ -86,6 +87,8 @@ describe("isPrimitive", () => {
     expect(isPrimitive(/regex/)).toBe(false);
     expect(isPrimitive(() => {})).toBe(false);
     expect(isPrimitive([])).toBe(false);
+    expect(isPrimitive(new Map())).toBe(false);
+    expect(isPrimitive(new Set())).toBe(false);
   });
 });
 
@@ -245,8 +248,7 @@ describe("is Valid type", () => {
 });
 describe("stringify", () => {
   test("should work as expected", () => {
-    expect(stringify({ a: 1 })).toBe(`{"a":1}`
-    );
+    expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
   test("should work with primitives", () => {
     expect(stringify(1)).toBe("1");
@@ -266,11 +268,10 @@ describe("stringify", () => {
     circular.repeated = obj;
     circular.all = circular;
     expect(stringify(circular)).toMatch(
-`{"b":2,"c":3,"o":{"a":1,"circular":"[circular reference] -> o"},"repeated":"[circular reference] -> o","all":"[circular reference] -> rootObject"}`
+      `{"b":2,"c":3,"o":{"a":1,"circular":"[circular reference] -> o"},"repeated":"[circular reference] -> o","all":"[circular reference] -> rootObject"}`
     );
   });
   test("should parse functions to strings", () => {
-
     expect(stringify((x) => x * 2)).toBe(`"x=>x*2"`);
   });
 
@@ -285,7 +286,17 @@ describe("stringify", () => {
       myClass: class myClass {},
     };
     expect(stringify(obj)).toBe(
-`{"x":1,"f":"x=>x*2","constructor":"function Number() { [native code] }","classical":"function classical(arg){return arg}","myClass":"class myClass{}"}`
+      `{"x":1,"f":"x=>x*2","constructor":"function Number() { [native code] }","classical":"function classical(arg){return arg}","myClass":"class myClass{}"}`
     );
+  });
+});
+
+describe("isInstanceOf", () => {
+  test("should work", () => {
+    expect(isInstanceOf(Object)({})).toBe(true);
+    expect(isInstanceOf(Object)([])).toBe(true);
+    expect(isInstanceOf(Object)(new Map())).toBe(true);
+
+    expect(isInstanceOf(Object)(2)).toBe(false);
   });
 });

@@ -9,7 +9,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check with constructor", delta);
-      expect(delta).toBeLessThan(3);
+      expect(delta).toBeLessThanOrEqual(0);
     });
     test("check with regex", () => {
       const start = Date.now();
@@ -17,7 +17,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with regex", delta);
-      expect(delta).toBeLessThan(3);
+      expect(delta).toBeLessThanOrEqual(0);
     });
     test("check with custom validator", () => {
       const start = Date.now();
@@ -25,7 +25,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with custom validator", delta);
-      expect(delta).toBeLessThan(3);
+      expect(delta).toBeLessThanOrEqual(0);
     });
   });
 
@@ -73,7 +73,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check big object", delta);
-      expect(delta).toBeLessThan(3);
+      expect(delta).toBeLessThanOrEqual(0);
     });
     test("check massive object with a valid schema", () => {
       const schema = {
@@ -87,7 +87,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       // console.log("check massive object", delta);
-      expect(delta).toBeLessThan(1000); // usually takes 500ms but in node 8.x is slower
+      expect(delta).toBeLessThanOrEqual(1000); // usually takes 500ms but in node 8.x is slower
     });
   });
   describe("Stops in first fail", () => {
@@ -106,7 +106,7 @@ describe("speed tests", () => {
       } catch (error) {}
       expect(global.console.log).not.toHaveBeenCalled();
     });
-    test.only("should be fast", () => {
+    test("should be fast", () => {
       const schema = {
         [/./]: () => false,
         [/.*/]: () => console.log("I run?"),
@@ -119,7 +119,7 @@ describe("speed tests", () => {
       const end = Date.now();
       const delta = end - start;
       expect(global.console.log).not.toHaveBeenCalled();
-      expect(delta).toBeLessThan(3);
+      expect(delta).toBeLessThanOrEqual(50);
     });
   });
 });

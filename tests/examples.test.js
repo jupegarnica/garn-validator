@@ -90,7 +90,7 @@ describe("check with enums", () => {
   });
 });
 
-describe.only("check objects against a schema", () => {
+describe("check objects against a schema", () => {
   test("check with constructor", () => {
     expect(() => {
       check({ a: Number })({
