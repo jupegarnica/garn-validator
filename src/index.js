@@ -24,26 +24,27 @@ export const isPrimitive = (value) => !(value instanceof Object);
 
 const checkObject = (whatToDo, types, props) => {
   const propsTypes = Object.keys(types).filter(notIsRegExp);
-  const regExpToCheck = Object.keys(types).filter(isRegExp);
 
+
+  let areAllValid = propsTypes.every((propName) => {
+    return whatToDo(types[propName], props[propName], props, propName);;
+  });
+  if(!areAllValid) return areAllValid;
+
+  const regExpToCheck = Object.keys(types).filter(isRegExp);
   const untestedReceivedProps = Object.keys(props).filter(
     (key) => !propsTypes.includes(key)
   );
-  let allValids = [];
 
-  propsTypes.forEach((propName) => {
-    allValids.push(whatToDo(types[propName], props[propName], props, propName));
-  });
-  regExpToCheck.forEach((regexpString) => {
-    untestedReceivedProps.forEach((propName) => {
+  areAllValid = regExpToCheck.every((regexpString) =>
+    untestedReceivedProps.every((propName) => {
       if (stringToRegExp(regexpString).test(propName)) {
-        allValids.push(
-          whatToDo(types[regexpString], props[propName], props, propName)
-        );
+        return whatToDo(types[regexpString], props[propName], props, propName);
       }
-    });
-  });
-  return allValids.every(Boolean);
+      return true
+    })
+  );
+  return areAllValid
 };
 
 export const checkShape = (types, props) =>

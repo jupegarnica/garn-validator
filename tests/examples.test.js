@@ -90,7 +90,7 @@ describe("check with enums", () => {
   });
 });
 
-describe("check objects against a schema", () => {
+describe.only("check objects against a schema", () => {
   test("check with constructor", () => {
     expect(() => {
       check({ a: Number })({
@@ -165,42 +165,51 @@ describe("check objects against a schema", () => {
       });
     }).toThrow();
   });
-  test("match key with regex", () => {
-    expect(() => {
-      check({ [/[a-z]/]: Number })({
-        a: 1,
-        b: 2,
-      });
-    }).not.toThrow();
+  describe("match key with regex", () => {
+    test('should match all keys matching the regex', () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number })({
+          a: 1,
+          b: 2,
+        });
+      }).not.toThrow();
+    });
 
-    expect(() => {
-      check({ [/[a-z]/]: 0 })({
-        a: 1,
-        b: 2,
-      });
-    }).toThrow();
+    test('should throw', () => {
+      expect(() => {
+        check({ [/[a-z]/]: 0 })({
+          a: 1,
+          b: 2,
+        });
+      }).toThrow();
+    });
 
-    expect(() => {
-      // only throws if the key is matched
-      check({ [/[A-Z]/]: Number })({
-        a: 1,
-        b: 2,
-      });
-    }).not.toThrow();
+    test('should throw only if the key is matched', () => {
+      expect(() => {
+        check({ [/[A-Z]/]: Number })({
+          a: 1,
+          b: 2,
+        });
+      }).not.toThrow();
+    });
 
+  test('not throws, all lowercase keys are numbers', () => {
     expect(() => {
       check({ [/[a-z]/]: Number, a: 1 })({
         a: 1,
         b: 2,
-      }); // not throw, all lowercase keys are numbers
+      }); //
     }).not.toThrow();
+  });
 
-    expect(() => {
-      check({ [/[a-z]/]: Number, a: 2 })({
-        a: 1,
-        b: 2,
-      }); // will throw (a is not 2)
-    }).toThrow();
+    test('should throw (a is not 2) ', () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number, a: 2 })({
+          a: 1,
+          b: 2,
+        });
+      }).toThrow();
+    });
   });
 });
 
