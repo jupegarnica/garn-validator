@@ -6,7 +6,7 @@ describe('check errors',()=> {
       check(Boolean)(33);
     }).toThrow(TypeError);
   });
-  test("Should throw meaningfull message", () => {
+  test("Should throw meaningfully message", () => {
     expect(() => {
       check(1)(33);
     }).toThrow('value 33 do not match type 1');
