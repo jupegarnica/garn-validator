@@ -470,11 +470,6 @@ describe("multiple validations in series", () => {
     }).toThrow(Error)
   });
   test("should check only until the first check fails", () => {
-    expect(()=> {
-      check(() => { throw new Error()}, String)(2)
-    }).toThrow(Error)
-  });
-  test("should check only until the first check fails", () => {
     global.console = {
       log: jest.fn(),
     };

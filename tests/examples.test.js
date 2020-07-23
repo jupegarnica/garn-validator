@@ -75,7 +75,7 @@ describe("check with custom validator", () => {
   });
 });
 describe("check with enums", () => {
-  test("optional", () => {
+  test("Should be used as OR operator", () => {
     expect(() => {
       check([1, 0])(1);
     }).not.toThrow();
@@ -203,6 +203,34 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
 });
+
+describe("multiple validations in series", () => {
+  test("should pass every validation as an AND operator", () => {
+    expect(isValid(Number, String)(2)).toBe(false);
+  });
+  test("should pass every validation not matter how many", () => {
+    expect(isValid((val) => val > 0, Number, 2, val => val === 2)(2)).toBe(true);
+  });
+
+  test("should throw the error message related to the check failed", () => {
+    expect(()=> {
+      check(() => { throw new Error()}, String)(2)
+    }).toThrow(Error)
+  });
+
+  test("should check only until the first check fails", () => {
+    global.console = {
+      log: jest.fn(),
+    };
+    try {
+      check(() => { throw new Error()}, () => console.log('I run?'))(2)
+    } catch (err) {
+
+    }
+    expect(global.console.log).not.toHaveBeenCalled();
+  });
+});
+
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
