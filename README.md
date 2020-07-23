@@ -6,10 +6,10 @@ Ultra fast runtime type validator for vanilla JS without dependencies.
 
 # Features
 
-- Ultra light and fast: 3kB unzip && none dependencies
+- Ultra light and fast: 3kB unzip & none dependencies
 - Support for checking primitives values and objects with schemas
-- Simple use and learn
-- Custom behaviors (3 built-in)
+- Easy to use and simple to learn
+- Custom behaviors (3 built-in: isValid, isValidOrThrow & isValidOrLog)
 - Works with ESModules or CommonJS from node 8.x to latests
 
 # Get started
