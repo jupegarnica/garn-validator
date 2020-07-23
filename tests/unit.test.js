@@ -243,7 +243,7 @@ describe("is Valid type", () => {
     }).toThrow(RangeError);
   });
 });
-describe.only("stringify", () => {
+describe("stringify", () => {
   test("should work as expected", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`
     );

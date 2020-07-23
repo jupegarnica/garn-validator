@@ -97,11 +97,13 @@ const throwOnError = (err) => {
   if (isError(err)) throw err;
   throw new TypeError(err);
 };
-const check = (error) => (type) => (value) => {
+const check = (error) => (...types) => (value) => {
   try {
-    let valid = isValidType(type, value);
-    if (valid) return valid;
-    throw (`value ${stringify(value)} do not match type ${stringify(type)}`);
+    return types.every(type => {
+      const valid = isValidType(type, value)
+      if (valid) return valid
+      throw (`value ${stringify(value)} do not match type ${stringify(type)}`);
+    });;
   } catch (err) {
     return error(err);
   }
