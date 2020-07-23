@@ -147,6 +147,8 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 - [x] arrayOf & objectOf examples
 - [ ] arrayOf & objectOf constructor
 - [ ] multiples validations `isValid(Number, val => val > 2)(2)`
+- [ ] Support for deno
+- [ ] Support for browser
 
 
 ## All it can do
