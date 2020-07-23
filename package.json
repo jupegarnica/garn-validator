@@ -8,7 +8,7 @@
   "browser": "commonjs/index.js",
   "files": [
     "src/index.js",
-    "commonjs(index.js"
+    "commonjs/index.js"
   ],
   "scripts": {
     "run:docker": "docker-compose run node",
