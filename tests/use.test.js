@@ -1,4 +1,4 @@
-import check, { setOnError, isValid, isValidOrLog } from "garn-validator";
+import check, { setOnError, isValid,isValidOrLog } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
@@ -398,18 +398,18 @@ describe("check objects recursively", () => {
 });
 
 describe("composable", () => {
-  const isNumber = check(Number);
-  const isPositive = check((v) => v > 0);
-  test("isNumber", () => {
+  test("isValidNumber", () => {
+    const isValidNumber = check(Number);
     expect(() => {
-      isNumber(2);
+      isValidNumber(2);
     }).not.toThrow();
 
     expect(() => {
-      isNumber("2");
+      isValidNumber("2");
     }).toThrow();
   });
   test("isPositive", () => {
+    const isPositive = check((v) => v > 0);
     expect(() => {
       isPositive(2);
     }).not.toThrow();
@@ -417,32 +417,6 @@ describe("composable", () => {
     expect(() => {
       isPositive(-1);
     }).toThrow();
-  });
-  test("on shapes", () => {
-    expect(() => {
-      check({
-        age: isNumber,
-      })({ age: 18 });
-    }).not.toThrow();
-
-    expect(() => {
-      check({
-        age: isNumber,
-      })({ age: "18" });
-    }).toThrow();
-    test("on shapes every", () => {
-      expect(() => {
-        check({
-          age: check(isNumber, isPositive),
-        })({ age: 18 });
-      }).not.toThrow();
-
-      expect(() => {
-        check({
-          age: check(isNumber, isPositive),
-        })({ age: -10 });
-      }).toThrow();
-    });
   });
 });
 
@@ -479,44 +453,30 @@ describe("multiple validations in series", () => {
     expect(isValid(Number, String)(2)).toBe(false);
   });
   test("should pass every validation not matter how many", () => {
-    expect(isValid((val) => val > 0, Number, 2, "2")(2)).toBe(false);
+    expect(isValid((val) => val > 0, Number, 2, '2')(2)).toBe(false);
   });
   test("should pass every validation not matter how many", () => {
-    expect(
-      isValid(
-        (val) => val > 0,
-        Number,
-        2,
-        (val) => val === 2
-      )(2)
-    ).toBe(true);
+    expect(isValid((val) => val > 0, Number, 2, val => val === 2)(2)).toBe(true);
   });
   test("should throw the error message related to the check failed", () => {
-    expect(() => {
-      check(Number, String)(2);
-    }).toThrow(
-      'value 2 do not match type "function String() { [native code] }"'
-    );
+    expect(()=> {
+      check(Number, String)(2)
+    }).toThrow('value 2 do not match type \"function String() { [native code] }\"')
   });
   test("should throw the error message related to the check failed", () => {
-    expect(() => {
-      check(() => {
-        throw new Error();
-      }, String)(2);
-    }).toThrow(Error);
+    expect(()=> {
+      check(() => { throw new Error()}, String)(2)
+    }).toThrow(Error)
   });
   test("should check only until the first check fails", () => {
     global.console = {
       log: jest.fn(),
     };
     try {
-      check(
-        () => {
-          throw new Error();
-        },
-        () => console.log("I run?")
-      )(2);
-    } catch (err) {}
+      check(() => { throw new Error()}, () => console.log('I run?'))(2)
+    } catch (err) {
+
+    }
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
