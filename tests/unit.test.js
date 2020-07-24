@@ -2,11 +2,11 @@ import {
   isType,
   isPrimitive,
   isConstructor,
-  isValidType,
   isNormalFunction,
   stringify,
   isInstanceOf,
-} from "garn-validator";
+} from "../src/utils";
+import {isValidType} from 'garn-validator'
 
 describe("test type by constructor", () => {
   test("should return true for basic JS types", () => {

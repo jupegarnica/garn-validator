@@ -1,27 +1,15 @@
-export const isType = (type) => (val) =>
-  ![undefined, null].includes(val) && val.constructor === type;
-
-
-export const isNormalFunction = (f) => f &&  typeof f === "function" && (!f.name || f.name[0] === f.name[0].toLowerCase());
-
-export function isConstructor(f) {
-  // detect is a normal function (anonymous or its name starts with lowercase)
-  if (isNormalFunction(f)) return false;
-  // symbols are not created with new
-  if (f && f.name === "Symbol") return true;
-  try {
-    new f();
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
-
-
-export const isInstanceOf = (type) => (val) => val instanceof type;
-export const isPrimitive = (value) => !isInstanceOf(Object)(value)
-// export const isPrimitive = (value) => !(value instanceof Object);
-// export const isPrimitive = value => Object(value) !== value;
+import {
+  notIsRegExp,
+  stringToRegExp,
+  isType,
+  isPrimitive,
+  isConstructor,
+  isNormalFunction,
+  isError,
+  isRegExp,
+  checkRegExp,
+  stringify,
+} from "./utils.js";
 
 const checkObject = (whatToDo, types, props) => {
   const propsTypes = Object.keys(types).filter(notIsRegExp);
@@ -72,7 +60,7 @@ export const isValidType = (type, value, rootValue, keyName) => {
         isValidType(_type, value, rootValue, keyName)
       );
     case "schema":
-      return  value && checkShape(type, value);
+      return value && checkShape(type, value);
     case "function":
       return type(value, rootValue, keyName);
 
@@ -80,35 +68,11 @@ export const isValidType = (type, value, rootValue, keyName) => {
       return false;
   }
 };
-
-const parser = () => {
-  const seen = new WeakMap();
-  return (key, value) => {
-    if (typeof value === "object" && value !== null) {
-      if (seen.has(value)) {
-        const oldKey = seen.get(value);
-        return `[circular reference] -> ${oldKey || "rootObject"}`;
-      }
-      seen.set(value, key);
-    }
-    if (typeof value === "function") {
-      return value.toString();
-    }
-    return value;
-  };
-};
-export const stringify = (val) => JSON.stringify(val, parser());
-
-const checkRegExp = (regExp, value) => regExp.test(value);
-const stringToRegExp = (string) => new RegExp(eval(string));
-const isRegExp = (value) => value && /^\/.+\/$/.test(value);
-const notIsRegExp = (value) => !isRegExp(value);
-
-const isError = (e) => e && e.stack && e.message;
 const throwOnError = (err) => {
   if (isError(err)) throw err;
   throw new TypeError(err);
 };
+
 const check = (error) => (...types) => (value) => {
   try {
     return types.every((type) => {
