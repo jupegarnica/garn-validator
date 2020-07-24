@@ -81,6 +81,7 @@ check(schema)(obj); // not throws, all ok
 check({ a: 1 })(obj); // not throws, all keys on the schema are valid
 check({ c: 1 })(obj); // will throw (c is missing)
 
+// check all keys that matches regex
 check({ [/[a-z]/]: Number })({
   x: 1,
   y: 2,
@@ -94,8 +95,8 @@ check({ x$: String })({ x: 1 }); // will throw, x is present but is not String
 check({ x$: String })({}); // not throws, x is undefined
 
 // you can use key$ or 'key?',
-
 // it would be nicer to have key? without quotes but is not valid JS
+
 check({ "x?": String })({}); // not throws
 ```
 
@@ -203,14 +204,13 @@ isValidOrLog(/[a-z]/)("G"); // logs error
 ## All it can do
 
 ```js
-import check, { setOnError, isValid } from "garn-validator";
+import check, {
+  setOnError, // returns new instance setting on error behavior
+  isValid, // returns true or false
+} from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
-    expect(() => {
-      check(String)("a string");
-    }).not.toThrow();
-
     expect(() => {
       check(RegExp)(/\s/);
     }).not.toThrow();
@@ -221,10 +221,6 @@ describe("check with constructors", () => {
 
     expect(() => {
       check(RangeError)(new RangeError());
-    }).not.toThrow();
-
-    expect(() => {
-      check(Object)({});
     }).not.toThrow();
 
     expect(() => {
@@ -240,17 +236,13 @@ describe("check with primitives values", () => {
     }).not.toThrow();
 
     expect(() => {
-      check(2)(2);
-    }).not.toThrow();
-
-    expect(() => {
       check(1)(2);
     }).toThrow();
   });
 });
 
 describe("check with custom validator", () => {
-  test("can return true or false", () => {
+  test("cyou can return true or false", () => {
     expect(() => {
       check(() => true)(33);
     }).not.toThrow();
@@ -259,7 +251,7 @@ describe("check with custom validator", () => {
       check(() => false)(33);
     }).toThrow();
   });
-  test("can throw a custom message", () => {
+  test("you can throw a custom message", () => {
     expect(() => {
       check(() => {
         throw "ups";
@@ -271,7 +263,7 @@ describe("check with custom validator", () => {
       check(Boolean)(33);
     }).toThrow(TypeError);
   });
-  test("can throw a custom type of error", () => {
+  test("you can throw a custom type of error", () => {
     expect(() => {
       check((v) => {
         if (v > 10) throw new RangeError("ups");
@@ -515,24 +507,47 @@ describe("check objects recursively", () => {
 });
 
 describe("composable", () => {
-  test("isValidNumber", () => {
-    const isValidNumber = check(Number);
+  test("with complex schema", () => {
+    const isValidPassword = check(
+      String,
+      (str) => str.length >= 8,
+      /[a-z]/,
+      /[A-Z]/,
+      /[0-9]/,
+      /[-_/!"·$%&/()]/
+    );
+    const isValidName = check(String, (name) => name.length >= 3);
+    const isValidAge = check(
+      Number,
+      (age) => age > 18,
+      (age) => age < 40
+    );
+
+    const validUser = check({
+      name: isValidName,
+      age: isValidAge,
+      password: isValidPassword,
+    });
 
     expect(() => {
-      isValidNumber(2);
+      validUser({
+        name: "garn",
+        age: 38,
+        password: "12345aA-",
+      });
     }).not.toThrow();
-  });
-  test("isPositive", () => {
-    const isPositive = check((v) => v > 0);
-
     expect(() => {
-      isPositive(2);
-    }).not.toThrow();
+      validUser({
+        name: "garn",
+        age: 38,
+        password: "1234",
+      });
+    }).toThrow();
   });
 });
 
 describe("set on error to isValid", () => {
-  // const isValid = setOnError(() => false); // import named isValid
+  const isValid = setOnError(() => false); // import named isValid
 
   test("should return true if valid", () => {
     expect(isValid(Number)(2)).toBe(true);
