@@ -147,6 +147,7 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 - [x] arrayOf & objectOf examples
 - [X] multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
 - [ ] schema with optionals key `{ optionalKey?: Number }`
+- [ ] setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [ ] Support for deno
 - [ ] Support for browser
 
