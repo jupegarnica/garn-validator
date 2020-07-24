@@ -1,4 +1,4 @@
-import check from "garn-validator";
+import check, { isValid } from "garn-validator";
 describe("check schema", () => {
   const value = {
     a: 1,
@@ -146,7 +146,52 @@ describe("check objects recursively", () => {
   });
   test("should throw", () => {
     expect(() => {
-      check({...schema, a: String})(obj);
+      check({ ...schema, a: String })(obj);
     }).toThrow();
+  });
+});
+
+describe("optional keys", () => {
+  test("if the key exists should be check", () => {
+    expect(isValid({ a$: Number })({ a: 1 })).toBe(true);
+    expect(isValid({ a$: String })({ a: 1 })).toBe(false);
+  });
+
+  test("if the key doesn't exists should be valid", () => {
+    expect(isValid({ a$: Number })({})).toBe(true);
+  });
+  test("shold work ending with $ or ?", () => {
+    expect(isValid({ 'a?': Number })({ a: 1 })).toBe(true);
+    expect(isValid({ 'a?': String })({ a: 1 })).toBe(false);
+  });
+
+  test("complex example shold work", () => {
+    expect(
+      isValid({
+        a$: Number,
+        b: 2,
+        c$: (v, r, key) => key === "c",
+        d$: String,
+      })({
+        a: 1,
+        b: 2,
+        c: true,
+      })
+    ).toBe(true);
+  });
+  test("complex example should fail", () => {
+    expect(
+      isValid({
+        a$: Number,
+        b: 2,
+        c$: (v, r, key) => key === "c",
+        d$: String,
+      })({
+        a: true,
+        b: 2,
+        c: true,
+      })
+    ).toBe(false);
+
   });
 });

@@ -39,8 +39,8 @@ const parser = () => {
     return value;
   };
 };
-export const stringify = (val) => JSON.stringify(val, parser());
 
+export const stringify = (val) => JSON.stringify(val, parser());
 export const checkRegExp = (regExp, value) => regExp.test(value);
 export const stringToRegExp = (string) => new RegExp(eval(string));
 export const isRegExp = (value) => value && /^\/.+\/$/.test(value);

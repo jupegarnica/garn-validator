@@ -11,23 +11,42 @@ import {
   stringify,
 } from "./utils.js";
 
-const checkObject = (whatToDo, types, props) => {
-  const propsTypes = Object.keys(types).filter(notIsRegExp);
+const isOptionalKey = (key = "") => /[?$]$/.test(key);
+const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
 
-  let areAllValid = propsTypes.every((propName) => {
-    return whatToDo(types[propName], props[propName], props, propName);
+const checkObject = (whatToDo, schema, object) => {
+  const requiredKeys = Object.keys(schema).filter(isRequiredKey);
+
+  const optionalKeys = Object.keys(schema).filter(isOptionalKey);
+
+  let areAllValid = optionalKeys.every((keyName) => {
+    const keyNameStripped = keyName.replace(/[?$]$/,'')
+    return whatToDo(
+      [undefined, schema[keyName]],
+      object[keyNameStripped],
+      object,
+      keyNameStripped
+    );
   });
+
   if (!areAllValid) return areAllValid;
 
-  const regExpToCheck = Object.keys(types).filter(isRegExp);
-  const untestedReceivedProps = Object.keys(props).filter(
-    (key) => !propsTypes.includes(key)
+  areAllValid = requiredKeys.every((keyName) =>
+    whatToDo(schema[keyName], object[keyName], object, keyName)
   );
 
-  areAllValid = regExpToCheck.every((regexpString) =>
-    untestedReceivedProps.every((propName) => {
-      if (stringToRegExp(regexpString).test(propName)) {
-        return whatToDo(types[regexpString], props[propName], props, propName);
+  if (!areAllValid) return areAllValid;
+
+  const regexKeys = Object.keys(schema).filter(isRegExp);
+
+  const untestedKeys = Object.keys(object).filter(
+    (key) => !requiredKeys.includes(key)
+  );
+
+  areAllValid = regexKeys.every((regexpString) =>
+    untestedKeys.every((keyName) => {
+      if (stringToRegExp(regexpString).test(keyName)) {
+        return whatToDo(schema[regexpString], object[keyName], object, keyName);
       }
       return true;
     })
