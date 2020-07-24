@@ -24,40 +24,38 @@ The library is tested in node 8.x to 14.x
 npm install garn-validator
 # or yarn add garn-validator
 ```
+
 #### Import with ES Modules
 
 ```js
-import isValidOrThrow from 'garn-validator'; // default export is isValidOrThrow
+import isValidOrThrow from "garn-validator"; // default export is isValidOrThrow
 // or use named exports
-import { isValidOrLog } from 'garn-validator';
-
+import { isValidOrLog } from "garn-validator";
 ```
 
 #### Require with CommonJs
 
 ```js
-
-const { isValidOrThrow } = require('garn-validator/commonjs');
+const { isValidOrThrow } = require("garn-validator/commonjs");
 // or use de default export
-const isValidOrThrow = require('garn-validator/commonjs').default;
-
+const isValidOrThrow = require("garn-validator/commonjs").default;
 ```
 
 ### Basic Use
 
 ```js
-import check from 'garn-validator'; // default export is isValidOrThrow
+import check from "garn-validator"; // default export is isValidOrThrow
 
 //check primitives against built-in constructors
 check(Number)(2); // not throws, all ok
 check(String)(2); // will throw
 
 // check against regex
-check(/a*/)('a'); // not throws, all ok
-check(/a+/)('a'); // will throw
+check(/a*/)("a"); // not throws, all ok
+check(/a+/)("a"); // will throw
 
 // check against primitive
-check('a')('a'); // not throws, all ok
+check("a")("a"); // not throws, all ok
 check(true)(false); // will throw
 
 // check against custom function
@@ -65,20 +63,19 @@ check((val) => val > 0)(33); // not throws, all ok
 check((val) => val > 0)(-1); // wil throw
 check(Number.isNaN)(NaN); // not throws, all ok
 
-
 // check against enums (OR operator)
-check([ 'a', 'b' ])('a'); // not throws, all ok
-check([ 'a', 'b' ])('c'); // will throw
-check([ Number, String ])('18'); // not throws
-check([ null, undefined, false, val => val < 0 ])(18); // will throw
+check(["a", "b"])("a"); // not throws, all ok
+check(["a", "b"])("c"); // will throw
+check([Number, String])("18"); // not throws
+check([null, undefined, false, (val) => val < 0])(18); // will throw
 
 // check multiple validations (AND operator)
-check(Array.isArray, val => val.length > 1)( [1,2]) // not throws
-check(Array.isArray, val => val.includes(0) )( [1,2]) // will throw
+check(Array.isArray, (val) => val.length > 1)([1, 2]); // not throws
+check(Array.isArray, (val) => val.includes(0))([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
-const obj    = { a: 1,      b: 2 };
+const obj = { a: 1, b: 2 };
 check(schema)(obj); // not throws, all ok
 
 check({ a: 1 })(obj); // not throws, all keys on the schema are valid
@@ -88,51 +85,80 @@ check({ [/[a-z]/]: Number })({
   x: 1,
   y: 2,
   z: 3,
-  CONSTANT: 'foo',
+  CONSTANT: "foo",
 }); // not throws, all lowercase keys are numbers
 
 // optional keys
 check({ x$: Number })({ x: 1 }); // not throws, x is present and is Number
 check({ x$: String })({ x: 1 }); // will throw, x is present but is not String
-check({ x$: String })({  });     // not throws, x is undefined
+check({ x$: String })({}); // not throws, x is undefined
 
 // you can use key$ or 'key?',
 
 // it would be nicer to have key? without quotes but is not valid JS
-check({ 'x?': String })({  });  // not throws
-
-
-
+check({ "x?": String })({}); // not throws
 ```
+
 ### Composable
 
 ```js
+// Simple example
+const isPositive = check((v) => v > 0);
+isPositive(2);
 
-const isValidNumber = check(Number)
-isValidNumber(2);
 
-const isPositive = check(v => v > 0);
-isPositive(2)
+// Real example
+const isValidPassword = check(
+  String,
+  (str) => str.length >= 8,
+  /[a-z]/,
+  /[A-Z]/,
+  /[0-9]/,
+  /[-_/!"·$%&/()]/
+);
+const isValidName = check(String, (name) => name.length >= 3);
+const isValidAge = check(
+  Number,
+  (age) => age > 18,
+  (age) => age < 40
+);
 
+const isValidUser = check({
+  name: isValidName,
+  age: isValidAge,
+  password: isValidPassword,
+});
+
+isValidUser({
+  name: "garn",
+  age: 38,
+  password: "1234",
+}); // ok
+
+isValidUser({
+  name: "garn",
+  age: 18,
+  password: "1234",
+}); // will throw
 ```
 
 ### Custom behavior
 
 ```js
-const isValidOrSendReport =  setOnError((err) => {
-  fetch('//myReportServer.com/report', {
-    method: 'POST',
+const isValidOrSendReport = setOnError((err) => {
+  fetch("//myReportServer.com/report", {
+    method: "POST",
     body: JSON.stringify(err),
-    headers:{
-      'Content-Type': 'application/json'
-    }
-  })
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   throw new MyInvalidError(err);
 });
 
-isValidOrSendReport(Number)('3') // will send error and will throw MyInvalidError
-
+isValidOrSendReport(Number)("3"); // will send error and will throw MyInvalidError
 ```
+
 ### Built-in behaviors
 
 There are 3 behaviors you can import
@@ -142,25 +168,21 @@ export const isValid = setOnError(() => false);
 export const isValidOrLog = setOnError((err) => console.error(err));
 export const isValidOrThrow = setOnError(throwOnError);
 export default isValidOrThrow;
-
 ```
 
 ```js
-import { isValid } from 'garn-validator';
+import { isValid } from "garn-validator";
 
-isValid(/[a-z]/)('g'); // returns true
-isValid(/[a-z]/)('G'); // returns false, not throwss
-
+isValid(/[a-z]/)("g"); // returns true
+isValid(/[a-z]/)("G"); // returns false, not throwss
 ```
 
 ```js
-import { isValidOrLog } from 'garn-validator';
+import { isValidOrLog } from "garn-validator";
 
-isValidOrLog(/[a-z]/)('g'); // do nothing (but also returns true)
-isValidOrLog(/[a-z]/)('G'); // logs error
-
+isValidOrLog(/[a-z]/)("g"); // do nothing (but also returns true)
+isValidOrLog(/[a-z]/)("G"); // logs error
 ```
-
 
 ## Roadmap
 
@@ -172,14 +194,14 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 - [x] Match object key by RegEx
 - [x] Setting to change behavior (throw error , log error or custom logic)
 - [x] ArrayOf & objectOf examples
-- [X] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
+- [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [ ] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [ ] Support for deno
 - [ ] Support for browser
 
-
 ## All it can do
+
 ```js
 import check, { setOnError, isValid } from "garn-validator";
 
@@ -306,7 +328,6 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
 
-
   test("check with custom function", () => {
     expect(() => {
       check({ a: (val) => val < 0 })({
@@ -315,15 +336,17 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
   test("check with custom function against the root object", () => {
-
     expect(() => {
-      check({ x: (val, rootObject, keyName) => rootObject.y === val })({ x: "x", y: "x" });
+      check({ x: (val, rootObject, keyName) => rootObject.y === val })({
+        x: "x",
+        y: "x",
+      });
     }).not.toThrow();
 
     expect(() => {
       check({
-        max: (val, rootObject,keyName) => val > rootObject.min,
-        min: (val, rootObject,keyName) => val < rootObject.max,
+        max: (val, rootObject, keyName) => val > rootObject.min,
+        min: (val, rootObject, keyName) => val < rootObject.max,
       })({
         max: 1,
         min: -1,
@@ -349,7 +372,7 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
   describe("match key with regex", () => {
-    test('should match all keys matching the regex', () => {
+    test("should match all keys matching the regex", () => {
       expect(() => {
         check({ [/[a-z]/]: Number })({
           a: 1,
@@ -358,7 +381,7 @@ describe("check objects against a schema", () => {
       }).not.toThrow();
     });
 
-    test('should throw', () => {
+    test("should throw", () => {
       expect(() => {
         check({ [/[a-z]/]: 0 })({
           a: 1,
@@ -367,7 +390,7 @@ describe("check objects against a schema", () => {
       }).toThrow();
     });
 
-    test('should throw only if the key is matched', () => {
+    test("should throw only if the key is matched", () => {
       expect(() => {
         check({ [/[A-Z]/]: Number })({
           a: 1,
@@ -376,16 +399,16 @@ describe("check objects against a schema", () => {
       }).not.toThrow();
     });
 
-  test('not throws, all lowercase keys are numbers', () => {
-    expect(() => {
-      check({ [/[a-z]/]: Number, a: 1 })({
-        a: 1,
-        b: 2,
-      }); //
-    }).not.toThrow();
-  });
+    test("not throws, all lowercase keys are numbers", () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number, a: 1 })({
+          a: 1,
+          b: 2,
+        }); //
+      }).not.toThrow();
+    });
 
-    test('should throw (a is not 2) ', () => {
+    test("should throw (a is not 2) ", () => {
       expect(() => {
         check({ [/[a-z]/]: Number, a: 2 })({
           a: 1,
@@ -401,13 +424,22 @@ describe("multiple validations in series", () => {
     expect(isValid(Number, String)(2)).toBe(false);
   });
   test("should pass every validation not matter how many", () => {
-    expect(isValid((val) => val > 0, Number, 2, val => val === 2)(2)).toBe(true);
+    expect(
+      isValid(
+        (val) => val > 0,
+        Number,
+        2,
+        (val) => val === 2
+      )(2)
+    ).toBe(true);
   });
 
   test("should throw the error message related to the check failed", () => {
-    expect(()=> {
-      check(() => { throw new Error()}, String)(2)
-    }).toThrow(Error)
+    expect(() => {
+      check(() => {
+        throw new Error();
+      }, String)(2);
+    }).toThrow(Error);
   });
 
   test("should check only until the first check fails", () => {
@@ -415,10 +447,13 @@ describe("multiple validations in series", () => {
       log: jest.fn(),
     };
     try {
-      check(() => { throw new Error()}, () => console.log('I run?'))(2)
-    } catch (err) {
-
-    }
+      check(
+        () => {
+          throw new Error();
+        },
+        () => console.log("I run?")
+      )(2);
+    } catch (err) {}
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });

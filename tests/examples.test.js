@@ -1,11 +1,10 @@
-import check, { setOnError, isValid } from "garn-validator";
+import check, {
+  setOnError, // returns new instance setting on error behavior
+  isValid, // returns true or false
+} from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
-    expect(() => {
-      check(String)("a string");
-    }).not.toThrow();
-
     expect(() => {
       check(RegExp)(/\s/);
     }).not.toThrow();
@@ -16,10 +15,6 @@ describe("check with constructors", () => {
 
     expect(() => {
       check(RangeError)(new RangeError());
-    }).not.toThrow();
-
-    expect(() => {
-      check(Object)({});
     }).not.toThrow();
 
     expect(() => {
@@ -35,17 +30,13 @@ describe("check with primitives values", () => {
     }).not.toThrow();
 
     expect(() => {
-      check(2)(2);
-    }).not.toThrow();
-
-    expect(() => {
       check(1)(2);
     }).toThrow();
   });
 });
 
 describe("check with custom validator", () => {
-  test("can return true or false", () => {
+  test("cyou can return true or false", () => {
     expect(() => {
       check(() => true)(33);
     }).not.toThrow();
@@ -54,7 +45,7 @@ describe("check with custom validator", () => {
       check(() => false)(33);
     }).toThrow();
   });
-  test("can throw a custom message", () => {
+  test("you can throw a custom message", () => {
     expect(() => {
       check(() => {
         throw "ups";
@@ -66,7 +57,7 @@ describe("check with custom validator", () => {
       check(Boolean)(33);
     }).toThrow(TypeError);
   });
-  test("can throw a custom type of error", () => {
+  test("you can throw a custom type of error", () => {
     expect(() => {
       check((v) => {
         if (v > 10) throw new RangeError("ups");
@@ -123,7 +114,6 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
 
-
   test("check with custom function", () => {
     expect(() => {
       check({ a: (val) => val < 0 })({
@@ -132,15 +122,17 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
   test("check with custom function against the root object", () => {
-
     expect(() => {
-      check({ x: (val, rootObject, keyName) => rootObject.y === val })({ x: "x", y: "x" });
+      check({ x: (val, rootObject, keyName) => rootObject.y === val })({
+        x: "x",
+        y: "x",
+      });
     }).not.toThrow();
 
     expect(() => {
       check({
-        max: (val, rootObject,keyName) => val > rootObject.min,
-        min: (val, rootObject,keyName) => val < rootObject.max,
+        max: (val, rootObject, keyName) => val > rootObject.min,
+        min: (val, rootObject, keyName) => val < rootObject.max,
       })({
         max: 1,
         min: -1,
@@ -166,7 +158,7 @@ describe("check objects against a schema", () => {
     }).toThrow();
   });
   describe("match key with regex", () => {
-    test('should match all keys matching the regex', () => {
+    test("should match all keys matching the regex", () => {
       expect(() => {
         check({ [/[a-z]/]: Number })({
           a: 1,
@@ -175,7 +167,7 @@ describe("check objects against a schema", () => {
       }).not.toThrow();
     });
 
-    test('should throw', () => {
+    test("should throw", () => {
       expect(() => {
         check({ [/[a-z]/]: 0 })({
           a: 1,
@@ -184,7 +176,7 @@ describe("check objects against a schema", () => {
       }).toThrow();
     });
 
-    test('should throw only if the key is matched', () => {
+    test("should throw only if the key is matched", () => {
       expect(() => {
         check({ [/[A-Z]/]: Number })({
           a: 1,
@@ -193,16 +185,16 @@ describe("check objects against a schema", () => {
       }).not.toThrow();
     });
 
-  test('not throws, all lowercase keys are numbers', () => {
-    expect(() => {
-      check({ [/[a-z]/]: Number, a: 1 })({
-        a: 1,
-        b: 2,
-      }); //
-    }).not.toThrow();
-  });
+    test("not throws, all lowercase keys are numbers", () => {
+      expect(() => {
+        check({ [/[a-z]/]: Number, a: 1 })({
+          a: 1,
+          b: 2,
+        }); //
+      }).not.toThrow();
+    });
 
-    test('should throw (a is not 2) ', () => {
+    test("should throw (a is not 2) ", () => {
       expect(() => {
         check({ [/[a-z]/]: Number, a: 2 })({
           a: 1,
@@ -218,13 +210,22 @@ describe("multiple validations in series", () => {
     expect(isValid(Number, String)(2)).toBe(false);
   });
   test("should pass every validation not matter how many", () => {
-    expect(isValid((val) => val > 0, Number, 2, val => val === 2)(2)).toBe(true);
+    expect(
+      isValid(
+        (val) => val > 0,
+        Number,
+        2,
+        (val) => val === 2
+      )(2)
+    ).toBe(true);
   });
 
   test("should throw the error message related to the check failed", () => {
-    expect(()=> {
-      check(() => { throw new Error()}, String)(2)
-    }).toThrow(Error)
+    expect(() => {
+      check(() => {
+        throw new Error();
+      }, String)(2);
+    }).toThrow(Error);
   });
 
   test("should check only until the first check fails", () => {
@@ -232,10 +233,13 @@ describe("multiple validations in series", () => {
       log: jest.fn(),
     };
     try {
-      check(() => { throw new Error()}, () => console.log('I run?'))(2)
-    } catch (err) {
-
-    }
+      check(
+        () => {
+          throw new Error();
+        },
+        () => console.log("I run?")
+      )(2);
+    } catch (err) {}
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
@@ -297,24 +301,47 @@ describe("check objects recursively", () => {
 });
 
 describe("composable", () => {
-  test("isValidNumber", () => {
-    const isValidNumber = check(Number);
+  test("with complex schema", () => {
+    const isValidPassword = check(
+      String,
+      (str) => str.length >= 8,
+      /[a-z]/,
+      /[A-Z]/,
+      /[0-9]/,
+      /[-_/!"·$%&/()]/
+    );
+    const isValidName = check(String, (name) => name.length >= 3);
+    const isValidAge = check(
+      Number,
+      (age) => age > 18,
+      (age) => age < 40
+    );
+
+    const validUser = check({
+      name: isValidName,
+      age: isValidAge,
+      password: isValidPassword,
+    });
 
     expect(() => {
-      isValidNumber(2);
+      validUser({
+        name: "garn",
+        age: 38,
+        password: "12345aA-",
+      });
     }).not.toThrow();
-  });
-  test("isPositive", () => {
-    const isPositive = check((v) => v > 0);
-
     expect(() => {
-      isPositive(2);
-    }).not.toThrow();
+      validUser({
+        name: "garn",
+        age: 38,
+        password: "1234",
+      });
+    }).toThrow();
   });
 });
 
 describe("set on error to isValid", () => {
-  // const isValid = setOnError(() => false); // import named isValid
+  const isValid = setOnError(() => false); // import named isValid
 
   test("should return true if valid", () => {
     expect(isValid(Number)(2)).toBe(true);
