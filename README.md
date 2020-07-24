@@ -47,38 +47,38 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 import check from "garn-validator"; // default export is isValidOrThrow
 
 //check primitives against built-in constructors
-check(Number)(2); // not throws, all ok
+check(Number)(2); // doesn't throws, all ok
 check(String)(2); // will throw
 
 // check against regex
-check(/a*/)("a"); // not throws, all ok
+check(/a*/)("a"); // doesn't throws, all ok
 check(/a+/)("a"); // will throw
 
 // check against primitive
-check("a")("a"); // not throws, all ok
+check("a")("a"); // doesn't throws, all ok
 check(true)(false); // will throw
 
 // check against custom function
-check((val) => val > 0)(33); // not throws, all ok
+check((val) => val > 0)(33); // doesn't throws, all ok
 check((val) => val > 0)(-1); // wil throw
-check(Number.isNaN)(NaN); // not throws, all ok
+check(Number.isNaN)(NaN); // doesn't throws, all ok
 
 // check against enums (OR operator)
-check(["a", "b"])("a"); // not throws, all ok
+check(["a", "b"])("a"); // doesn't throws, all ok
 check(["a", "b"])("c"); // will throw
-check([Number, String])("18"); // not throws
+check([Number, String])("18"); // doesn't throws
 check([null, undefined, false, (val) => val < 0])(18); // will throw
 
 // check multiple validations (AND operator)
-check(Array.isArray, (val) => val.length > 1)([1, 2]); // not throws
+check(Array.isArray, (val) => val.length > 1)([1, 2]); // doesn't throws
 check(Array.isArray, (val) => val.includes(0))([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
-check(schema)(obj); // not throws, all ok
+check(schema)(obj); // doesn't throws, all ok
 
-check({ a: 1 })(obj); // not throws, all keys on the schema are valid
+check({ a: 1 })(obj); // doesn't throws, all keys on the schema are valid
 check({ c: 1 })(obj); // will throw (c is missing)
 
 // check all keys that matches regex
@@ -87,17 +87,17 @@ check({ [/[a-z]/]: Number })({
   y: 2,
   z: 3,
   CONSTANT: "foo",
-}); // not throws, all lowercase keys are numbers
+}); // doesn't throws, all lowercase keys are numbers
 
 // optional keys
-check({ x$: Number })({ x: 1 }); // not throws, x is present and is Number
+check({ x$: Number })({ x: 1 }); // doesn't throws, x is present and is Number
 check({ x$: String })({ x: 1 }); // will throw, x is present but is not String
-check({ x$: String })({}); // not throws, x is undefined
+check({ x$: String })({}); // doesn't throws, x is undefined
 
 // you can use key$ or 'key?',
 // it would be nicer to have key? without quotes but is not valid JS
 
-check({ "x?": String })({}); // not throws
+check({ "x?": String })({}); // doesn't throws
 ```
 
 ### Composable
@@ -117,6 +117,7 @@ const isValidPassword = check(
   /[0-9]/,
   /[-_/!"·$%&/()]/
 );
+
 const isValidName = check(String, (name) => name.length >= 3);
 const isValidAge = check(
   Number,
@@ -165,8 +166,8 @@ isValidOrSendReport(Number)("3"); // will send error and will throw MyInvalidErr
 There are 3 behaviors you can import
 
 ```js
-export const isValid = setOnError(() => false);
-export const isValidOrLog = setOnError((err) => console.error(err));
+export const isValid = setOnError(returnsFalse);
+export const isValidOrLog = setOnError(logError);
 export const isValidOrThrow = setOnError(throwOnError);
 export default isValidOrThrow;
 ```
@@ -175,7 +176,7 @@ export default isValidOrThrow;
 import { isValid } from "garn-validator";
 
 isValid(/[a-z]/)("g"); // returns true
-isValid(/[a-z]/)("G"); // returns false, not throwss
+isValid(/[a-z]/)("G"); // returns false, doesn't throws
 ```
 
 ```js
