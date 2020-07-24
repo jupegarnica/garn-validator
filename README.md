@@ -137,17 +137,17 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 
 ## Roadmap
 
-- [x] check value by constructor
-- [x] enum type (oneOf & oneOfType)
-- [x] shape type
-- [x] custom type validation with a function (value, rootValue)
+- [x] Check value by constructor
+- [x] Enum type (oneOf & oneOfType)
+- [x] Shape type
+- [x] Custom type validation with a function (value, rootValue)
 - [x] Check RegEx
 - [x] Match object key by RegEx
-- [x] setting to change behavior (throw error , log error or custom logic)
-- [x] arrayOf & objectOf examples
-- [X] multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
-- [ ] schema with optionals key `{ optionalKey?: Number }`
-- [ ] setting for check all keys (no matter if it fails) and return (or throw) an array of errors
+- [x] Setting to change behavior (throw error , log error or custom logic)
+- [x] ArrayOf & objectOf examples
+- [X] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
+- [ ] Schema with optionals key `{ optionalKey?: Number }`
+- [ ] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [ ] Support for deno
 - [ ] Support for browser
 
