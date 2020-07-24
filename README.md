@@ -134,7 +134,7 @@ const isValidUser = check({
 isValidUser({
   name: "garn",
   age: 38,
-  password: "1234",
+  password: "12345aA-",
 }); // ok
 
 isValidUser({
