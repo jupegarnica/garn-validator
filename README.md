@@ -52,7 +52,7 @@ check(String)(2); // will throw
 
 // check against regex
 check(/a*/)("a"); // doesn't throws, all ok
-check(/a+/)("a"); // will throw
+check(/a/)("b"); // will throw
 
 // check against primitive
 check("a")("a"); // doesn't throws, all ok
