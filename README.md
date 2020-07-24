@@ -143,10 +143,10 @@ isValidOrLog(/[a-z]/)('G'); // logs error
 - [x] custom type validation with a function (value, rootValue)
 - [x] Check RegEx
 - [x] Match object key by RegEx
-- [x] setting to change behavior (throw error , log error or custom log)
+- [x] setting to change behavior (throw error , log error or custom logic)
 - [x] arrayOf & objectOf examples
-- [X] multiples validations `isValid(Number, val => val > 2)(2)`
-- [ ] arrayOf & objectOf constructor
+- [X] multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
+- [ ] schema with optionals key `{ optionalKey?: Number }`
 - [ ] Support for deno
 - [ ] Support for browser
 
