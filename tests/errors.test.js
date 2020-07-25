@@ -29,14 +29,14 @@ describe("check errors", () => {
     expect(() => {
       check({ a: Number })(33);
     }).toThrow(
-      'value 33 do not match type {"a":"function Number() { [native code] }"}'
+      'value 33 do not match type {"a":"Number"}'
     );
   });
   test("should format the value", () => {
     expect(() => {
       check({ a: Number })({ b: 33 });
     }).toThrow(
-      'value {"b":33} do not match type {"a":"function Number() { [native code] }"}'
+      'value {"b":33} do not match type {"a":"Number"}'
     );
   });
 });
@@ -45,7 +45,7 @@ describe("check error in serie", () => {
     expect(() => {
       check(Number, String)(2);
     }).toThrow(
-      'value 2 do not match type "function String() { [native code] }"'
+      'value 2 do not match type "String"'
     );
   });
   test("should throw the error message related to the check failed", () => {

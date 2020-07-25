@@ -1,9 +1,12 @@
 export const isType = (type) => (val) =>
   ![undefined, null].includes(val) && val.constructor === type;
 
-export const isNormalFunction = (f) => f &&  typeof f === "function" && (!f.name || f.name[0] === f.name[0].toLowerCase());
+const isClass = fn => /^\s*class/.test(fn.toString());
+
+export const isNormalFunction = (f) => f && typeof f === "function" && !isClass(f) && (!f.name || f.name[0] === f.name[0].toLowerCase());
 
 export function isConstructor(f) {
+  if(isClass(f)) return true;
   // detect is a normal function (anonymous or its name starts with lowercase)
   if (isNormalFunction(f)) return false;
   // symbols are not created with new
@@ -32,6 +35,9 @@ const parser = () => {
         return `[circular reference] -> ${oldKey || "rootObject"}`;
       }
       seen.set(value, key);
+    }
+    if (typeof value === "function" && isConstructor(value)) {
+      return value.name;
     }
     if (typeof value === "function") {
       return value.toString();

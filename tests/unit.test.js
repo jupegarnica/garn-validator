@@ -283,10 +283,10 @@ describe("stringify", () => {
       classical: function classical(arg) {
         return arg;
       },
-      myClass: class myClass {},
+      myClass: class MyClass {},
     };
     expect(stringify(obj)).toBe(
-      `{"x":1,"f":"x=>x*2","constructor":"function Number() { [native code] }","classical":"function classical(arg){return arg}","myClass":"class myClass{}"}`
+      `{"x":1,"f":"x=>x*2","constructor":"Number","classical":"function classical(arg){return arg}","myClass":"MyClass"}`
     );
   });
 });
