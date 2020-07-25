@@ -6,7 +6,7 @@ Ultra fast runtime type validator for vanilla JS without dependencies.
 
 # Features
 
-- Ultra light and fast: 3kB unzip & none dependencies
+- Ultra light and **fast**: 3kB unzip (1.5 gzipped) with **0 dependencies**
 - Support for checking primitives values and objects with schemas
 - Easy to use and simple to learn
 - Custom behaviors (3 built-in: isValid, isValidOrThrow & isValidOrLog)
@@ -47,42 +47,42 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 import check from "garn-validator"; // default export is isValidOrThrow
 
 //check primitives against built-in constructors
-check(Number)(2); // doesn't throws, all ok
-check(String)(2); // will throw
+check(Number) (2); // doesn't throws, all ok
+check(String) (2); // will throw
 
 // check against regex
-check(/a*/)("a"); // doesn't throws, all ok
-check(/a/)("b"); // will throw
+check(/a*/) ("a"); // doesn't throws, all ok
+check(/a/) ("b"); // will throw
 
 // check against primitive
-check("a")("a"); // doesn't throws, all ok
-check(true)(false); // will throw
+check("a") ("a"); // doesn't throws, all ok
+check(true) (false); // will throw
 
 // check against custom function
-check((val) => val > 0)(33); // doesn't throws, all ok
-check((val) => val > 0)(-1); // wil throw
-check(Number.isNaN)(NaN); // doesn't throws, all ok
+check((value) => value > 0) (33); // doesn't throws, all ok
+check((value) => value > 0) (-1); // wil throw
+check(Number.isNaN) (NaN); // doesn't throws, all ok
 
 // check against enums (OR operator)
-check(["a", "b"])("a"); // doesn't throws, all ok
-check(["a", "b"])("c"); // will throw
-check([Number, String])("18"); // doesn't throws
-check([null, undefined, false, (val) => val < 0])(18); // will throw
+check(["a", "b"]) ("a"); // doesn't throws, all ok
+check(["a", "b"]) ("c"); // will throw
+check([Number, String]) ("18"); // doesn't throws
+check([null, undefined, false, (value) => value < 0]) (18); // will throw
 
 // check multiple validations (AND operator)
-check(Array.isArray, (val) => val.length > 1)([1, 2]); // doesn't throws
-check(Array.isArray, (val) => val.includes(0))([1, 2]); // will throw
+check(Array.isArray, (val) => val.length > 1) ([1, 2]); // doesn't throws
+check(Array.isArray, (val) => val.includes(0)) ([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
-check(schema)(obj); // doesn't throws, all ok
+check(schema) (obj); // doesn't throws, all ok
 
-check({ a: 1 })(obj); // doesn't throws, all keys on the schema are valid
-check({ c: 1 })(obj); // will throw (c is missing)
+check({ a: 1 }) (obj); // doesn't throws, all keys on the schema are valid
+check({ c: 1 }) (obj); // will throw (c is missing)
 
 // check all keys that matches regex
-check({ [/[a-z]/]: Number })({
+check({ [/[a-z]/]: Number }) ({
   x: 1,
   y: 2,
   z: 3,
@@ -90,22 +90,26 @@ check({ [/[a-z]/]: Number })({
 }); // doesn't throws, all lowercase keys are numbers
 
 // optional keys
-check({ x$: Number })({ x: 1 }); // doesn't throws, x is present and is Number
-check({ x$: String })({ x: 1 }); // will throw, x is present but is not String
-check({ x$: String })({}); // doesn't throws, x is undefined
+check({ x$: Number }) ({ x: 1 }); // doesn't throws, x is present and is Number
+check({ x$: String }) ({ x: 1 }); // will throw, x is present but is not String
+check({ x$: String }) ({}); // doesn't throws, x is undefined
 
 // you can use key$ or 'key?',
 // it would be nicer to have key? without quotes but is not valid JS
 
-check({ "x?": String })({}); // doesn't throws
+check({ "x?": String }) ({}); // doesn't throws
 ```
 
 ### Composable
 
 ```js
 // Simple example
-const isPositive = check((v) => v > 0);
-isPositive(2);
+const isPositive = check( v => v > 0 );
+const isNotBig = check( v => v < 100 );
+
+isPositive(-2); // will throw
+
+check(isPositive,isNotBig) (200); // will throw
 
 
 // Real example
@@ -158,7 +162,7 @@ const isValidOrSendReport = setOnError((err) => {
   throw new MyInvalidError(err);
 });
 
-isValidOrSendReport(Number)("3"); // will send error and will throw MyInvalidError
+isValidOrSendReport(Number) ("3"); // will send error and will throw MyInvalidError
 ```
 
 ### Built-in behaviors
@@ -175,15 +179,15 @@ export default isValidOrThrow;
 ```js
 import { isValid } from "garn-validator";
 
-isValid(/[a-z]/)("g"); // returns true
-isValid(/[a-z]/)("G"); // returns false, doesn't throws
+isValid(/[a-z]/) ("g"); // returns true
+isValid(/[a-z]/) ("G"); // returns false, doesn't throws
 ```
 
 ```js
 import { isValidOrLog } from "garn-validator";
 
-isValidOrLog(/[a-z]/)("g"); // do nothing (but also returns true)
-isValidOrLog(/[a-z]/)("G"); // logs error
+isValidOrLog(/[a-z]/) ("g"); // do nothing (but also returns true)
+isValidOrLog(/[a-z]/) ("G"); // logs error
 ```
 
 ## Roadmap
@@ -196,7 +200,7 @@ isValidOrLog(/[a-z]/)("G"); // logs error
 - [x] Match object key by RegEx
 - [x] Setting to change behavior (throw error , log error or custom logic)
 - [x] ArrayOf & objectOf examples
-- [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/)('foo')`
+- [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/ )('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [ ] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [ ] Support for deno
