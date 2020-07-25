@@ -40,6 +40,12 @@ const parser = () => {
   };
 };
 
+export const optionalRegex = /[?$]$/
+export const isOptionalKey = (key = "") => optionalRegex.test(key);
+export const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
+
+
+
 export const stringify = (val) => JSON.stringify(val, parser());
 export const checkRegExp = (regExp, value) => regExp.test(value);
 export const stringToRegExp = (string) => new RegExp(eval(string));

@@ -1,5 +1,4 @@
 import {
-  notIsRegExp,
   stringToRegExp,
   isType,
   isPrimitive,
@@ -9,19 +8,21 @@ import {
   isRegExp,
   checkRegExp,
   stringify,
+  isRequiredKey,
+  isOptionalKey,
+  optionalRegex,
 } from "./utils.js";
 
-const isOptionalKey = (key = "") => /[?$]$/.test(key);
-const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
 
-const checkObject = (whatToDo, schema, object) => {
+
+export const checkShape  =(schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
 
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
 
   let areAllValid = optionalKeys.every((keyName) => {
-    const keyNameStripped = keyName.replace(/[?$]$/,'')
-    return whatToDo(
+    const keyNameStripped = keyName.replace(optionalRegex,'')
+    return isValidType(
       [undefined, schema[keyName]],
       object[keyNameStripped],
       object,
@@ -32,7 +33,7 @@ const checkObject = (whatToDo, schema, object) => {
   if (!areAllValid) return areAllValid;
 
   areAllValid = requiredKeys.every((keyName) =>
-    whatToDo(schema[keyName], object[keyName], object, keyName)
+    isValidType(schema[keyName], object[keyName], object, keyName)
   );
 
   if (!areAllValid) return areAllValid;
@@ -46,16 +47,13 @@ const checkObject = (whatToDo, schema, object) => {
   areAllValid = regexKeys.every((regexpString) =>
     untestedKeys.every((keyName) => {
       if (stringToRegExp(regexpString).test(keyName)) {
-        return whatToDo(schema[regexpString], object[keyName], object, keyName);
+        return isValidType(schema[regexpString], object[keyName], object, keyName);
       }
       return true;
     })
   );
   return areAllValid;
 };
-
-export const checkShape = (types, props) =>
-  checkObject(isValidType, types, props);
 
 const whatKindIs = (type) => {
   if (isType(Object)(type)) return "schema";
@@ -66,6 +64,7 @@ const whatKindIs = (type) => {
   if (isType(RegExp)(type)) return "regex";
 };
 export const isValidType = (type, value, rootValue, keyName) => {
+
   const kind = whatKindIs(type);
   switch (kind) {
     case "regex":
@@ -91,6 +90,7 @@ const throwOnError = (err) => {
   if (isError(err)) throw err;
   throw new TypeError(err);
 };
+
 
 const check = (error) => (...types) => (value) => {
   try {
