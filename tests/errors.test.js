@@ -70,7 +70,7 @@ describe("check error in serie", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
-describe.only("collect all errors", () => {
+describe("collect all errors", () => {
   test("should collect all errors in series", () => {
     expect(() => {
       try {
@@ -79,7 +79,7 @@ describe.only("collect all errors", () => {
           throw new RangeError(`${v} must be negative`);
         })(33);
       } catch (error) {
-        error.errors.forEach(err => console.warn(err.name,err.message))
+        // error.errors.forEach(err => console.warn(err.name,err.message))
         throw error;
       }
     }).toThrow();

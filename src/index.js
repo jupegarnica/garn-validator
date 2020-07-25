@@ -13,7 +13,7 @@ import {
   optionalRegex,
 } from "./utils.js";
 
-export const checkShape = (schema, object) => {
+export const checkShapeCollectOneError = (schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
 
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
@@ -43,20 +43,61 @@ export const checkShape = (schema, object) => {
   );
 
   areAllValid = regexKeys.every((regexpString) =>
-    untestedKeys.every((keyName) => {
-      if (stringToRegExp(regexpString).test(keyName)) {
-        return isValidType(
-          schema[regexpString],
-          object[keyName],
-          object,
-          keyName
-        );
-      }
-      return true;
-    })
-  );
+    untestedKeys
+    .filter(keyName => stringToRegExp(regexpString).test(keyName))
+    .every((keyName) => isValidType(
+      schema[regexpString],
+      object[keyName],
+      object,
+      keyName
+    )
+  ))
   return areAllValid;
 };
+
+// export const checkShapeCollectAllErrors = (schema, object) => {
+//   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
+
+//   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
+
+//   let areAllValid = optionalKeys.every((keyName) => {
+//     const keyNameStripped = keyName.replace(optionalRegex, "");
+//     return isValidType(
+//       [undefined, schema[keyName]],
+//       object[keyNameStripped],
+//       object,
+//       keyNameStripped
+//     );
+//   });
+
+//   if (!areAllValid) return areAllValid;
+
+//   areAllValid = requiredKeys.every((keyName) =>
+//     isValidType(schema[keyName], object[keyName], object, keyName)
+//   );
+
+//   if (!areAllValid) return areAllValid;
+
+//   const regexKeys = Object.keys(schema).filter(isRegExp);
+
+//   const untestedKeys = Object.keys(object).filter(
+//     (key) => !requiredKeys.includes(key)
+//   );
+
+//   areAllValid = regexKeys.every((regexpString) =>
+//     untestedKeys
+//     .filter(keyName => stringToRegExp(regexpString).test(keyName))
+//     .every((keyName) => isValidType(
+//       schema[regexpString],
+//       object[keyName],
+//       object,
+//       keyName
+//     )
+//   ))
+//   return areAllValid;
+// };
+
+const checkShape = checkShapeCollectOneError;
 
 const whatKindIs = (type) => {
   if (isType(Object)(type)) return "schema";
@@ -126,7 +167,7 @@ export const collectAllErrors = (...types) => (value) => {
 
       throwOnError(`value ${stringify(value)} do not match type ${stringify(type)}`);
     } catch (error) {
-      // console.error(error);
+      // console.error(error.message);
       errors.push(error);
     }
   }
