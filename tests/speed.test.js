@@ -75,7 +75,7 @@ describe("speed tests", () => {
       // console.log("check big object", delta);
       expect(delta).toBeLessThanOrEqual(2);
     });
-    test("check massive object with a valid schema", () => {
+    test.skip("check massive object with a valid schema", () => {
       const schema = {
         [/./]: {
           [/./]: () => true,
@@ -106,7 +106,7 @@ describe("speed tests", () => {
       } catch (error) {}
       expect(global.console.log).not.toHaveBeenCalled();
     });
-    test("should be fast", () => {
+    test.skip("should be fast", () => {
       const schema = {
         [/./]: () => false,
         [/.*/]: () => console.log("I run?"),
