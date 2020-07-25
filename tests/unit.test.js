@@ -6,58 +6,85 @@ import {
   stringify,
   isInstanceOf,
 } from "../src/utils";
-import {isValidType} from 'garn-validator'
+import { isValidType } from "garn-validator";
 
-describe("test type by constructor", () => {
-  test("should return true for basic JS types", () => {
-    expect(isType(RegExp)(/regexp/)).toBe(true);
-    expect(isType(RegExp)(new RegExp("foo"))).toBe(true);
 
-    expect(isType(Object)({ a: 1 })).toBe(true);
-    expect(isType(Object)(new Object({ b: 2 }))).toBe(true);
 
-    expect(isType(Boolean)(true)).toBe(true);
-    expect(isType(Boolean)(false)).toBe(true);
+describe("isType by constructor", () => {
+  class MyClass {}
+  test.each([
+    [RegExp, /regexp/],
+    [RegExp, new RegExp("foo")],
 
-    expect(isType(String)("xs")).toBe(true);
-    expect(isType(String)("")).toBe(true);
-    expect(isType(String)("")).toBe(true);
-    expect(isType(String)(``)).toBe(true);
+    [Object, { a: 1 }],
+    [Object, new Object({ b: 2 })],
 
-    expect(isType(Number)(1)).toBe(true);
-    expect(isType(Number)(NaN)).toBe(true);
-    expect(isType(Number)(Infinity)).toBe(true);
-    expect(isType(Number)(0.34)).toBe(true);
-    expect(isType(Number)(3.1e12)).toBe(true);
+    [Boolean, true],
+    [Boolean, false],
 
-    expect(isType(Array)([1, 2])).toBe(true);
-    expect(isType(Array)(new Array(1, 2))).toBe(true);
-    expect(isType(ArrayBuffer)(new ArrayBuffer(8))).toBe(true);
+    [Promise, new Promise(()=>{}).catch(()=>{})],
+    [Promise, Promise.resolve().catch(()=>{})],
+    [Promise, Promise.reject().catch(()=>{})],
+    [Promise, Promise.all([]).catch(()=>{})],
+    [Promise, (async () => {})().catch(()=>{})],
 
-    expect(isType(Symbol)(Symbol())).toBe(true);
+    [String, "xs"],
+    [String, ""],
+    [String, ""],
+    [String, ``],
+    [String, new String("hola")],
 
-    expect(isType(Map)(new Map())).toBe(true);
-    expect(isType(WeakMap)(new WeakMap())).toBe(true);
-    expect(isType(Set)(new Set())).toBe(true);
-    expect(isType(WeakSet)(new WeakSet())).toBe(true);
+    [MyClass, new MyClass()],
 
+    [Number, 1],
+    [Number, NaN],
+    [Number, Infinity],
+    [Number, 0.34],
+    [Number, 3.1e12],
+
+    [Array, [1, 2]],
+    [Array, new Array(1, 2)],
+    [ArrayBuffer, new ArrayBuffer(8)],
+
+    [Symbol, Symbol()],
+
+    [Map, new Map()],
+    [WeakMap, new WeakMap()],
+    [Set, new Set()],
+    [WeakSet, new WeakSet()],
     // not yet supported in jsdom
-    // expect(isType(BigInt)(new BigInt(2))).toBe(true);
-    // expect(isType(BigInt)(2n)).toBe(true);
+    [BigInt, BigInt(2)],
+    [BigInt, 2n],
+  ])("should return true for type %p -- value %p", (type, val) => {
+    expect(isType(type)(val)).toBe(true);
+  });
+  test.each([
+    [Object, []],
+    [Object, new Error()],
+    [Object, new MyClass()],
+    [Object, function(){}],
+    [Boolean, "true"],
+    [String, 1],
+    [String, []],
+    [String, {}],
+    [String, true],
+    [Number, "1"],
+  ])("should return false for type %p -- value %p", (type, val) => {
+    expect(isType(type)(val)).toBe(false);
   });
 
-  test("should return false for built-in types", () => {
-    expect(isType(Object)("{ a: 1 }")).toBe(false);
+  // test("should return false for built-in types", () => {
+  //   expect(isType(Object)("{ a: 1 }")).toBe(false);
 
-    expect(isType(Boolean)("true")).toBe(false);
+  //   expect(isType(Boolean)("true")).toBe(false);
 
-    expect(isType(String)(1)).toBe(false);
-    expect(isType(String)([])).toBe(false);
-    expect(isType(String)({})).toBe(false);
-    expect(isType(String)()).toBe(false);
+  //   expect(isType(String)(1)).toBe(false);
+  //   expect(isType(String)([])).toBe(false);
+  //   expect(isType(String)({})).toBe(false);
+  //   expect(isType(String)()).toBe(false);
 
-    expect(isType(Number)("1")).toBe(false);
-  });
+  //   expect(isType(Number)("1")).toBe(false);
+  // });
 
   test("should recognize instance of classes", () => {
     class Car {}
@@ -72,23 +99,25 @@ describe("test type by constructor", () => {
 });
 
 describe("isPrimitive", () => {
-  test(" should recognize primitive types", () => {
-    expect(isPrimitive("hola")).toBe(true);
-    expect(isPrimitive(1)).toBe(true);
-    expect(isPrimitive(false)).toBe(true);
-    expect(isPrimitive(NaN)).toBe(true);
+  test.each([
+    ["a", true],
+    [1, true],
+    [false, true],
+    [NaN, true],
+    [undefined, true],
+    [null, true],
+    [Symbol(), true],
 
-    expect(isPrimitive(undefined)).toBe(true);
-    expect(isPrimitive(null)).toBe(true);
-
-    expect(isPrimitive(Symbol())).toBe(true);
-
-    expect(isPrimitive({})).toBe(false);
-    expect(isPrimitive(/regex/)).toBe(false);
-    expect(isPrimitive(() => {})).toBe(false);
-    expect(isPrimitive([])).toBe(false);
-    expect(isPrimitive(new Map())).toBe(false);
-    expect(isPrimitive(new Set())).toBe(false);
+    [{}, false],
+    [/regex/, false],
+    [() => {}, false],
+    [[], false],
+    [new Map(), false],
+    [new Set(), false],
+    [class {}, false],
+    [function () {}, false],
+  ])("should recognize %p as %p", (val, expected) => {
+    expect(isPrimitive(val)).toBe(expected);
   });
 });
 
