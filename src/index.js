@@ -13,15 +13,13 @@ import {
   optionalRegex,
 } from "./utils.js";
 
-
-
-export const checkShape  =(schema, object) => {
+export const checkShape = (schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
 
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
 
   let areAllValid = optionalKeys.every((keyName) => {
-    const keyNameStripped = keyName.replace(optionalRegex,'')
+    const keyNameStripped = keyName.replace(optionalRegex, "");
     return isValidType(
       [undefined, schema[keyName]],
       object[keyNameStripped],
@@ -47,7 +45,12 @@ export const checkShape  =(schema, object) => {
   areAllValid = regexKeys.every((regexpString) =>
     untestedKeys.every((keyName) => {
       if (stringToRegExp(regexpString).test(keyName)) {
-        return isValidType(schema[regexpString], object[keyName], object, keyName);
+        return isValidType(
+          schema[regexpString],
+          object[keyName],
+          object,
+          keyName
+        );
       }
       return true;
     })
@@ -64,7 +67,6 @@ const whatKindIs = (type) => {
   if (isType(RegExp)(type)) return "regex";
 };
 export const isValidType = (type, value, rootValue, keyName) => {
-
   const kind = whatKindIs(type);
   switch (kind) {
     case "regex":
@@ -91,17 +93,47 @@ const throwOnError = (err) => {
   throw new TypeError(err);
 };
 
-
-const check = (error) => (...types) => (value) => {
+const check = (onError) => (...types) => (value) => {
   try {
     return types.every((type) => {
       const valid = isValidType(type, value);
+
       if (valid) return valid;
+
       throw `value ${stringify(value)} do not match type ${stringify(type)}`;
     });
   } catch (err) {
-    return error(err);
+    return onError(err);
   }
+};
+
+if (typeof AggregateError === "undefined") {
+  class MyAggregateError extends Error {
+    constructor(errors, message) {
+      super(message);
+      this.errors = errors;
+    }
+  }
+  var AggregateError = MyAggregateError;
+}
+
+export const collectAllErrors = (...types) => (value) => {
+  const errors = [];
+  for (const type of types) {
+    try {
+      const valid = isValidType(type, value);
+      if (valid) return valid;
+
+      throwOnError(`value ${stringify(value)} do not match type ${stringify(type)}`);
+    } catch (error) {
+      // console.error(error);
+      errors.push(error);
+    }
+  }
+  if (errors.length > 0) {
+    throw new AggregateError(errors, "aggregateError");
+  }
+  return true;
 };
 
 export const setOnError = (onError) => check(onError);

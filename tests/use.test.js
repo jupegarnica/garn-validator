@@ -165,32 +165,5 @@ describe("multiple validations in series", () => {
       )(2)
     ).toBe(true);
   });
-  test("should throw the error message related to the check failed", () => {
-    expect(() => {
-      check(Number, String)(2);
-    }).toThrow(
-      'value 2 do not match type "function String() { [native code] }"'
-    );
-  });
-  test("should throw the error message related to the check failed", () => {
-    expect(() => {
-      check(() => {
-        throw new Error();
-      }, String)(2);
-    }).toThrow(Error);
-  });
-  test("should check only until the first check fails", () => {
-    global.console = {
-      log: jest.fn(),
-    };
-    try {
-      check(
-        () => {
-          throw new Error();
-        },
-        () => console.log("I run?")
-      )(2);
-    } catch (err) {}
-    expect(global.console.log).not.toHaveBeenCalled();
-  });
+
 });
