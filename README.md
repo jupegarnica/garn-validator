@@ -8,8 +8,8 @@ Ultra fast runtime type validator for vanilla JS without dependencies.
 
 - Ultra light and **fast**: 3kB unzip (1.5 gzipped) with **0 dependencies**
 - Support for checking primitives values and objects with schemas
-- Easy to use and simple to learn
-- Custom behaviors (3 built-in: isValid, isValidOrThrow & isValidOrLog)
+- Easy to use and simple to learn but powerful
+- Custom behaviors (4 built-in: isValid, isValidOrThrow  isValidOrLog and hasErrors)
 - Works with ESModules or CommonJS from node 8.x to latests
 
 # Get started
@@ -30,7 +30,7 @@ npm install garn-validator
 ```js
 import isValidOrThrow from "garn-validator"; // default export is isValidOrThrow
 // or use named exports
-import { isValidOrLog } from "garn-validator";
+import { isValidOrThrow } from "garn-validator";
 ```
 
 #### Require with CommonJs
@@ -148,28 +148,13 @@ isValidUser({
 }); // will throw
 ```
 
-### Custom behavior
 
-```js
-const isValidOrSendReport = setOnError((err) => {
-  fetch("//myReportServer.com/report", {
-    method: "POST",
-    body: JSON.stringify(err),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  throw new MyInvalidError(err);
-});
-
-isValidOrSendReport(Number) ("3"); // will send error and will throw MyInvalidError
-```
-
-### Built-in behaviors
+### Behaviors
 
 There are 3 behaviors you can import
 
 ```js
+
 export const isValid = setOnError(returnsFalse);
 export const isValidOrLog = setOnError(logError);
 export const isValidOrThrow = setOnError(throwOnError);
@@ -551,37 +536,37 @@ describe("composable", () => {
   });
 });
 
-describe("set on error to isValid", () => {
-  const isValid = setOnError(() => false); // import named isValid
+// describe("set on error to isValid", () => {
+//   const isValid = setOnError(() => false); // import named isValid
 
-  test("should return true if valid", () => {
-    expect(isValid(Number)(2)).toBe(true);
-  });
-  test("should return false if valid", () => {
-    expect(isValid(String)(2)).toBe(false);
-  });
-});
+//   test("should return true if valid", () => {
+//     expect(isValid(Number)(2)).toBe(true);
+//   });
+//   test("should return false if valid", () => {
+//     expect(isValid(String)(2)).toBe(false);
+//   });
+// });
 
-describe("set on error  to log error", () => {
-  beforeAll(() => {
-    global.console = {
-      error: jest.fn(),
-      log: jest.fn(),
-    };
-  });
-  const checkOrLog = setOnError((err) => console.error(err)); // same as isValidOrLog
+// describe("set on error  to log error", () => {
+//   beforeAll(() => {
+//     global.console = {
+//       error: jest.fn(),
+//       log: jest.fn(),
+//     };
+//   });
+//   const checkOrLog = setOnError((err) => console.error(err)); // same as isValidOrLog
 
-  test("should not log error", () => {
-    checkOrLog(Number)(2);
+//   test("should not log error", () => {
+//     checkOrLog(Number)(2);
 
-    expect(global.console.error).not.toHaveBeenCalled();
-  });
-  test("should log error", () => {
-    checkOrLog(String)(2);
+//     expect(global.console.error).not.toHaveBeenCalled();
+//   });
+//   test("should log error", () => {
+//     checkOrLog(String)(2);
 
-    expect(global.console.error).toHaveBeenCalled();
-  });
-});
+//     expect(global.console.error).toHaveBeenCalled();
+//   });
+// });
 ```
 
 ### More examples
