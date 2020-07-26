@@ -28,25 +28,19 @@ describe("check errors", () => {
   test("should format the schema", () => {
     expect(() => {
       check({ a: Number })(33);
-    }).toThrow(
-      'value 33 do not match type {"a":"Number"}'
-    );
+    }).toThrow('value 33 do not match type {"a":"Number"}');
   });
   test("should format the value", () => {
     expect(() => {
       check({ a: Number })({ b: 33 });
-    }).toThrow(
-      'value {"b":33} do not match type {"a":"Number"}'
-    );
+    }).toThrow('value {"b":33} do not match type {"a":"Number"}');
   });
 });
 describe("check error in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       check(Number, String)(2);
-    }).toThrow(
-      'value 2 do not match type "String"'
-    );
+    }).toThrow('value 2 do not match type "String"');
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
@@ -71,17 +65,43 @@ describe("check error in serie", () => {
   });
 });
 describe("collect all errors", () => {
-  test("should collect all errors in series", () => {
-    expect(() => {
+  describe("in series", () => {
+    test("should collect all errors in series", () => {
+      expect(() => {
+        try {
+          collectAllErrors(Boolean, String, (v) => {
+            if (v < 0) return true;
+            throw new RangeError(`${v} must be negative`);
+          })(33);
+        } catch (error) {
+          // error.errors.forEach(err => console.warn(err.name,err.message))
+          throw error;
+        }
+      }).toThrow();
+    });
+  });
+  describe.skip("in schema", () => {
+    test("should collect all errors in schema", () => {
+
       try {
-        collectAllErrors(Boolean, String, (v) => {
-          if (v < 0) return true;
-          throw new RangeError(`${v} must be negative`);
-        })(33);
+        collectAllErrors({
+          bool: Boolean,
+          str: String,
+          negative: (v) => {
+            if (v < 0) return true;
+            throw new RangeError(`${v} must be negative`);
+          },
+        })({
+          bool: null,
+          str:1,
+          negative:1
+        });
       } catch (error) {
-        // error.errors.forEach(err => console.warn(err.name,err.message))
-        throw error;
+        console.error(error);
+        error.errors.forEach(err => console.warn(err.name,err.message));
+        expect(error.errors.length).toBe(3)
       }
-    }).toThrow();
+
+    });
   });
 });
