@@ -219,17 +219,14 @@ hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 - [x] ArrayOf & objectOf examples
 - [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/ )('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
-- [ ] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
+- [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [ ] Support for deno
 - [ ] Support for browser
 
 ## All it can do
 
 ```js
-import check, {
-  setOnError, // returns new instance setting on error behavior
-  isValid, // returns true or false
-} from "garn-validator";
+import check, { hasErrors, isValid } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
@@ -251,17 +248,7 @@ describe("check with constructors", () => {
     }).not.toThrow();
   });
 });
-describe("check with primitives values", () => {
-  test("should work", () => {
-    expect(() => {
-      check("a string")("a string");
-    }).not.toThrow();
 
-    expect(() => {
-      check(1)(2);
-    }).toThrow();
-  });
-});
 
 describe("check with custom validator", () => {
   test("cyou can return true or false", () => {
@@ -471,7 +458,21 @@ describe("multiple validations in series", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
+describe("collect all Error", () => {
+  test("should return null", () => {
+    expect(
+      hasErrors({ num: Number, str: String })({ num: 2, str: "str" })
+    ).toBe(null);
+  });
+  test("should return array of errors", () => {
+    expect(
+      hasErrors({ num: Number, str: String })( { num: "2", str: "str" })
+    ).toEqual([
+      new TypeError('on path /num value "2" do not match type "Number"'),
+    ]);
+  });
 
+});
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
@@ -567,38 +568,6 @@ describe("composable", () => {
     }).toThrow();
   });
 });
-
-// describe("set on error to isValid", () => {
-//   const isValid = setOnError(() => false); // import named isValid
-
-//   test("should return true if valid", () => {
-//     expect(isValid(Number)(2)).toBe(true);
-//   });
-//   test("should return false if valid", () => {
-//     expect(isValid(String)(2)).toBe(false);
-//   });
-// });
-
-// describe("set on error  to log error", () => {
-//   beforeAll(() => {
-//     global.console = {
-//       error: jest.fn(),
-//       log: jest.fn(),
-//     };
-//   });
-//   const checkOrLog = setOnError((err) => console.error(err)); // same as isValidOrLog
-
-//   test("should not log error", () => {
-//     checkOrLog(Number)(2);
-
-//     expect(global.console.error).not.toHaveBeenCalled();
-//   });
-//   test("should log error", () => {
-//     checkOrLog(String)(2);
-
-//     expect(global.console.error).toHaveBeenCalled();
-//   });
-// });
 ```
 
 ### More examples
