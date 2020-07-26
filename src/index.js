@@ -272,7 +272,6 @@ export const config = ({
 
 export const isValid = config({
   onFinishWithErrors: () => false,
-  onError: () => false,
   collectAllErrors: false,
 });
 
@@ -288,8 +287,5 @@ export const hasErrors = config({
 });
 
 export const isValidOrThrow = config({
-  // onFinishWithErrors: throwOnError,
-  // onError: throwOnError,
-  // collectAllErrors: false,
 });
 export default isValidOrThrow;
