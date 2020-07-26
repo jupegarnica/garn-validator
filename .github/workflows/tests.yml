@@ -30,6 +30,5 @@ jobs:
         npm run build
         npm run test:prod
         npm run test:prod:dom
-        npm run test:raw
       env:
         CI: true
