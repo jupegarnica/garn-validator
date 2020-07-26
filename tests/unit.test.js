@@ -329,7 +329,7 @@ describe("stringify", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
   test.each([
-    [/.*/, "/.*/"],
+    [/.*/, '"/.*/"'],
     [1, "1"],
     [true, "true"],
     [null, "null"],
