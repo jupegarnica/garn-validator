@@ -205,6 +205,7 @@ export const isValidType = (
   keyName
 ) => {
   const kind = whatKindIs(type);
+ try {
   switch (kind) {
     case "regex":
       return checkRegExp(type, value);
@@ -224,42 +225,12 @@ export const isValidType = (
     default:
       return false;
   }
+ } catch (error) {
+   return conf.onError(error)
+ }
 };
 
-// const check = ({onError}) => (...types) => (value) => {
-//   try {
-//     return types.every((type) => {
-//       const valid = isValidType(type, value);
 
-//       if (valid) return valid;
-
-//       throw `value ${stringify(value)} do not match type ${stringify(type)}`;
-//     });
-//   } catch (err) {
-//     return onError(err);
-//   }
-// };
-
-// export const collectAllErrors = (...types) => (value) => {
-//   const errors = [];
-//   for (const type of types) {
-//     try {
-//       const valid = isValidType(type, value);
-//       if (valid) return valid;
-
-//       throwOnError(
-//         `value ${stringify(value)} do not match type ${stringify(type)}`
-//       );
-//     } catch (error) {
-//       // console.error(error.message);
-//       errors.push(error);
-//     }
-//   }
-//   if (errors.length > 0) {
-//     throw new AggregateError(errors, "aggregateError");
-//   }
-//   return true;
-// };
 
 const run = (conf) => (...types) => (value) => {
   const errors = [];
@@ -268,7 +239,7 @@ const run = (conf) => (...types) => (value) => {
       const valid = isValidType(conf, type, value);
       if (valid) continue;
 
-      throw formatErrorMessage(type, value);
+      throw conf.onError(formatErrorMessage(type, value));
     } catch (error) {
       errors.push(error);
       if (!conf.collectAllErrors) break;
@@ -279,36 +250,6 @@ const run = (conf) => (...types) => (value) => {
   }
   return conf.onFinishSuccess();
 };
-
-// export const hasErrors = (...types) => (value) => {
-//   const errors = [];
-//   for (const type of types) {
-//     try {
-//       const valid = isValidType(type, value);
-//       if (valid) continue ;
-
-//       throwOnError(
-//         `value ${stringify(value)} do not match type ${stringify(type)}`
-//       );
-//     } catch (error) {
-//       // console.error(error.message);
-//       errors.push(error);
-//     }
-//   }
-//   if (errors.length > 0) return errors;
-//   return null;
-// };
-
-// export const setOnError = (onError) => check({onError});
-
-// export const isValid = setOnError(() => false);
-
-// export const isValidOrLog = setOnError((err) => {
-//   console.error(err);
-//   return false;
-// });
-
-// export const isValidOrThrow = setOnError(throwOnError);
 
 export const config = ({
   onError = throwOnError,

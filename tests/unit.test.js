@@ -7,6 +7,7 @@ import {
   stringify,
   isInstanceOf,
   isClass,
+  isError,
 } from "../src/utils";
 
 import { isValidType as _isValidType } from "garn-validator";
@@ -193,14 +194,17 @@ describe("isCustomValidator:detect if a function is anonymous or its name starts
 });
 
 describe("isValidType", () => {
-  const conf = {
-    onError: () => false,
-    collectAllErrors: false,
-    onFinishSuccess: () => true,
-    onFinishWithErrors: () => false,
-  };
+  // const conf = {
+  //   onError: (err) => {
+  //     if (isError(err)) throw err;
+  //     throw new TypeError(err);
+  //   },
+  //   collectAllErrors: false,
+  //   onFinishSuccess: () => true,
+  //   onFinishWithErrors: () => false,
+  // };
 
-  const isValidType = (...args) => _isValidType(conf, ...args);
+  const isValidType = (...args) => _isValidType(undefined, ...args);
 
   test.each([
     [/.ola/, "hola", true],
@@ -234,7 +238,6 @@ describe("isValidType", () => {
     expect(isValidType(type, value)).toBe(expected);
   });
 
-
   test("should work for enums of constructors", () => {
     expect(isValidType([String, Function], "a")).toBe(true);
     expect(isValidType([String, Function], 1)).toBe(false);
@@ -247,39 +250,29 @@ describe("isValidType", () => {
     expect(isValidType([undefined, String], undefined)).toBe(true);
     expect(isValidType([undefined, Number], "c")).toBe(false);
   });
-  test("should work for shapes", () => {
-    expect(isValidType({ a: Number }, { a: 1 })).toBe(true);
-    expect(isValidType({ a: Number }, { a: "a" })).toBe(false);
 
-    expect(isValidType({ a: [Number, String] }, { a: "a" })).toBe(true);
-    expect(
-      isValidType(
-        {
-          a: [Number, String],
-          b: [undefined, "b"],
-        },
-        { a: "a" }
-      )
-    ).toBe(true);
-    expect(
-      isValidType(
-        {
-          a: [Number, String],
-          b: [undefined, "b"],
-        },
-        { a: "a", b: "b" }
-      )
-    ).toBe(true);
-    expect(
-      isValidType(
-        {
-          a: [Number, String],
-          b: [undefined, "b"],
-        },
-        { a: "a", b: "c" }
-      )
-    ).toBe(false);
+  test.each([
+    [{ a: Number }, { a: 1 }],
+    [{ a: [Number, String] }, { a: "a" }],
+    [{ a: [Number, String], b: [undefined, "b"] }, { a: "a" }],
+    [
+      { a: [Number, String], b: [undefined, "b"] },
+      { a: "a", b: "b" },
+    ],
+    //  [{ a: Number }, { a: "a" },false],
+  ])("should work for shapes: %p : %p", (schema, value) => {
+    expect(isValidType(schema, value)).toBe(true);
   });
+  test.each([
+    [{ a: Number }, { a: "1" }],
+    [{ a: [Number, String] }, {}],
+    [{ a: Number }, { a: "a" }],
+  ])("should throw for shapes: %p : %p", (schema, value) => {
+    expect(() => {
+      isValidType(schema, value);
+    }).toThrow();
+  });
+
   test("should work for custom validators functions", () => {
     expect(isValidType((value) => value > 5, 6)).toBe(true);
     expect(isValidType((value) => value === 5, 6)).toBe(false);

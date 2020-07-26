@@ -104,63 +104,63 @@ describe("check error in serie", () => {
 //   });
 // });
 
-// describe("hasErrors", () => {
-//   describe("in serie", () => {
-//     test.each([
-//       [Number, (v) => v > 0, 2, null],
-//       [
-//         Number,
-//         (v) => v > 100,
-//         2,
-//         [new TypeError('value 2 do not match type "v=>v>100"')],
-//       ],
-//       [
-//         String,
-//         (v) => v > 100,
-//         2,
-//         [
-//           new TypeError('value 2 do not match type "String"'),
-//           new TypeError('value 2 do not match type "v=>v>100"'),
-//         ],
-//       ],
-//     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
-//       expect(hasErrors(a, b)(input)).toStrictEqual(expected);
-//     });
-//   });
-//   describe.only("in schema", () => {
-//     test.each([
-//       [{ num: Number }, { num: 2 }, null],
-//       [{ num: Number, str: String }, { num: 2, str: "str" }, null],
-//     ])(
-//       "should return null : hasErrors(%p)(%p) === %p",
-//       (schema, obj, expected) => {
-//         expect(hasErrors(schema)(obj)).toStrictEqual(expected);
-//       }
-//     );
-//   });
-//   test.each([
-//     [
-//       { num: Number, str: String },
-//       { num: "2", str: "str" },
-//       [
-//         new TypeError(
-//           'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
-//         ),
-//       ],
-//     ],
-//     [
-//       { num: Number, str: String },
-//       { num: "2", str: null },
-//       [
-//         new TypeError(
-//           'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
-//         ),
-//       ],
-//     ],
-//   ])(
-//     "should return array of errors hasErrors(%p)(%p) === %p",
-//     (schema, obj, expected) => {
-//       expect(hasErrors(schema)(obj)).toStrictEqual(expected);
-//     }
-//   );
-// });
+describe("hasErrors", () => {
+  describe("in serie", () => {
+    test.each([
+      [Number, (v) => v > 0, 2, null],
+      [
+        Number,
+        (v) => v > 100,
+        2,
+        [new TypeError('value 2 do not match type "v=>v>100"')],
+      ],
+      [
+        String,
+        (v) => v > 100,
+        2,
+        [
+          new TypeError('value 2 do not match type "String"'),
+          new TypeError('value 2 do not match type "v=>v>100"'),
+        ],
+      ],
+    ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
+      expect(hasErrors(a, b)(input)).toStrictEqual(expected);
+    });
+  });
+  describe("in schema", () => {
+    test.each([
+      [{ num: Number }, { num: 2 }, null],
+      [{ num: Number, str: String }, { num: 2, str: "str" }, null],
+    ])(
+      "should return null : hasErrors(%p)(%p) === %p",
+      (schema, obj, expected) => {
+        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+      }
+    );
+  });
+  test.each([
+    [
+      { num: Number, str: String },
+      { num: "2", str: "str" },
+      [
+        new TypeError(
+          'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
+        ),
+      ],
+    ],
+    [
+      { num: Number, str: String },
+      { num: "2", str: null },
+      [
+        new TypeError(
+          'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
+        ),
+      ],
+    ],
+  ])(
+    "should return array of errors hasErrors(%p)(%p) === %p",
+    (schema, obj, expected) => {
+      expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+    }
+  );
+});
