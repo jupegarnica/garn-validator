@@ -2,16 +2,17 @@ import {
   isType,
   isPrimitive,
   isConstructor,
-  isNormalFunction,
+  isCustomValidator,
+  isFunction,
   stringify,
   isInstanceOf,
+  isClass,
 } from "../src/utils";
 import { isValidType } from "garn-validator";
 
-
-
 describe("isType by constructor", () => {
   class MyClass {}
+  const noop = () => {};
   test.each([
     [RegExp, /regexp/],
     [RegExp, new RegExp("foo")],
@@ -22,11 +23,11 @@ describe("isType by constructor", () => {
     [Boolean, true],
     [Boolean, false],
 
-    [Promise, new Promise(()=>{}).catch(()=>{})],
-    [Promise, Promise.resolve().catch(()=>{})],
-    [Promise, Promise.reject().catch(()=>{})],
-    [Promise, Promise.all([]).catch(()=>{})],
-    [Promise, (async () => {})().catch(()=>{})],
+    [Promise, new Promise(noop).catch(noop)],
+    [Promise, Promise.resolve().catch(noop)],
+    [Promise, Promise.reject().catch(noop)],
+    [Promise, Promise.all([]).catch(noop)],
+    [Promise, (async () => {})().catch(noop)],
 
     [String, "xs"],
     [String, ""],
@@ -62,7 +63,7 @@ describe("isType by constructor", () => {
     [Object, []],
     [Object, new Error()],
     [Object, new MyClass()],
-    [Object, function(){}],
+    [Object, function () {}],
     [Boolean, "true"],
     [String, 1],
     [String, []],
@@ -72,30 +73,18 @@ describe("isType by constructor", () => {
   ])("should return false for type %p -- value %p", (type, val) => {
     expect(isType(type)(val)).toBe(false);
   });
-
-  // test("should return false for built-in types", () => {
-  //   expect(isType(Object)("{ a: 1 }")).toBe(false);
-
-  //   expect(isType(Boolean)("true")).toBe(false);
-
-  //   expect(isType(String)(1)).toBe(false);
-  //   expect(isType(String)([])).toBe(false);
-  //   expect(isType(String)({})).toBe(false);
-  //   expect(isType(String)()).toBe(false);
-
-  //   expect(isType(Number)("1")).toBe(false);
-  // });
-
-  test("should recognize instance of classes", () => {
-    class Car {}
-    expect(isType(Car)(new Car())).toBe(true);
-
-    class Porsche extends Car {}
-
-    expect(isType(Car)(new Porsche())).toBe(false);
-
-    expect(isType(Object)(new Array())).toBe(false);
-  });
+  class Car {}
+  class Porsche extends Car {}
+  test.each([
+    [Car, new Car(), true],
+    [Car, new Porsche(), false],
+    [Object, new Array(), false],
+  ])(
+    "should recognize class %p of value %p to be %p",
+    (type, val, expected) => {
+      expect(isType(type)(val)).toBe(expected);
+    }
+  );
 });
 
 describe("isPrimitive", () => {
@@ -122,26 +111,85 @@ describe("isPrimitive", () => {
 });
 
 describe("isConstructor", () => {
-  test("should detect if a value can be instantiated with new", () => {
-    expect(isConstructor(Object)).toBe(true);
-    expect(isConstructor(Array)).toBe(true);
-    expect(isConstructor(console)).toBe(false);
-    expect(isConstructor(12)).toBe(false);
-    expect(isConstructor(() => {})).toBe(false);
-    expect(isConstructor(function name() {})).toBe(false);
-    const fn = () => {};
-    expect(isConstructor(fn)).toBe(false);
+  const fnArrow = () => {};
+  const FnArrow = () => {};
+  const FnAsync = async () => {};
+  const Fn = function () {};
+  const fn = function () {};
+
+  test.each([
+    [Object, true],
+    [Array, true],
+    [console.log, false],
+    [12, false],
+    [() => {}, false],
+    [fn, false],
+    [Fn, true],
+
+    [FnAsync, false],
+
+    [fnArrow, false],
+    [FnArrow, false],
+
+    [function Name() {}, true],
+    [function name() {}, false],
+    [class myClass {}, true],
+    [class MyClass {}, true],
+  ])("should detect if %p is constructor or not", (value, expected) => {
+    expect(isConstructor(value)).toBe(expected);
   });
 });
 
-describe("is normal function", () => {
-  test("should detect if a function is anonymous or his name starts with lowercase (not a class)", () => {
-    expect(isNormalFunction(Object)).toBe(false);
-    expect(isNormalFunction(() => {})).toBe(true);
-    expect(isNormalFunction(function name() {})).toBe(true);
-    expect(isNormalFunction(function () {})).toBe(true);
-    expect(isNormalFunction("asdasd")).toBe(false);
-    expect(isNormalFunction(1)).toBe(false);
+describe("isFunction not hacked", () => {
+  function hack() {}
+  hack.toString = () => "class {}";
+
+  test.each([
+    [function () {}, true],
+    [function* () {}, true],
+    [async function () {}, true],
+    [function Name() {}, true],
+    [(classArg) => classArg, true],
+    [Array.isArray, true],
+
+    [class {}, false],
+    [class MyClass {}, false],
+    [hack, false],
+  ])("input %p should return %p", (input, expected) => {
+    expect(isFunction(input)).toBe(expected);
+  });
+});
+describe("isClass", () => {
+  function hack() {}
+  hack.toString = () => "class {}";
+
+  test.each([
+    [class {}, true],
+    [class MyClass {}, true],
+
+    ["class {}", false],
+    [hack, false],
+    [(classArg) => classArg, false],
+    [Object, false],
+    [Error, false],
+    [undefined, false],
+  ])("input %p should return %p", (input, expected) => {
+    expect(isClass(input)).toBe(expected);
+  });
+});
+
+describe("isCustomValidator detect if a function is anonymous or his name starts with lowercase", () => {
+  test.each([
+    [() => {}, true],
+    [function name() {}, true],
+    [function () {}, true],
+    // [async () => {}, false], // noy yet supported
+    [Object, false],
+    [Object.is, true],
+    ["asdasd", false],
+    [1, false],
+  ])("isCustomValidator(%p) should return %p", (input, expected) => {
+    expect(isCustomValidator(input)).toBe(expected);
   });
 });
 
@@ -279,12 +327,15 @@ describe("stringify", () => {
   test("should work as expected", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
-  test("should work with primitives", () => {
-    expect(stringify(1)).toBe("1");
-    expect(stringify(true)).toBe("true");
-    expect(stringify(null)).toBe("null");
-    expect(stringify(undefined)).toBe(undefined); // doesn't stringify. Normal behavior of JSON.stringify
-    expect(stringify("string")).toBe('"string"'); // normal behavior,  in order to parse it back
+  test.each([
+    [1,"1"],
+    [true,"true"],
+    [null,"null"],
+    [{},"{}"],
+    [undefined,undefined], // doesn't stringify. Normal behavior of JSON.stringify
+    ["string",'"string"'], // normal behavior,  in order to parse it back
+  ])("primitive %p should be %p", (input, expected) => {
+    expect(stringify(input)).toBe(expected);
   });
   test("should work with arrays", () => {
     expect(stringify([1])).toBe(`[1]`);

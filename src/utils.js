@@ -1,14 +1,18 @@
 export const isType = (type) => (val) =>
   ![undefined, null].includes(val) && val.constructor === type;
 
-const isClass = fn => /^\s*class/.test(fn.toString());
+export const isClass = fn => typeof fn === 'function' &&  /^\s*class\b/.test(fn.toString()) && !isFunctionHacked(fn);
 
-export const isNormalFunction = (f) => f && typeof f === "function" && !isClass(f) && (!f.name || f.name[0] === f.name[0].toLowerCase());
+export const isFunction = fn => typeof fn === 'function' && !isFunctionHacked(fn) && !isClass(fn);
+
+export const isFunctionHacked = fn =>  typeof fn === 'function'  && fn.toString.toString() !== 'function toString() { [native code] }'
+
+export const isCustomValidator = (f) => f && typeof f === "function" && !isClass(f) && (!f.name || f.name[0] === f.name[0].toLowerCase());
 
 export function isConstructor(f) {
-  if(isClass(f)) return true;
   // detect is a normal function (anonymous or its name starts with lowercase)
-  if (isNormalFunction(f)) return false;
+  if(isClass(f)) return true;
+  if (isCustomValidator(f)) return false;
   // symbols are not created with new
   if (f && f.name === "Symbol") return true;
   try {

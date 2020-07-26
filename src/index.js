@@ -3,7 +3,7 @@ import {
   isType,
   isPrimitive,
   isConstructor,
-  isNormalFunction,
+  isCustomValidator,
   isError,
   isRegExp,
   checkRegExp,
@@ -149,7 +149,7 @@ const whatKindIs = (type) => {
   if (isType(Object)(type)) return "schema";
   if (isPrimitive(type)) return "primitive";
   if (isConstructor(type)) return "constructor";
-  if (isNormalFunction(type)) return "function";
+  if (isCustomValidator(type)) return "function";
   if (isType(Array)(type)) return "enum";
   if (isType(RegExp)(type)) return "regex";
 };
