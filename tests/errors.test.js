@@ -1,4 +1,4 @@
-import check, { collectAllErrors, hasErrors } from "garn-validator";
+import check, {  hasErrors } from "garn-validator";
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {

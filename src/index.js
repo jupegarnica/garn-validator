@@ -286,6 +286,18 @@ export const hasErrors = config({
   collectAllErrors: true,
 });
 
+export const isValidOrLogAllError = config({
+  onFinishWithErrors: () => false,
+  onError: (err) => console.error(err) || false,
+  collectAllErrors: true,
+});
+
+export const isValidOrThrowAllError = config({
+  onFinishWithErrors: () => false,
+  onError: (err) => console.error(err) || false,
+  collectAllErrors: true,
+});
+
 export const isValidOrThrow = config({
 });
 export default isValidOrThrow;

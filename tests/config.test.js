@@ -37,7 +37,8 @@ describe("configured to throw all  errors as AggregateError ", () => {
       throwAllErrors(Number, Boolean,String)(true);
 
     } catch (error) {
-      expect(error.errors.length).toBe(2)
+      expect(error.errors.length).toBe(2);
+      // error.errors.forEach(e => console.warn(e.name, e.message))
     }
   });
 
