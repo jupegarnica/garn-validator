@@ -109,10 +109,9 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
   const regexKeys = Object.keys(schema).filter(isRegExp);
-  const untestedKeys = Object.keys(object).filter(
-    (key) => !requiredKeys.includes(key)
-  );
-
+  const untestedKeys = Object.keys(object)
+    .filter((key) => !requiredKeys.includes(key))
+    .filter((key) => !optionalKeys.map(k => k.replace(optionalRegex, "")).includes(key));
   const optionalError = [];
   for (const keyName of optionalKeys) {
     try {

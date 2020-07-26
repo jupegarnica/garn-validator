@@ -174,11 +174,12 @@ describe("hasErrors", () => {
         country: {
           name: String,
         },
+        [/./]: () => {
+          throw new EvalError("unexpected key");
+        },
       },
       optional$: true,
-      [/./]: () => {
-        throw new EvalError("unexpected key");
-      },
+      [/./]: () => false,
     };
     test("should return null ", () => {
       const obj = {
@@ -206,6 +207,7 @@ describe("hasErrors", () => {
           country: {
             NAME: "Japan",
           },
+          evalError: null,
         },
         noValidKey: 1,
       };
@@ -213,11 +215,11 @@ describe("hasErrors", () => {
         new TypeError(
           'on path /noValidKey value 1 do not match type "()=>false"'
         ),
-        new EvalError('unexpected key'),
         new TypeError(
           'on path /name value "Garn" do not match type "/^[a-z]{3,}$/"'
         ),
         new TypeError('on path /age value 18 do not match type "age=>age>18"'),
+        new EvalError("unexpected key"),
         new TypeError(
           'on path /car/brand value "Honda" do not match type ["honda","toyota"]'
         ),
@@ -227,6 +229,7 @@ describe("hasErrors", () => {
         new TypeError(
           'on path /car/country/name value undefined do not match type "String"'
         ),
+        new TypeError("on path /optional value false do not match type true"),
       ]);
     });
   });
