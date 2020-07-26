@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x,14.x]
+        node-version: [ 10.x, 12.x,14.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -30,5 +30,6 @@ jobs:
         npm run build
         npm run test:prod
         npm run test:prod:dom
+        npm run test:raw
       env:
         CI: true

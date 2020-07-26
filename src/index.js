@@ -269,7 +269,6 @@ export const config = ({
 } = defaultConfiguration) =>
   run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
-export const setOnError = (onError) => config({ onError });
 
 export const isValid = config({
   onFinishWithErrors: () => false,

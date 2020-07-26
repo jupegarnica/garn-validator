@@ -194,15 +194,6 @@ describe("isCustomValidator:detect if a function is anonymous or its name starts
 });
 
 describe("isValidType", () => {
-  // const conf = {
-  //   onError: (err) => {
-  //     if (isError(err)) throw err;
-  //     throw new TypeError(err);
-  //   },
-  //   collectAllErrors: false,
-  //   onFinishSuccess: () => true,
-  //   onFinishWithErrors: () => false,
-  // };
 
   const isValidType = (...args) => _isValidType(undefined, ...args);
 
@@ -338,7 +329,7 @@ describe("stringify", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
   test.each([
-    // [/.*/, "/.*/"],
+    [/.*/, "/.*/"],
     [1, "1"],
     [true, "true"],
     [null, "null"],
