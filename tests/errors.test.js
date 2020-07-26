@@ -64,45 +64,6 @@ describe("check error in serie", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
-// describe("collect all errors", () => {
-//   describe("in series", () => {
-//     test("should collect all errors in series", () => {
-//       expect(() => {
-//         try {
-//           collectAllErrors(Boolean, String, (v) => {
-//             if (v < 0) return true;
-//             throw new RangeError(`${v} must be negative`);
-//           })(33);
-//         } catch (error) {
-//           // error.errors.forEach((err) => console.warn(err.name, err.message));
-//           throw error;
-//         }
-//       }).toThrow();
-//     });
-//   });
-//   describe.skip("in schema", () => {
-//     test("should collect all errors in schema", () => {
-//       try {
-//         collectAllErrors({
-//           bool: Boolean,
-//           str: String,
-//           negative: (v) => {
-//             if (v < 0) return true;
-//             throw new RangeError(`${v} must be negative`);
-//           },
-//         })({
-//           bool: null,
-//           str: 1,
-//           negative: 1,
-//         });
-//       } catch (error) {
-//         // console.error(error);
-//         // error.errors.forEach(err => console.log(err.name,err.message));
-//         expect(error.errors.length).toBe(3);
-//       }
-//     });
-//   });
-// });
 
 describe("hasErrors", () => {
   describe("in serie", () => {
@@ -141,19 +102,14 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [
-          new TypeError(
-            'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
-          ),
-        ],
+        [new TypeError('on path /num value "2" do not match type "Number"')],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeError(
-            'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
-          ),
+          new TypeError('on path /num value "2" do not match type "Number"'),
+          new TypeError('on path /str value null do not match type "String"'),
         ],
       ],
     ])(
@@ -163,20 +119,17 @@ describe("hasErrors", () => {
       }
     );
   });
-  describe.only("in recursive schema", () => {
+  describe("in recursive schema", () => {
     test.each([
-      [{ obj: {num:Number} }, { obj:{num: 2} }],
-      [{ obj:{num: Number, str: String }}, { obj:{num: 2, str: "str"} }],
-    ])(
-      "should return null : hasErrors(%p)(%p) === %p",
-      (schema, obj) => {
-        expect(hasErrors(schema)(obj)).toStrictEqual(null);
-      }
-    );
+      [{ obj: { num: Number } }, { obj: { num: 2 } }],
+      [{ obj: { num: Number, str: String } }, { obj: { num: 2, str: "str" } }],
+    ])("should return null : hasErrors(%p)(%p) === %p", (schema, obj) => {
+      expect(hasErrors(schema)(obj)).toStrictEqual(null);
+    });
     test.each([
       [
-        { obj:{num: Number, str: String} },
-        { obj:{num: "2", str: 'str'} },
+        { obj: { num: Number, str: String } },
+        { obj: { num: "2", str: "str" } },
         [
           new TypeError(
             'on path /obj/num value "2" do not match type "Number"'
@@ -184,17 +137,17 @@ describe("hasErrors", () => {
         ],
       ],
       [
-        { thr: () => { throw new RangeError('ups')} },
+        {
+          thr: () => {
+            throw new RangeError("ups");
+          },
+        },
         { thr: 1 },
-        [
-          new RangeError(
-            'ups'
-          ),
-        ],
+        [new RangeError("ups")],
       ],
       [
-        { obj:{num: Number, str: String }},
-        { obj:{num: "2", str: null} },
+        { obj: { num: Number, str: String } },
+        { obj: { num: "2", str: null } },
         [
           new TypeError(
             'on path /obj/num value "2" do not match type "Number"'
@@ -210,5 +163,71 @@ describe("hasErrors", () => {
         expect(hasErrors(schema)(obj)).toStrictEqual(expected);
       }
     );
+  });
+  describe("complex schema", () => {
+    const schema = {
+      name: /^[a-z]{3,}$/,
+      age: (age) => age > 18,
+      car: {
+        brand: ["honda", "toyota"],
+        date: Date,
+        country: {
+          name: String,
+        },
+      },
+      optional$: true,
+      [/./]: () => {
+        throw new EvalError("unexpected key");
+      },
+    };
+    test("should return null ", () => {
+      const obj = {
+        name: "garn",
+        age: 19,
+        optional: true,
+        car: {
+          brand: "honda",
+          date: new Date("1982-01-01"),
+          country: {
+            name: "Japan",
+          },
+        },
+      };
+      expect(hasErrors(schema)(obj)).toEqual(null);
+    });
+    test("should return errors", () => {
+      const obj = {
+        name: "Garn",
+        age: 18,
+        optional: false,
+        car: {
+          brand: "Honda",
+          date: "1982-01-01",
+          country: {
+            NAME: "Japan",
+          },
+        },
+        noValidKey: 1,
+      };
+      expect(hasErrors(schema)(obj)).toEqual([
+        new TypeError(
+          'on path /noValidKey value 1 do not match type "()=>false"'
+        ),
+        new EvalError('unexpected key'),
+        new TypeError(
+          'on path /name value "Garn" do not match type "/^[a-z]{3,}$/"'
+        ),
+        new TypeError('on path /age value 18 do not match type "age=>age>18"'),
+        new TypeError(
+          'on path /car/brand value "Honda" do not match type ["honda","toyota"]'
+        ),
+        new TypeError(
+          'on path /car/date value "1982-01-01" do not match type "Date"'
+        ),
+        new TypeError(
+          'on path /car/country/name value undefined do not match type "String"'
+        ),
+      ]);
+    });
   });
 });

@@ -338,13 +338,14 @@ describe("stringify", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
   test.each([
+    // [/.*/, "/.*/"],
     [1, "1"],
     [true, "true"],
     [null, "null"],
     [{}, "{}"],
     [undefined, undefined], // doesn't stringify. Normal behavior of JSON.stringify
     ["string", '"string"'], // normal behavior,  in order to parse it back
-  ])("primitive %p should be %p", (input, expected) => {
+  ])(" %p should be %p", (input, expected) => {
     expect(stringify(input)).toBe(expected);
   });
   test("should work with arrays", () => {
