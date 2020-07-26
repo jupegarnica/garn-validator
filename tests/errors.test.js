@@ -137,30 +137,69 @@ describe("hasErrors", () => {
         expect(hasErrors(schema)(obj)).toStrictEqual(expected);
       }
     );
+    test.each([
+      [
+        { num: Number, str: String },
+        { num: "2", str: "str" },
+        [
+          new TypeError(
+            'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
+          ),
+        ],
+      ],
+      [
+        { num: Number, str: String },
+        { num: "2", str: null },
+        [
+          new TypeError(
+            'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
+          ),
+        ],
+      ],
+    ])(
+      "should return array of errors hasErrors(%p)(%p) === %p",
+      (schema, obj, expected) => {
+        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+      }
+    );
   });
-  test.each([
-    [
-      { num: Number, str: String },
-      { num: "2", str: "str" },
+  describe.only("in recursive schema", () => {
+    test.each([
+      [{ obj: {num:Number} }, { obj:{num: 2} }],
+      [{ obj:{num: Number, str: String }}, { obj:{num: 2, str: "str"} }],
+    ])(
+      "should return null : hasErrors(%p)(%p) === %p",
+      (schema, obj) => {
+        expect(hasErrors(schema)(obj)).toStrictEqual(null);
+      }
+    );
+    test.each([
       [
-        new TypeError(
-          'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
-        ),
+        { obj:{num: Number, str: String} },
+        { obj:{num: "2", str: 1} },
+        [
+          new TypeError(
+            'On path /obj/num value "2" do not match type "Number"'
+          ),
+        ],
       ],
-    ],
-    [
-      { num: Number, str: String },
-      { num: "2", str: null },
       [
-        new TypeError(
-          'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
-        ),
+        { obj:{num: Number, str: String }},
+        { obj:{num: "2", str: null} },
+        [
+          new TypeError(
+            'On path /obj/num value "2" do not match type "Number"'
+          ),
+          new TypeError(
+            'On path /obj/str value null do not match type "String"'
+          ),
+        ],
       ],
-    ],
-  ])(
-    "should return array of errors hasErrors(%p)(%p) === %p",
-    (schema, obj, expected) => {
-      expect(hasErrors(schema)(obj)).toStrictEqual(expected);
-    }
-  );
+    ])(
+      "should return array of errors hasErrors(%p)(%p) === %p",
+      (schema, obj, expected) => {
+        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+      }
+    );
+  });
 });

@@ -96,6 +96,13 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   return conf.onError(formatErrorMessage(schema, object));
 };
 
+const parseToArray = (errorOrErrors) => {
+  if (Array.isArray(errorOrErrors)) {
+    return errorOrErrors;
+  } else {
+    return [errorOrErrors];
+  }
+};
 export const checkShapeCollectAllErrors = (conf, schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
@@ -116,14 +123,11 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
         keyNameStripped
       );
       if (valid) continue;
-      throw {
-        keyName,
-        keyNameStripped,
-        validator: schema[keyName],
-        value: object[keyNameStripped],
-      };
+      return conf.onError(
+        formatErrorMessage(schema[keyName], object[keyNameStripped])
+      );
     } catch (error) {
-      optionalError.push(error);
+      optionalError.push(...parseToArray(error));
     }
   }
 
@@ -138,13 +142,9 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
         keyName
       );
       if (valid) continue;
-      throw {
-        keyName,
-        validator: schema[keyName],
-        value: object[keyName],
-      };
+      return conf.onError(formatErrorMessage(schema[keyName], object[keyName]));
     } catch (error) {
-      requiredErrors.push(error);
+      requiredErrors.push(...parseToArray(error));
     }
   }
 
@@ -163,13 +163,11 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
           keyName
         );
         if (valid) continue;
-        throw {
-          keyName,
-          validator: schema[keyName],
-          value: object[keyName],
-        };
+        return conf.onError(
+          formatErrorMessage(schema[regexpString], object[keyName])
+        );
       } catch (error) {
-        regexErrors.push(error);
+        regexErrors.push(...parseToArray(error));
       }
     }
   }
@@ -181,7 +179,10 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
   return true;
 };
 
-const checkShape = checkShapeCollectOneError;
+const checkShape = (conf, ...args) =>
+  conf.collectAllErrors
+    ? checkShapeCollectAllErrors(conf, ...args)
+    : checkShapeCollectOneError(conf, ...args);
 
 const whatKindIs = (type) => {
   if (isType(Object)(type)) return "schema";
@@ -205,7 +206,6 @@ export const isValidType = (
   keyName
 ) => {
   const kind = whatKindIs(type);
- try {
   switch (kind) {
     case "regex":
       return checkRegExp(type, value);
@@ -225,12 +225,7 @@ export const isValidType = (
     default:
       return false;
   }
- } catch (error) {
-   return conf.onError(error)
- }
 };
-
-
 
 const run = (conf) => (...types) => (value) => {
   const errors = [];
@@ -238,10 +233,10 @@ const run = (conf) => (...types) => (value) => {
     try {
       const valid = isValidType(conf, type, value);
       if (valid) continue;
-
       throw conf.onError(formatErrorMessage(type, value));
     } catch (error) {
-      errors.push(error);
+      errors.push(...parseToArray(error));
+
       if (!conf.collectAllErrors) break;
     }
   }
