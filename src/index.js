@@ -44,58 +44,104 @@ export const checkShapeCollectOneError = (schema, object) => {
 
   areAllValid = regexKeys.every((regexpString) =>
     untestedKeys
-    .filter(keyName => stringToRegExp(regexpString).test(keyName))
-    .every((keyName) => isValidType(
-      schema[regexpString],
-      object[keyName],
-      object,
-      keyName
-    )
-  ))
+      .filter((keyName) => stringToRegExp(regexpString).test(keyName))
+      .every((keyName) =>
+        isValidType(schema[regexpString], object[keyName], object, keyName)
+      )
+  );
   return areAllValid;
 };
 
-// export const checkShapeCollectAllErrors = (schema, object) => {
-//   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
+export const checkShapeCollectAllErrors = (schema, object) => {
+  const requiredKeys = Object.keys(schema).filter(isRequiredKey);
+  const optionalKeys = Object.keys(schema).filter(isOptionalKey);
+  const regexKeys = Object.keys(schema).filter(isRegExp);
+  const untestedKeys = Object.keys(object).filter(
+    (key) => !requiredKeys.includes(key)
+  );
 
-//   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
+  // let areAllValid = optionalKeys.every((keyName) => {
+  //   const keyNameStripped = keyName.replace(optionalRegex, "");
+  //   return isValidType(
+  //     [undefined, schema[keyName]],
+  //     object[keyNameStripped],
+  //     object,
+  //     keyNameStripped
+  //   );
+  // });
+  // if (!areAllValid) return areAllValid;
+  const optionalError = []
+  for (const keyName of optionalKeys) {
+    try {
+      const keyNameStripped = keyName.replace(optionalRegex, "");
+      let valid = isValidType(
+        [undefined, schema[keyName]],
+        object[keyNameStripped],
+        object,
+        keyNameStripped
+      );
+      if (valid) continue;
+      throw {
+        keyName,
+        keyNameStripped,
+        validator: schema[keyName],
+        value:  object[keyNameStripped]
+      }
+    } catch (error) {
+      optionalError.push(error)
+    }
+  }
 
-//   let areAllValid = optionalKeys.every((keyName) => {
-//     const keyNameStripped = keyName.replace(optionalRegex, "");
-//     return isValidType(
-//       [undefined, schema[keyName]],
-//       object[keyNameStripped],
-//       object,
-//       keyNameStripped
-//     );
-//   });
 
-//   if (!areAllValid) return areAllValid;
+  // areAllValid = requiredKeys.every((keyName) =>
+  //   isValidType(schema[keyName], object[keyName], object, keyName)
+  // );
+  // if (!areAllValid) return areAllValid;
+  let requiredErrors = []
+  for (const keyName of requiredKeys) {
+    try {
+      let valid = isValidType(schema[keyName], object[keyName], object, keyName)
+      if (valid) continue;
+      throw {
+        keyName,
+        validator: schema[keyName],
+        value:  object[keyName]
+      }
+    } catch (error) {
+      requiredErrors.push(error)
+    }
+  }
+  // areAllValid = regexKeys.every((regexpString) =>
+  //   untestedKeys
+  //     .filter((keyName) => stringToRegExp(regexpString).test(keyName))
+  //     .every((keyName) =>
+  //       isValidType(schema[regexpString], object[keyName], object, keyName)
+  //     )
+  // );
+  let regexErrors = []
+  for (const regexpString of regexKeys) {
+    let keys =  untestedKeys.filter((keyName) => stringToRegExp(regexpString).test(keyName))
+    for (const keyName of keys) {
+      try {
+        let valid = isValidType(schema[regexpString], object[keyName], object, keyName)
+        if (valid) continue;
+        throw {
+          keyName,
+          validator: schema[keyName],
+          value:  object[keyName]
+        }
+      } catch (error) {
+        regexErrors.push(error)
+      }
+    }
+  }
 
-//   areAllValid = requiredKeys.every((keyName) =>
-//     isValidType(schema[keyName], object[keyName], object, keyName)
-//   );
+  const errors = [...regexErrors, ...requiredErrors, ...optionalError];
+  if (errors.length > 0) {
+    throw errors
+  }
 
-//   if (!areAllValid) return areAllValid;
-
-//   const regexKeys = Object.keys(schema).filter(isRegExp);
-
-//   const untestedKeys = Object.keys(object).filter(
-//     (key) => !requiredKeys.includes(key)
-//   );
-
-//   areAllValid = regexKeys.every((regexpString) =>
-//     untestedKeys
-//     .filter(keyName => stringToRegExp(regexpString).test(keyName))
-//     .every((keyName) => isValidType(
-//       schema[regexpString],
-//       object[keyName],
-//       object,
-//       keyName
-//     )
-//   ))
-//   return areAllValid;
-// };
+};
 
 const checkShape = checkShapeCollectOneError;
 
@@ -165,7 +211,9 @@ export const collectAllErrors = (...types) => (value) => {
       const valid = isValidType(type, value);
       if (valid) return valid;
 
-      throwOnError(`value ${stringify(value)} do not match type ${stringify(type)}`);
+      throwOnError(
+        `value ${stringify(value)} do not match type ${stringify(type)}`
+      );
     } catch (error) {
       // console.error(error.message);
       errors.push(error);
