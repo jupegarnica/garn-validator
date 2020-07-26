@@ -176,10 +176,19 @@ describe("hasErrors", () => {
     test.each([
       [
         { obj:{num: Number, str: String} },
-        { obj:{num: "2", str: 1} },
+        { obj:{num: "2", str: 'str'} },
         [
           new TypeError(
-            'On path /obj/num value "2" do not match type "Number"'
+            'on path /obj/num value "2" do not match type "Number"'
+          ),
+        ],
+      ],
+      [
+        { thr: () => { throw new RangeError('ups')} },
+        { thr: 1 },
+        [
+          new RangeError(
+            'ups'
           ),
         ],
       ],
@@ -188,10 +197,10 @@ describe("hasErrors", () => {
         { obj:{num: "2", str: null} },
         [
           new TypeError(
-            'On path /obj/num value "2" do not match type "Number"'
+            'on path /obj/num value "2" do not match type "Number"'
           ),
           new TypeError(
-            'On path /obj/str value null do not match type "String"'
+            'on path /obj/str value null do not match type "String"'
           ),
         ],
       ],

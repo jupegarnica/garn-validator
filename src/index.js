@@ -24,8 +24,10 @@ if (typeof AggregateError === "undefined") {
   global.AggregateError = AggregateError;
 }
 
-const formatErrorMessage = (type, value) =>
-  `value ${stringify(value)} do not match type ${stringify(type)}`;
+const formatErrorMessage = (type, value, path = null) =>
+  `${path ? `on path /${path.join("/")} ` : ""}value ${stringify(
+    value
+  )} do not match type ${stringify(type)}`;
 
 const throwOnError = (err) => {
   if (isError(err)) throw err;
@@ -103,7 +105,7 @@ const parseToArray = (errorOrErrors) => {
     return [errorOrErrors];
   }
 };
-export const checkShapeCollectAllErrors = (conf, schema, object) => {
+export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
   const regexKeys = Object.keys(schema).filter(isRegExp);
@@ -115,16 +117,22 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
   for (const keyName of optionalKeys) {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
+      const currentPath = [...path, keyNameStripped];
       let valid = isValidType(
         conf,
         [undefined, schema[keyName]],
         object[keyNameStripped],
         object,
-        keyNameStripped
+        keyNameStripped,
+        currentPath
       );
       if (valid) continue;
       return conf.onError(
-        formatErrorMessage(schema[keyName], object[keyNameStripped])
+        formatErrorMessage(
+          schema[keyName],
+          object[keyNameStripped],
+          currentPath
+        )
       );
     } catch (error) {
       optionalError.push(...parseToArray(error));
@@ -134,15 +142,19 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
   let requiredErrors = [];
   for (const keyName of requiredKeys) {
     try {
+      const currentPath = [...path, keyName];
       let valid = isValidType(
         conf,
         schema[keyName],
         object[keyName],
         object,
-        keyName
+        keyName,
+        currentPath
       );
       if (valid) continue;
-      return conf.onError(formatErrorMessage(schema[keyName], object[keyName]));
+      return conf.onError(
+        formatErrorMessage(schema[keyName], object[keyName], currentPath)
+      );
     } catch (error) {
       requiredErrors.push(...parseToArray(error));
     }
@@ -155,16 +167,19 @@ export const checkShapeCollectAllErrors = (conf, schema, object) => {
     );
     for (const keyName of keys) {
       try {
+        const currentPath = [...path, keyName];
+
         let valid = isValidType(
           conf,
           schema[regexpString],
           object[keyName],
           object,
-          keyName
+          keyName,
+          currentPath
         );
         if (valid) continue;
         return conf.onError(
-          formatErrorMessage(schema[regexpString], object[keyName])
+          formatErrorMessage(schema[regexpString], object[keyName], currentPath)
         );
       } catch (error) {
         regexErrors.push(...parseToArray(error));
@@ -203,7 +218,8 @@ export const isValidType = (
   type,
   value,
   rootValue,
-  keyName
+  keyName,
+  path
 ) => {
   const kind = whatKindIs(type);
   switch (kind) {
@@ -218,7 +234,7 @@ export const isValidType = (
         isValidType(conf, _type, value, rootValue, keyName)
       );
     case "schema":
-      return value && checkShape(conf, type, value);
+      return value && checkShape(conf, type, value, path);
     case "function":
       return type(value, rootValue, keyName);
 
