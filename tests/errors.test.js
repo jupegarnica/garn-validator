@@ -1,4 +1,4 @@
-import check, { collectAllErrors } from "garn-validator";
+import check, { collectAllErrors, hasErrors } from "garn-validator";
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -64,44 +64,103 @@ describe("check error in serie", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
-describe("collect all errors", () => {
-  describe("in series", () => {
-    test("should collect all errors in series", () => {
-      expect(() => {
-        try {
-          collectAllErrors(Boolean, String, (v) => {
-            if (v < 0) return true;
-            throw new RangeError(`${v} must be negative`);
-          })(33);
-        } catch (error) {
-          // error.errors.forEach(err => console.warn(err.name,err.message))
-          throw error;
-        }
-      }).toThrow();
-    });
-  });
-  describe.skip("in schema", () => {
-    test("should collect all errors in schema", () => {
+// describe("collect all errors", () => {
+//   describe("in series", () => {
+//     test("should collect all errors in series", () => {
+//       expect(() => {
+//         try {
+//           collectAllErrors(Boolean, String, (v) => {
+//             if (v < 0) return true;
+//             throw new RangeError(`${v} must be negative`);
+//           })(33);
+//         } catch (error) {
+//           // error.errors.forEach((err) => console.warn(err.name, err.message));
+//           throw error;
+//         }
+//       }).toThrow();
+//     });
+//   });
+//   describe.skip("in schema", () => {
+//     test("should collect all errors in schema", () => {
+//       try {
+//         collectAllErrors({
+//           bool: Boolean,
+//           str: String,
+//           negative: (v) => {
+//             if (v < 0) return true;
+//             throw new RangeError(`${v} must be negative`);
+//           },
+//         })({
+//           bool: null,
+//           str: 1,
+//           negative: 1,
+//         });
+//       } catch (error) {
+//         // console.error(error);
+//         // error.errors.forEach(err => console.log(err.name,err.message));
+//         expect(error.errors.length).toBe(3);
+//       }
+//     });
+//   });
+// });
 
-      try {
-        collectAllErrors({
-          bool: Boolean,
-          str: String,
-          negative: (v) => {
-            if (v < 0) return true;
-            throw new RangeError(`${v} must be negative`);
-          },
-        })({
-          bool: null,
-          str:1,
-          negative:1
-        });
-      } catch (error) {
-        console.error(error);
-        error.errors.forEach(err => console.warn(err.name,err.message));
-        expect(error.errors.length).toBe(3)
-      }
-
-    });
-  });
-});
+// describe("hasErrors", () => {
+//   describe("in serie", () => {
+//     test.each([
+//       [Number, (v) => v > 0, 2, null],
+//       [
+//         Number,
+//         (v) => v > 100,
+//         2,
+//         [new TypeError('value 2 do not match type "v=>v>100"')],
+//       ],
+//       [
+//         String,
+//         (v) => v > 100,
+//         2,
+//         [
+//           new TypeError('value 2 do not match type "String"'),
+//           new TypeError('value 2 do not match type "v=>v>100"'),
+//         ],
+//       ],
+//     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
+//       expect(hasErrors(a, b)(input)).toStrictEqual(expected);
+//     });
+//   });
+//   describe.only("in schema", () => {
+//     test.each([
+//       [{ num: Number }, { num: 2 }, null],
+//       [{ num: Number, str: String }, { num: 2, str: "str" }, null],
+//     ])(
+//       "should return null : hasErrors(%p)(%p) === %p",
+//       (schema, obj, expected) => {
+//         expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+//       }
+//     );
+//   });
+//   test.each([
+//     [
+//       { num: Number, str: String },
+//       { num: "2", str: "str" },
+//       [
+//         new TypeError(
+//           'value {"num":"2","str":"str"} do not match type {"num":"Number","str":"String"}'
+//         ),
+//       ],
+//     ],
+//     [
+//       { num: Number, str: String },
+//       { num: "2", str: null },
+//       [
+//         new TypeError(
+//           'value {"num":"2","str":null} do not match type {"num":"Number","str":"String"}'
+//         ),
+//       ],
+//     ],
+//   ])(
+//     "should return array of errors hasErrors(%p)(%p) === %p",
+//     (schema, obj, expected) => {
+//       expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+//     }
+//   );
+// });

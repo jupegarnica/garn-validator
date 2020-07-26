@@ -14,6 +14,7 @@
     "run:docker": "docker-compose run node",
     "test": "npm run test:watch",
     "test:watch": "jest tests --watch",
+    "test:raw": "node tests/raw.debug.mjs",
     "test:prod": "jest tests",
     "test:coverage": "jest tests --coverage",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",

@@ -13,7 +13,40 @@ import {
   optionalRegex,
 } from "./utils.js";
 
-export const checkShapeCollectOneError = (schema, object) => {
+// AggregateError polyfill
+if (typeof AggregateError === "undefined") {
+  class AggregateError extends Error {
+    constructor(errors, message) {
+      super(message);
+      this.errors = errors;
+    }
+  }
+  global.AggregateError = AggregateError;
+}
+
+const formatErrorMessage = (type, value) =>
+  `value ${stringify(value)} do not match type ${stringify(type)}`;
+
+const throwOnError = (err) => {
+  if (isError(err)) throw err;
+  throw new TypeError(err);
+};
+
+const onFinishSuccessDefault = () => true;
+
+const onFinishWithErrorsDefault = (errors) => {
+  if (errors.length === 1) throwOnError(errors[0]);
+  throw new AggregateError(errors, "aggregateError");
+};
+
+const defaultConfiguration = {
+  onError: throwOnError,
+  collectAllErrors: false,
+  onFinishSuccess: onFinishSuccessDefault,
+  onFinishWithErrors: onFinishWithErrorsDefault,
+};
+
+export const checkShapeCollectOneError = (conf, schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
 
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
@@ -21,6 +54,7 @@ export const checkShapeCollectOneError = (schema, object) => {
   let areAllValid = optionalKeys.every((keyName) => {
     const keyNameStripped = keyName.replace(optionalRegex, "");
     return isValidType(
+      conf,
       [undefined, schema[keyName]],
       object[keyNameStripped],
       object,
@@ -28,13 +62,16 @@ export const checkShapeCollectOneError = (schema, object) => {
     );
   });
 
-  if (!areAllValid) return areAllValid;
+  if (!areAllValid)
+    return conf.onError(
+      formatErrorMessage(schema[keyName], object[keyNameStripped])
+    );
 
   areAllValid = requiredKeys.every((keyName) =>
-    isValidType(schema[keyName], object[keyName], object, keyName)
+    isValidType(conf, schema[keyName], object[keyName], object, keyName)
   );
 
-  if (!areAllValid) return areAllValid;
+  if (!areAllValid) return conf.onError(formatErrorMessage(schema, object));
 
   const regexKeys = Object.keys(schema).filter(isRegExp);
 
@@ -46,13 +83,20 @@ export const checkShapeCollectOneError = (schema, object) => {
     untestedKeys
       .filter((keyName) => stringToRegExp(regexpString).test(keyName))
       .every((keyName) =>
-        isValidType(schema[regexpString], object[keyName], object, keyName)
+        isValidType(
+          conf,
+          schema[regexpString],
+          object[keyName],
+          object,
+          keyName
+        )
       )
   );
-  return areAllValid;
+  if (areAllValid) return true;
+  return conf.onError(formatErrorMessage(schema, object));
 };
 
-export const checkShapeCollectAllErrors = (schema, object) => {
+export const checkShapeCollectAllErrors = (conf, schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
   const regexKeys = Object.keys(schema).filter(isRegExp);
@@ -60,21 +104,12 @@ export const checkShapeCollectAllErrors = (schema, object) => {
     (key) => !requiredKeys.includes(key)
   );
 
-  // let areAllValid = optionalKeys.every((keyName) => {
-  //   const keyNameStripped = keyName.replace(optionalRegex, "");
-  //   return isValidType(
-  //     [undefined, schema[keyName]],
-  //     object[keyNameStripped],
-  //     object,
-  //     keyNameStripped
-  //   );
-  // });
-  // if (!areAllValid) return areAllValid;
-  const optionalError = []
+  const optionalError = [];
   for (const keyName of optionalKeys) {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       let valid = isValidType(
+        conf,
         [undefined, schema[keyName]],
         object[keyNameStripped],
         object,
@@ -85,62 +120,65 @@ export const checkShapeCollectAllErrors = (schema, object) => {
         keyName,
         keyNameStripped,
         validator: schema[keyName],
-        value:  object[keyNameStripped]
-      }
+        value: object[keyNameStripped],
+      };
     } catch (error) {
-      optionalError.push(error)
+      optionalError.push(error);
     }
   }
 
-
-  // areAllValid = requiredKeys.every((keyName) =>
-  //   isValidType(schema[keyName], object[keyName], object, keyName)
-  // );
-  // if (!areAllValid) return areAllValid;
-  let requiredErrors = []
+  let requiredErrors = [];
   for (const keyName of requiredKeys) {
     try {
-      let valid = isValidType(schema[keyName], object[keyName], object, keyName)
+      let valid = isValidType(
+        conf,
+        schema[keyName],
+        object[keyName],
+        object,
+        keyName
+      );
       if (valid) continue;
       throw {
         keyName,
         validator: schema[keyName],
-        value:  object[keyName]
-      }
+        value: object[keyName],
+      };
     } catch (error) {
-      requiredErrors.push(error)
+      requiredErrors.push(error);
     }
   }
-  // areAllValid = regexKeys.every((regexpString) =>
-  //   untestedKeys
-  //     .filter((keyName) => stringToRegExp(regexpString).test(keyName))
-  //     .every((keyName) =>
-  //       isValidType(schema[regexpString], object[keyName], object, keyName)
-  //     )
-  // );
-  let regexErrors = []
+
+  let regexErrors = [];
   for (const regexpString of regexKeys) {
-    let keys =  untestedKeys.filter((keyName) => stringToRegExp(regexpString).test(keyName))
+    let keys = untestedKeys.filter((keyName) =>
+      stringToRegExp(regexpString).test(keyName)
+    );
     for (const keyName of keys) {
       try {
-        let valid = isValidType(schema[regexpString], object[keyName], object, keyName)
+        let valid = isValidType(
+          conf,
+          schema[regexpString],
+          object[keyName],
+          object,
+          keyName
+        );
         if (valid) continue;
         throw {
           keyName,
           validator: schema[keyName],
-          value:  object[keyName]
-        }
+          value: object[keyName],
+        };
       } catch (error) {
-        regexErrors.push(error)
+        regexErrors.push(error);
       }
     }
   }
 
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
   if (errors.length > 0) {
-    throw errors
+    throw errors;
   }
-
+  return true;
 };
 
 const checkShape = checkShapeCollectOneError;
@@ -152,8 +190,20 @@ const whatKindIs = (type) => {
   if (isCustomValidator(type)) return "function";
   if (isType(Array)(type)) return "enum";
   if (isType(RegExp)(type)) return "regex";
+  throw new Error("Invalid type " + stringify(type));
 };
-export const isValidType = (type, value, rootValue, keyName) => {
+
+/*
+  return true or false
+  throw error
+*/
+export const isValidType = (
+  conf = defaultConfiguration,
+  type,
+  value,
+  rootValue,
+  keyName
+) => {
   const kind = whatKindIs(type);
   switch (kind) {
     case "regex":
@@ -164,10 +214,10 @@ export const isValidType = (type, value, rootValue, keyName) => {
       return isType(type)(value);
     case "enum":
       return type.some((_type) =>
-        isValidType(_type, value, rootValue, keyName)
+        isValidType(conf, _type, value, rootValue, keyName)
       );
     case "schema":
-      return value && checkShape(type, value);
+      return value && checkShape(conf, type, value);
     case "function":
       return type(value, rootValue, keyName);
 
@@ -175,65 +225,121 @@ export const isValidType = (type, value, rootValue, keyName) => {
       return false;
   }
 };
-const throwOnError = (err) => {
-  if (isError(err)) throw err;
-  throw new TypeError(err);
-};
 
-const check = (onError) => (...types) => (value) => {
-  try {
-    return types.every((type) => {
-      const valid = isValidType(type, value);
+// const check = ({onError}) => (...types) => (value) => {
+//   try {
+//     return types.every((type) => {
+//       const valid = isValidType(type, value);
 
-      if (valid) return valid;
+//       if (valid) return valid;
 
-      throw `value ${stringify(value)} do not match type ${stringify(type)}`;
-    });
-  } catch (err) {
-    return onError(err);
-  }
-};
+//       throw `value ${stringify(value)} do not match type ${stringify(type)}`;
+//     });
+//   } catch (err) {
+//     return onError(err);
+//   }
+// };
 
-if (typeof AggregateError === "undefined") {
-  class MyAggregateError extends Error {
-    constructor(errors, message) {
-      super(message);
-      this.errors = errors;
-    }
-  }
-  var AggregateError = MyAggregateError;
-}
+// export const collectAllErrors = (...types) => (value) => {
+//   const errors = [];
+//   for (const type of types) {
+//     try {
+//       const valid = isValidType(type, value);
+//       if (valid) return valid;
 
-export const collectAllErrors = (...types) => (value) => {
+//       throwOnError(
+//         `value ${stringify(value)} do not match type ${stringify(type)}`
+//       );
+//     } catch (error) {
+//       // console.error(error.message);
+//       errors.push(error);
+//     }
+//   }
+//   if (errors.length > 0) {
+//     throw new AggregateError(errors, "aggregateError");
+//   }
+//   return true;
+// };
+
+const run = (conf) => (...types) => (value) => {
   const errors = [];
   for (const type of types) {
     try {
-      const valid = isValidType(type, value);
-      if (valid) return valid;
+      const valid = isValidType(conf, type, value);
+      if (valid) continue;
 
-      throwOnError(
-        `value ${stringify(value)} do not match type ${stringify(type)}`
-      );
+      throw formatErrorMessage(type, value);
     } catch (error) {
-      // console.error(error.message);
       errors.push(error);
+      if (!conf.collectAllErrors) break;
     }
   }
   if (errors.length > 0) {
-    throw new AggregateError(errors, "aggregateError");
+    return conf.onFinishWithErrors(errors);
   }
-  return true;
+  return conf.onFinishSuccess();
 };
 
-export const setOnError = (onError) => check(onError);
+// export const hasErrors = (...types) => (value) => {
+//   const errors = [];
+//   for (const type of types) {
+//     try {
+//       const valid = isValidType(type, value);
+//       if (valid) continue ;
 
-export const isValid = setOnError(() => false);
+//       throwOnError(
+//         `value ${stringify(value)} do not match type ${stringify(type)}`
+//       );
+//     } catch (error) {
+//       // console.error(error.message);
+//       errors.push(error);
+//     }
+//   }
+//   if (errors.length > 0) return errors;
+//   return null;
+// };
 
-export const isValidOrLog = setOnError((err) => {
-  console.error(err);
-  return false;
+// export const setOnError = (onError) => check({onError});
+
+// export const isValid = setOnError(() => false);
+
+// export const isValidOrLog = setOnError((err) => {
+//   console.error(err);
+//   return false;
+// });
+
+// export const isValidOrThrow = setOnError(throwOnError);
+
+export const config = ({
+  onError = throwOnError,
+  collectAllErrors = false,
+  onFinishSuccess = onFinishSuccessDefault,
+  onFinishWithErrors = onFinishWithErrorsDefault,
+} = defaultConfiguration) =>
+  run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
+
+export const setOnError = (onError) => config({ onError });
+
+export const isValid = config({
+  onFinishWithErrors: () => false,
+  onError: () => false,
+  collectAllErrors: false,
 });
 
-export const isValidOrThrow = setOnError(throwOnError);
+export const isValidOrLog = config({
+  onError: (err) => console.error(err) || false,
+  collectAllErrors: false,
+});
 
+export const hasErrors = config({
+  onFinishWithErrors: (errors) => errors,
+  onFinishSuccess: () => null,
+  collectAllErrors: true,
+});
+
+export const isValidOrThrow = config({
+  // onFinishWithErrors: throwOnError,
+  // onError: throwOnError,
+  // collectAllErrors: false,
+});
 export default isValidOrThrow;
