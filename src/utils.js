@@ -46,6 +46,9 @@ const parser = () => {
     if (typeof value === "function") {
       return value.toString();
     }
+    if (isInstanceOf(RegExp)(value) ) {
+      return value.toString();
+    }
     return value;
   };
 };
