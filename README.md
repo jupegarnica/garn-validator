@@ -151,19 +151,39 @@ isValidUser({
 
 ### Behaviors
 
-There are 3 behaviors you can import
+There are 4 behaviors you can import:
+isValid, isValidOrThrow, isValidOrLog, hasErrors
+
+
+The default import is isValidOrThrow
 
 ```js
 
-export const isValid = setOnError(returnsFalse);
-export const isValidOrLog = setOnError(logError);
-export const isValidOrThrow = setOnError(throwOnError);
+export const isValid = config({
+  onFinishWithErrors: () => false,
+  collectAllErrors: false,
+});
+
+export const isValidOrLog = config({
+  onError: (err) => console.error(err) || false,
+  collectAllErrors: false,
+});
+
+export const hasErrors = config({
+  onFinishWithErrors: (errors) => errors,
+  onFinishSuccess: () => null,
+  collectAllErrors: true,
+});
+
+export const isValidOrThrow = config();
+
 export default isValidOrThrow;
 ```
 
 ```js
 import { isValid } from "garn-validator";
 
+// stops in first Error
 isValid(/[a-z]/) ("g"); // returns true
 isValid(/[a-z]/) ("G"); // returns false, doesn't throws
 ```
@@ -171,9 +191,21 @@ isValid(/[a-z]/) ("G"); // returns false, doesn't throws
 ```js
 import { isValidOrLog } from "garn-validator";
 
+// stops in first Error
 isValidOrLog(/[a-z]/) ("g"); // do nothing (but also returns true)
 isValidOrLog(/[a-z]/) ("G"); // logs error
+
 ```
+
+```js
+import { hasErrors } from "garn-validator";
+
+// return null or array or errors
+hasErrors(/[a-z]/) ("g"); // null
+hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
+
+```
+
 
 ## Roadmap
 
