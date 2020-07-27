@@ -10,11 +10,12 @@ export const isFunctionHacked = fn =>  typeof fn === 'function'  && fn.toString.
 export const isCustomValidator = (f) => f && typeof f === "function" && !isClass(f) && (!f.name || f.name[0] === f.name[0].toLowerCase());
 
 export function isConstructor(f) {
-  // detect is a normal function (anonymous or its name starts with lowercase)
   if(isClass(f)) return true;
-  if (isCustomValidator(f)) return false;
   // symbols are not created with new
   if (f && f.name === "Symbol") return true;
+  if (f && f.name === "Promise") return true;
+  // detect is a normal function (anonymous or its name starts with lowercase)
+  if (isCustomValidator(f)) return false;
   try {
     new f();
     return true;

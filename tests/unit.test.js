@@ -135,6 +135,7 @@ describe("isConstructor", () => {
     [function name() {}, false],
     [class myClass {}, true],
     [class MyClass {}, true],
+    [Promise, true],
   ])("should detect if %p is constructor or not", (value, expected) => {
     expect(isConstructor(value)).toBe(expected);
   });

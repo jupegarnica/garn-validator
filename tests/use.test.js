@@ -1,4 +1,23 @@
-import check, { setOnError, isValid, isValidOrLog } from "garn-validator";
+import check, { isValid } from "garn-validator";
+
+
+describe.only('isValid', () => {
+  test.each([
+      [Function, function(){}],
+      [Function, () => {}],
+      [Promise, new Promise(()=>{})],
+      [Promise,Promise.resolve()],
+      [Object, {}],
+      [Number, 2],
+      [String, 'str'],
+  ])(
+    'isValid(%p)(%p) return true',
+    (a, b) => {
+      expect(isValid(a)(b)).toBe(true);
+    }
+  );
+});
+
 
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
