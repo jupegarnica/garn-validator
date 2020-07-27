@@ -208,10 +208,7 @@ const whatKindIs = (type) => {
   throw new Error("Invalid type " + stringify(type));
 };
 
-/*
-  return true or false
-  throw error
-*/
+
 export const isValidType = (
   conf = defaultConfiguration,
   type,

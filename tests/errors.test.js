@@ -1,26 +1,26 @@
-import check, {  hasErrors, isValidOrThrowAllErrors } from "garn-validator";
+import  {isValidOrThrow,  hasErrors, isValidOrLogAllErrors,isValidOrThrowAllErrors } from "garn-validator";
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
     expect(() => {
-      check(Boolean)(33);
+      isValidOrThrow(Boolean)(33);
     }).toThrow(TypeError);
   });
   test("Should throw meaningfully message", () => {
     expect(() => {
-      check(1)(33);
+      isValidOrThrow(1)(33);
     }).toThrow("value 33 do not match type 1");
   });
   test("should throw a custom type of error", () => {
     expect(() => {
-      check((v) => {
+      isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
     }).toThrow(RangeError);
   });
   test("should throw a custom type of error", () => {
     expect(() => {
-      check((v) => {
+      isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
     }).toThrow("ups");
@@ -28,7 +28,7 @@ describe("check errors", () => {
   test("should throw anything", () => {
 
    try {
-      check((v) => {
+      isValidOrThrow((v) => {
         if (v > 10) throw "ups";
       })(33);
    } catch (error) {
@@ -53,24 +53,24 @@ describe("check errors", () => {
    });
   test("should format the schema", () => {
     expect(() => {
-      check({ a: Number })(33);
+      isValidOrThrow({ a: Number })(33);
     }).toThrow('value 33 do not match type {"a":"Number"}');
   });
   test("should format the value", () => {
     expect(() => {
-      check({ a: Number })({ b: 33 });
+      isValidOrThrow({ a: Number })({ b: 33 });
     }).toThrow('value {"b":33} do not match type {"a":"Number"}');
   });
 });
 describe("check error in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
-      check(Number, String)(2);
+      isValidOrThrow(Number, String)(2);
     }).toThrow('value 2 do not match type "String"');
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
-      check(() => {
+      isValidOrThrow(() => {
         throw new Error();
       }, String)(2);
     }).toThrow(Error);
@@ -80,7 +80,7 @@ describe("check error in serie", () => {
       log: jest.fn(),
     };
     try {
-      check(
+      isValidOrThrow(
         () => {
           throw new Error();
         },
@@ -259,4 +259,46 @@ describe("hasErrors", () => {
       ]);
     });
   });
+});
+
+
+
+describe("isValidOrThrowAllErrors configured to throw all errors as AggregateError ", () => {
+  test("should throw AggregateError with all errors", () => {
+    expect(() => {
+      isValidOrThrowAllErrors(Number, String)(true);
+    }).toThrow(AggregateError);
+
+    expect(() => {
+      isValidOrThrowAllErrors(Number, String)(true);
+    }).not.toThrow(TypeError);
+  });
+  test('should throw 2 errors', () => {
+    try {
+      isValidOrThrowAllErrors(Number, Boolean,String)(true);
+
+    } catch (error) {
+      expect(error.errors.length).toBe(2);
+      // error.errors.forEach(e => console.warn(e.name, e.message))
+    }
+  });
+
+});
+describe("isValidOrLogAllErrors configured to log all  errors and return true or false ", () => {
+  test("should throw AggregateError with all errors", () => {
+    expect(
+      isValidOrLogAllErrors(Number, String)(true)
+    ).toBe(false);
+
+    expect(
+      isValidOrLogAllErrors(Boolean, true)(true)
+    ).toBe(true)
+  });
+  test('should throw 2 errors', () => {
+    global.console.error = jest.fn();
+    isValidOrLogAllErrors(Number, Boolean,String)(true);
+    expect(global.console.error).toHaveBeenCalledTimes(2);
+
+  });
+
 });
