@@ -178,7 +178,7 @@ import { isValidOrLog } from "garn-validator";
 
 // stops in first Error
 isValidOrLog(/[a-z]/) ("g"); // do nothing (but also returns true)
-isValidOrLog(/[a-z]/) ("G"); // logs error
+isValidOrLog(/[a-z]/) ("G"); // logs error and return false
 
 ```
 
@@ -186,6 +186,7 @@ isValidOrLog(/[a-z]/) ("G"); // logs error
 import { hasErrors } from "garn-validator";
 
 // return null or array or errors
+// checks until the end
 hasErrors(/[a-z]/) ("g"); // null
 hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 
