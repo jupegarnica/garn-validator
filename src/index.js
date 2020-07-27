@@ -28,7 +28,7 @@ const formatErrorMessage = (type, value, path = null) =>
     value
   )} do not match type ${stringify(type)}`;
 
-const onErrorDefault = (err, type, value, path) => {
+const onErrorDefault = (err, { type, value, path }) => {
   if (err) throw err;
   throw new TypeError(formatErrorMessage(type, value, path));
 };
@@ -36,7 +36,7 @@ const onErrorDefault = (err, type, value, path) => {
 const onFinishSuccessDefault = () => true;
 
 const onFinishWithErrorsDefault = (errors) => {
-  if (errors.length === 1) throw (errors[0]);
+  if (errors.length === 1) throw errors[0];
   throw new AggregateError(errors, "aggregateError");
 };
 
@@ -64,13 +64,16 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   });
 
   if (!areAllValid)
-    return conf.onError(null, schema[keyName], object[keyNameStripped]);
+    return conf.onError(null, {
+      type: schema[keyName],
+      value: object[keyNameStripped],
+    });
 
   areAllValid = requiredKeys.every((keyName) =>
     isValidType(conf, schema[keyName], object[keyName], object, keyName)
   );
 
-  if (!areAllValid) return conf.onError(null, schema, object);
+  if (!areAllValid) return conf.onError(null, { type: schema, value: object });
 
   const regexKeys = Object.keys(schema).filter(isRegExp);
 
@@ -92,7 +95,7 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
       )
   );
   if (areAllValid) return true;
-  return conf.onError(null, schema, object);
+  return conf.onError(null, { type: schema, value: object });
 };
 
 const parseToArray = (errorOrErrors) => {
@@ -126,12 +129,11 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         currentPath
       );
       if (valid) continue;
-      return conf.onError(
-        null,
-        schema[keyName],
-        object[keyNameStripped],
-        currentPath
-      );
+      return conf.onError(null, {
+        type: schema[keyName],
+        value: object[keyNameStripped],
+        path: currentPath,
+      });
     } catch (error) {
       optionalError.push(...parseToArray(error));
     }
@@ -150,7 +152,11 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         currentPath
       );
       if (valid) continue;
-      return conf.onError(null, schema[keyName], object[keyName], currentPath);
+      return conf.onError(null, {
+        type: schema[keyName],
+        value: object[keyName],
+        path: currentPath,
+      });
     } catch (error) {
       requiredErrors.push(...parseToArray(error));
     }
@@ -174,12 +180,11 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
           currentPath
         );
         if (valid) continue;
-        return conf.onError(
-          null,
-          schema[regexpString],
-          object[keyName],
-          currentPath
-        );
+        return conf.onError(null, {
+          type: schema[regexpString],
+          value: object[keyName],
+          path: currentPath,
+        });
       } catch (error) {
         regexErrors.push(...parseToArray(error));
       }
@@ -208,7 +213,6 @@ const whatKindIs = (type) => {
   throw new Error("Invalid type " + stringify(type));
 };
 
-
 export const isValidType = (
   conf = defaultConfiguration,
   type,
@@ -230,7 +234,9 @@ export const isValidType = (
         isValidType(conf, _type, value, rootValue, keyName)
       );
     case "schema":
-      return value && checkShape(conf, type, value, path);
+      checkShape(conf, type, value, path);
+      // checkSchema will throw if invalid in each each key
+      return true;
     case "function":
       return type(value, rootValue, keyName);
 
@@ -245,7 +251,7 @@ const run = (conf) => (...types) => (value) => {
     try {
       const valid = isValidType(conf, type, value);
       if (valid) continue;
-      throw conf.onError(null, type, value);
+      throw conf.onError(null, { type, value });
     } catch (error) {
       errors.push(...parseToArray(error));
 
@@ -266,13 +272,15 @@ const config = ({
 } = defaultConfiguration) =>
   run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
+const logOnErrorAndReturnFalse = (err, { type, value, path }) =>
+  console.error(err || formatErrorMessage(type, value, path)) || false;
 export const isValid = config({
   onFinishWithErrors: () => false,
   // collectAllErrors: false, // default
 });
 
 export const isValidOrLog = config({
-  onError: (err) => console.error(err) || false,
+  onError: logOnErrorAndReturnFalse,
   // collectAllErrors: false, // default
 });
 
@@ -285,13 +293,11 @@ export const hasErrors = config({
 export const isValidOrLogAllErrors = config({
   onFinishWithErrors: () => false,
   // onFinishSuccess: () => true, // default
-  onError: (err, type, value, path) => console.error(err) || false,
+  onError: logOnErrorAndReturnFalse,
   collectAllErrors: true,
 });
 
 export const isValidOrThrowAllErrors = config({
-  // onFinishWithErrors: () => false,
-  // onError: (err) => console.error(err) || false,
   collectAllErrors: true,
 });
 

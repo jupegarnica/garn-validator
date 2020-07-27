@@ -1,4 +1,9 @@
-import  {isValidOrThrow,  hasErrors, isValidOrLogAllErrors,isValidOrThrowAllErrors } from "garn-validator";
+import {
+  isValidOrThrow,
+  hasErrors,
+  isValidOrLogAllErrors,
+  isValidOrThrowAllErrors,
+} from "garn-validator";
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -26,31 +31,29 @@ describe("check errors", () => {
     }).toThrow("ups");
   });
   test("should throw anything", () => {
-
-   try {
+    try {
       isValidOrThrow((v) => {
         if (v > 10) throw "ups";
       })(33);
-   } catch (error) {
-     expect(error).toBe('ups')
-   }
-
+    } catch (error) {
+      expect(error).toBe("ups");
+    }
   });
   test("should throw anything", () => {
-
     try {
-      isValidOrThrowAllErrors(() => {
-         throw 1;
-       },
-       () => {
-        throw 2;
-      })(33);
+      isValidOrThrowAllErrors(
+        () => {
+          throw 1;
+        },
+        () => {
+          throw 2;
+        }
+      )(33);
     } catch (error) {
       // error is AggregateError
-      expect(error.errors).toEqual([1,2])
+      expect(error.errors).toEqual([1, 2]);
     }
-
-   });
+  });
   test("should format the schema", () => {
     expect(() => {
       isValidOrThrow({ a: Number })(33);
@@ -259,9 +262,34 @@ describe("hasErrors", () => {
       ]);
     });
   });
+  describe("multiples schemas in series", () => {
+    test("should return errors", () => {
+      const schema1 = {
+        x: Number,
+      };
+      const schema2 = {
+        y: Boolean,
+        z: Function,
+      };
+      const obj = {
+        x: true,
+        y: 1
+      }
+      expect(hasErrors(schema1,schema2)(obj)).toEqual([
+        new TypeError(
+          'on path /x value true do not match type "Number"'
+        ),
+        new TypeError(
+          'on path /y value 1 do not match type "Boolean"'
+        ),
+        new TypeError(
+          'on path /z value undefined do not match type "Function"'
+        ),
+
+      ]);
+    });
+  });
 });
-
-
 
 describe("isValidOrThrowAllErrors configured to throw all errors as AggregateError ", () => {
   test("should throw AggregateError with all errors", () => {
@@ -273,32 +301,51 @@ describe("isValidOrThrowAllErrors configured to throw all errors as AggregateErr
       isValidOrThrowAllErrors(Number, String)(true);
     }).not.toThrow(TypeError);
   });
-  test('should throw 2 errors', () => {
+  test("should throw 2 errors", () => {
     try {
-      isValidOrThrowAllErrors(Number, Boolean,String)(true);
-
+      isValidOrThrowAllErrors(Number, Boolean, String)(true);
     } catch (error) {
       expect(error.errors.length).toBe(2);
       // error.errors.forEach(e => console.warn(e.name, e.message))
     }
   });
-
 });
 describe("isValidOrLogAllErrors configured to log all  errors and return true or false ", () => {
-  test("should throw AggregateError with all errors", () => {
-    expect(
-      isValidOrLogAllErrors(Number, String)(true)
-    ).toBe(false);
+  test("should return true or false", () => {
+    expect(isValidOrLogAllErrors(Number, String)(true)).toBe(false);
 
-    expect(
-      isValidOrLogAllErrors(Boolean, true)(true)
-    ).toBe(true)
+    expect(isValidOrLogAllErrors(Boolean, true)(true)).toBe(true);
   });
-  test('should throw 2 errors', () => {
+  test("should log 2 errors", () => {
     global.console.error = jest.fn();
-    isValidOrLogAllErrors(Number, Boolean,String)(true);
+    isValidOrLogAllErrors(Number, Boolean, String)(true);
     expect(global.console.error).toHaveBeenCalledTimes(2);
-
   });
+  test("should log meaningful errors", () => {
+    global.console.error = jest.fn();
+    isValidOrLogAllErrors(Number, Boolean, String)(true);
 
+    expect(global.console.error).toHaveBeenCalledWith(
+      'value true do not match type "Number"'
+    );
+    expect(global.console.error).toHaveBeenCalledWith(
+      'value true do not match type "String"'
+    );
+  });
+  test("should log meaningful errors in schemas", () => {
+    global.console.error = jest.fn();
+    isValidOrLogAllErrors(
+      { x: Number },
+      { y: Boolean },
+      { z: String }
+    )({ x: 1, y: 2, z: 3 });
+
+    expect(global.console.error).toHaveBeenCalledWith(
+      "on path /y value 2 do not match type \"Boolean\""
+
+    );
+    expect(global.console.error).toHaveBeenCalledWith(
+      "on path /y value 2 do not match type \"Boolean\""
+    );
+  });
 });
