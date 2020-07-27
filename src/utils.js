@@ -66,4 +66,4 @@ export const isRegExp = (value) => value && /^\/.+\/$/.test(value);
 export const notIsRegExp = (value) => !isRegExp(value);
 
 // export const isError = (e) => e && e.stack && e.message;
-export const isError = (e) => e instanceof Error
+// export const isError = (e) => e instanceof Error

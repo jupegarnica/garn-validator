@@ -1,4 +1,4 @@
-import check, {  hasErrors } from "garn-validator";
+import check, {  hasErrors, isValidOrThrowAllErrors } from "garn-validator";
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -25,6 +25,32 @@ describe("check errors", () => {
       })(33);
     }).toThrow("ups");
   });
+  test("should throw anything", () => {
+
+   try {
+      check((v) => {
+        if (v > 10) throw "ups";
+      })(33);
+   } catch (error) {
+     expect(error).toBe('ups')
+   }
+
+  });
+  test("should throw anything", () => {
+
+    try {
+      isValidOrThrowAllErrors(() => {
+         throw 1;
+       },
+       () => {
+        throw 2;
+      })(33);
+    } catch (error) {
+      // error is AggregateError
+      expect(error.errors).toEqual([1,2])
+    }
+
+   });
   test("should format the schema", () => {
     expect(() => {
       check({ a: Number })(33);

@@ -4,7 +4,6 @@ import {
   isPrimitive,
   isConstructor,
   isCustomValidator,
-  isError,
   isRegExp,
   checkRegExp,
   stringify,
@@ -29,20 +28,20 @@ const formatErrorMessage = (type, value, path = null) =>
     value
   )} do not match type ${stringify(type)}`;
 
-const throwOnError = (err) => {
-  if (isError(err)) throw err;
-  throw new TypeError(err);
+const onErrorDefault = (err, type, value, path) => {
+  if (err) throw err;
+  throw new TypeError(formatErrorMessage(type, value, path));
 };
 
 const onFinishSuccessDefault = () => true;
 
 const onFinishWithErrorsDefault = (errors) => {
-  if (errors.length === 1) throwOnError(errors[0]);
+  if (errors.length === 1) throw (errors[0]);
   throw new AggregateError(errors, "aggregateError");
 };
 
 const defaultConfiguration = {
-  onError: throwOnError,
+  onError: onErrorDefault,
   collectAllErrors: false,
   onFinishSuccess: onFinishSuccessDefault,
   onFinishWithErrors: onFinishWithErrorsDefault,
@@ -65,15 +64,13 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   });
 
   if (!areAllValid)
-    return conf.onError(
-      formatErrorMessage(schema[keyName], object[keyNameStripped])
-    );
+    return conf.onError(null, schema[keyName], object[keyNameStripped]);
 
   areAllValid = requiredKeys.every((keyName) =>
     isValidType(conf, schema[keyName], object[keyName], object, keyName)
   );
 
-  if (!areAllValid) return conf.onError(formatErrorMessage(schema, object));
+  if (!areAllValid) return conf.onError(null, schema, object);
 
   const regexKeys = Object.keys(schema).filter(isRegExp);
 
@@ -95,7 +92,7 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
       )
   );
   if (areAllValid) return true;
-  return conf.onError(formatErrorMessage(schema, object));
+  return conf.onError(null, schema, object);
 };
 
 const parseToArray = (errorOrErrors) => {
@@ -111,7 +108,10 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
   const regexKeys = Object.keys(schema).filter(isRegExp);
   const untestedKeys = Object.keys(object)
     .filter((key) => !requiredKeys.includes(key))
-    .filter((key) => !optionalKeys.map(k => k.replace(optionalRegex, "")).includes(key));
+    .filter(
+      (key) =>
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
+    );
   const optionalError = [];
   for (const keyName of optionalKeys) {
     try {
@@ -127,11 +127,10 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
       );
       if (valid) continue;
       return conf.onError(
-        formatErrorMessage(
-          schema[keyName],
-          object[keyNameStripped],
-          currentPath
-        )
+        null,
+        schema[keyName],
+        object[keyNameStripped],
+        currentPath
       );
     } catch (error) {
       optionalError.push(...parseToArray(error));
@@ -151,9 +150,7 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         currentPath
       );
       if (valid) continue;
-      return conf.onError(
-        formatErrorMessage(schema[keyName], object[keyName], currentPath)
-      );
+      return conf.onError(null, schema[keyName], object[keyName], currentPath);
     } catch (error) {
       requiredErrors.push(...parseToArray(error));
     }
@@ -178,7 +175,10 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         );
         if (valid) continue;
         return conf.onError(
-          formatErrorMessage(schema[regexpString], object[keyName], currentPath)
+          null,
+          schema[regexpString],
+          object[keyName],
+          currentPath
         );
       } catch (error) {
         regexErrors.push(...parseToArray(error));
@@ -248,7 +248,7 @@ const run = (conf) => (...types) => (value) => {
     try {
       const valid = isValidType(conf, type, value);
       if (valid) continue;
-      throw conf.onError(formatErrorMessage(type, value));
+      throw conf.onError(null, type, value);
     } catch (error) {
       errors.push(...parseToArray(error));
 
@@ -261,23 +261,22 @@ const run = (conf) => (...types) => (value) => {
   return conf.onFinishSuccess();
 };
 
-export const config = ({
-  onError = throwOnError,
+const config = ({
+  onError = onErrorDefault,
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
   onFinishWithErrors = onFinishWithErrorsDefault,
 } = defaultConfiguration) =>
   run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
-
 export const isValid = config({
   onFinishWithErrors: () => false,
-  collectAllErrors: false,
+  // collectAllErrors: false, // default
 });
 
 export const isValidOrLog = config({
   onError: (err) => console.error(err) || false,
-  collectAllErrors: false,
+  // collectAllErrors: false, // default
 });
 
 export const hasErrors = config({
@@ -286,18 +285,18 @@ export const hasErrors = config({
   collectAllErrors: true,
 });
 
-export const isValidOrLogAllError = config({
+export const isValidOrLogAllErrors = config({
   onFinishWithErrors: () => false,
-  onError: (err) => console.error(err) || false,
+  // onFinishSuccess: () => true, // default
+  onError: (err, type, value, path) => console.error(err) || false,
   collectAllErrors: true,
 });
 
-export const isValidOrThrowAllError = config({
-  onFinishWithErrors: () => false,
-  onError: (err) => console.error(err) || false,
+export const isValidOrThrowAllErrors = config({
+  // onFinishWithErrors: () => false,
+  // onError: (err) => console.error(err) || false,
   collectAllErrors: true,
 });
 
-export const isValidOrThrow = config({
-});
+export const isValidOrThrow = config({});
 export default isValidOrThrow;
