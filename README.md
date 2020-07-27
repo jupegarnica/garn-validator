@@ -119,7 +119,7 @@ const isValidPassword = check(
   /[a-z]/,
   /[A-Z]/,
   /[0-9]/,
-  /[-_/!"·$%&/()]/
+  /[-_/!·$%&/()]/
 );
 
 const isValidName = check(String, (name) => name.length >= 3);
