@@ -151,34 +151,19 @@ isValidUser({
 
 ### Behaviors
 
-There are 4 behaviors you can import:
-isValid, isValidOrThrow, isValidOrLog, hasErrors
+There are 5 behaviors you can import:
+
+- isValidOrThrow (returns true of throw on first error)
+- hasErrors (return null or array of errors, doesn't throw)
+- isValid (returns true or false, doesn't throw)
+- isValidOrLog (returns true or false and log first error)
+- isValidOrLogAllErrors  (returns true or false and log all errors)
+- isValidOrThrowAllErrors (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
 
 
-The default import is isValidOrThrow
+The default export is isValidOrThrow
 
-```js
-
-export const isValid = config({
-  onFinishWithErrors: () => false,
-  collectAllErrors: false,
-});
-
-export const isValidOrLog = config({
-  onError: (err) => console.error(err) || false,
-  collectAllErrors: false,
-});
-
-export const hasErrors = config({
-  onFinishWithErrors: (errors) => errors,
-  onFinishSuccess: () => null,
-  collectAllErrors: true,
-});
-
-export const isValidOrThrow = config();
-
-export default isValidOrThrow;
-```
+Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/errors.test.js)
 
 ```js
 import { isValid } from "garn-validator";
@@ -220,6 +205,7 @@ hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 - [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/ )('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
+- [ ] Async validation support
 - [ ] Support for deno
 - [ ] Support for browser
 
