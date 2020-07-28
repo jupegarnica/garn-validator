@@ -1,23 +1,21 @@
 import check, { isValid } from "garn-validator";
 
-
-describe.only('isValid', () => {
+describe("isValid", () => {
   test.each([
-      [Function, function(){}],
-      [Function, () => {}],
-      [Promise, new Promise(()=>{})],
-      [Promise,Promise.resolve()],
-      [Object, {}],
-      [Number, 2],
-      [String, 'str'],
-  ])(
-    'isValid(%p)(%p) return true',
-    (a, b) => {
-      expect(isValid(a)(b)).toBe(true);
-    }
-  );
+    [Function, function () {}],
+    [Function, () => {}],
+    // [Function, function* () {}],
+    // [Function, async () => {}],
+    [Promise, (async () => {})()],
+    [Promise, new Promise(() => {})],
+    [Promise, Promise.resolve()],
+    [Object, {}],
+    [Number, 2],
+    [String, "str"],
+  ])("isValid(%p)(%p) return true", (a, b) => {
+    expect(isValid(a)(b)).toBe(true);
+  });
 });
-
 
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
@@ -86,12 +84,21 @@ describe("composable", () => {
         password: "1234",
       });
     }).toThrow();
-
   });
   test("with complex schema", () => {
-    const isValidPassword = check(String, /[a-z]/,/[A-Z]/,/[0-9]/,/[-_/!"·$%&/()]/);
-    const isValidName = check(String, name => name.length >= 3);
-    const isValidAge = check(Number, age => age > 18 , age => age < 40);
+    const isValidPassword = check(
+      String,
+      /[a-z]/,
+      /[A-Z]/,
+      /[0-9]/,
+      /[-_/!"·$%&/()]/
+    );
+    const isValidName = check(String, (name) => name.length >= 3);
+    const isValidAge = check(
+      Number,
+      (age) => age > 18,
+      (age) => age < 40
+    );
 
     const validUser = check({
       name: isValidName,
@@ -112,14 +119,16 @@ describe("composable", () => {
         password: "1234",
       });
     }).toThrow();
-
   });
   test("nested", () => {
-
     const validUser = check({
-      name: check(String, name => name.length >= 3),
-      age: check(Number, age => age > 18 , age => age < 40),
-      password: check(String, /[a-z]/,/[A-Z]/,/[0-9]/,/[-_/!"·$%&/()]/),
+      name: check(String, (name) => name.length >= 3),
+      age: check(
+        Number,
+        (age) => age > 18,
+        (age) => age < 40
+      ),
+      password: check(String, /[a-z]/, /[A-Z]/, /[0-9]/, /[-_/!"·$%&/()]/),
     });
     expect(() => {
       validUser({
@@ -135,10 +144,8 @@ describe("composable", () => {
         password: "1234",
       });
     }).toThrow();
-
   });
 });
-
 
 describe("multiple validations in series", () => {
   test("should pass every validation as an and operator", () => {
@@ -157,5 +164,4 @@ describe("multiple validations in series", () => {
       )(2)
     ).toBe(true);
   });
-
 });

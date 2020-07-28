@@ -1,16 +1,15 @@
 import {
-  isType,
+  checkConstructor,
   isPrimitive,
   isConstructor,
   isCustomValidator,
   isFunction,
   stringify,
-  isInstanceOf,
   isClass,
-  isError,
+  whatTypeIs,
 } from "../src/utils";
 
-import { isValidType as _isValidType } from "garn-validator";
+import { constructors, numbers, strings, notConstructors } from "../data/data";
 
 class MyClass {}
 const noop = () => {};
@@ -19,7 +18,7 @@ function MyFnClass() {}
 function myFnClass() {}
 class Porsche extends Car {}
 
-describe("isType by constructor", () => {
+describe("checkConstructor", () => {
   test.each([
     [RegExp, /regexp/],
     [RegExp, new RegExp("foo")],
@@ -67,7 +66,7 @@ describe("isType by constructor", () => {
     [MyFnClass, new MyFnClass()],
     [myFnClass, new myFnClass()],
   ])("should return true for type %p -- value %p", (type, val) => {
-    expect(isType(type)(val)).toBe(true);
+    expect(checkConstructor(type,val)).toBe(true);
   });
   test.each([
     [Object, []],
@@ -83,20 +82,26 @@ describe("isType by constructor", () => {
     [Car, new Porsche()],
     [Object, new Array()],
   ])("should return false for type %p -- value %p", (type, val) => {
-    expect(isType(type)(val)).toBe(false);
+    expect(checkConstructor(type,val)).toBe(false);
   });
 });
 
 describe("isPrimitive", () => {
   test.each([
-    ["a", true],
-    [1, true],
-    [false, true],
-    [NaN, true],
-    [undefined, true],
     [null, true],
+    // undefined : typeof instance === "undefined"
+    [undefined, true],
+    // Boolean : typeof instance === "boolean"
+    [false, true],
+    [true, true],
+    // Symbol : typeof instance === "symbol"
     [Symbol(), true],
+    // BigInt : typeof instance === "bigint"
+    [1n, true],
+    [BigInt("12"), true],
+    [BigInt(12), true],
 
+    // Object : typeof instance === "object"
     [{}, false],
     [/regex/, false],
     [() => {}, false],
@@ -105,8 +110,21 @@ describe("isPrimitive", () => {
     [new Set(), false],
     [class {}, false],
     [function () {}, false],
+    [function* () {}, false],
+    [() => {}, false],
+    [async () => {}, false],
   ])("should recognize %p as %p", (val, expected) => {
     expect(isPrimitive(val)).toBe(expected);
+  });
+  // test.each(constructors)("should recognize  %f", (val) => {
+  //   expect(isPrimitive(val)).toBe(false);
+  // });
+  test.each(numbers)("should recognize number %f", (val) => {
+    expect(isPrimitive(val)).toBe(true);
+  });
+
+  test.each(strings)("should recognize string %s", (val) => {
+    expect(isPrimitive(val)).toBe(true);
   });
 });
 
@@ -116,29 +134,39 @@ describe("isConstructor", () => {
   const FnAsync = async () => {};
   const Fn = function () {};
   const fn = function () {};
-
   test.each([
     [Object, true],
     [Array, true],
+    [Fn, true],
+    [function Name() {}, true],
+    [class myClass {}, true],
+    [class MyClass {}, true],
+    [Promise, true],
+    [Date, true],
+    [Function, true],
+    // [AsyncFunction, true],
     [console.log, false],
     [12, false],
     [() => {}, false],
     [fn, false],
-    [Fn, true],
-
     [FnAsync, false],
-
     [fnArrow, false],
     [FnArrow, false],
-
-    [function Name() {}, true],
     [function name() {}, false],
-    [class myClass {}, true],
-    [class MyClass {}, true],
-    [Promise, true],
-  ])("should detect if %p is constructor or not", (value, expected) => {
+    [Math, false],
+
+  ])( "isConstructor(%s) === %p", (value, expected) => {
     expect(isConstructor(value)).toBe(expected);
   });
+  test.each(constructors)("isConstructor(%s) is constructor", (input) => {
+    expect(isConstructor(input)).toBe(true);
+  });
+  test.each(notConstructors)(
+    "isConstructor(%s) not is constructor",
+    (input) => {
+      expect(isConstructor(input)).toBe(false);
+    }
+  );
 });
 
 describe("isFunction not hacked", () => {
@@ -184,7 +212,7 @@ describe("isCustomValidator:detect if a function is anonymous or its name starts
     [() => {}, true],
     [function name() {}, true],
     [function () {}, true],
-    // [async () => {}, false], // noy yet supported
+    [async () => {}, true], // noy yet supported
     [Object, false],
     [Object.is, true],
     ["asdasd", false],
@@ -194,137 +222,6 @@ describe("isCustomValidator:detect if a function is anonymous or its name starts
   });
 });
 
-describe("isValidType", () => {
-
-  const isValidType = (...args) => _isValidType(undefined, ...args);
-
-  test.each([
-    [/.ola/, "hola", true],
-    [new RegExp("hola"), "hola", true],
-    [/.ola/, "sola", true],
-    [/.ola/, "ola", false],
-  ])("should work for regex: %p %p to be %p", (type, value, expected) => {
-    expect(isValidType(type, value)).toBe(expected);
-  });
-
-  test.each([
-    [String, "a", true],
-    [String, 1, false],
-    [RegExp, /12/, true],
-  ])(
-    "should work for constructors:  %p %p to be %p",
-    (type, value, expected) => {
-      expect(isValidType(type, value)).toBe(expected);
-    }
-  );
-  test.each([
-    ["a", "a", true],
-    ["a", `a${""}`, true],
-    ["a", "b", false],
-    [1.0, 1, true],
-    [2, 1, false],
-    [true, true, true],
-    [undefined, undefined, true],
-    [null, null, true],
-  ])("should work for primitives:  %p %p to be %p", (type, value, expected) => {
-    expect(isValidType(type, value)).toBe(expected);
-  });
-
-  test("should work for enums of constructors", () => {
-    expect(isValidType([String, Function], "a")).toBe(true);
-    expect(isValidType([String, Function], 1)).toBe(false);
-    expect(isValidType([String, Object], [])).toBe(false);
-  });
-  test("should work for enums of primitives", () => {
-    expect(isValidType(["b", "a"], "a")).toBe(true);
-    expect(isValidType(["b", "a"], "c")).toBe(false);
-    expect(isValidType([undefined, String], "c")).toBe(true);
-    expect(isValidType([undefined, String], undefined)).toBe(true);
-    expect(isValidType([undefined, Number], "c")).toBe(false);
-  });
-
-  test.each([
-    [{ a: Number }, { a: 1 }],
-    [{ a: [Number, String] }, { a: "a" }],
-    [{ a: [Number, String], b: [undefined, "b"] }, { a: "a" }],
-    [
-      { a: [Number, String], b: [undefined, "b"] },
-      { a: "a", b: "b" },
-    ],
-    //  [{ a: Number }, { a: "a" },false],
-  ])("should work for shapes: %p : %p", (schema, value) => {
-    expect(isValidType(schema, value)).toBe(true);
-  });
-  test.each([
-    [{ a: Number }, { a: "1" }],
-    [{ a: [Number, String] }, {}],
-    [{ a: Number }, { a: "a" }],
-  ])("should throw for shapes: %p : %p", (schema, value) => {
-    expect(() => {
-      isValidType(schema, value);
-    }).toThrow();
-  });
-
-  test("should work for custom validators functions", () => {
-    expect(isValidType((value) => value > 5, 6)).toBe(true);
-    expect(isValidType((value) => value === 5, 6)).toBe(false);
-
-    expect(
-      isValidType(
-        (value, propName, props) => propName === value,
-        6,
-        { a: "a" },
-        "a"
-      )
-    ).toBe(false);
-  });
-  test("should use a camelCase function or anonymous", () => {
-    function validator(v) {
-      return true;
-    }
-    function Validator(v) {
-      return true;
-    }
-    expect(isValidType(validator, 3)).toBe(true);
-    expect(isValidType(Validator, 3)).toBe(false);
-  });
-
-  test("should throw", () => {
-    expect(() => {
-      isValidType(() => {
-        throw "asd";
-      }, 6);
-    }).toThrow();
-  });
-  test("should throw custom message", () => {
-    expect(() => {
-      isValidType((value) => {
-        if (value > 5) {
-          throw "must be greater than 5";
-        }
-      }, 6);
-    }).toThrow("must be greater than 5");
-  });
-
-  test("should throw custom Error", () => {
-    expect(() => {
-      isValidType((value) => {
-        if (value > 5) {
-          throw new RangeError("must be greater than 5");
-        }
-      }, 6);
-    }).toThrow("must be greater than 5");
-  });
-  test("should throw custom Error", () => {
-    expect(() => {
-      isValidType((value) => {
-        if (value > 5) {
-          throw new RangeError("must be greater than 5");
-        }
-      }, 6);
-    }).toThrow(RangeError);
-  });
-});
 describe("stringify", () => {
   test("should work as expected", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
@@ -374,12 +271,8 @@ describe("stringify", () => {
   });
 });
 
-describe("isInstanceOf", () => {
-  test("should work", () => {
-    expect(isInstanceOf(Object)({})).toBe(true);
-    expect(isInstanceOf(Object)([])).toBe(true);
-    expect(isInstanceOf(Object)(new Map())).toBe(true);
-
-    expect(isInstanceOf(Object)(2)).toBe(false);
+describe("whatTypeIs", () => {
+  test.each(constructors)("whatTypeIs(%s) is constructor", (input) => {
+    expect(whatTypeIs(input)).toBe("constructor");
   });
 });

@@ -1,26 +1,53 @@
 import check from "garn-validator";
+import { numbers } from "../data/data";
 
 describe("check numbers", () => {
-  test("check with constructor", () => {
+  test.each(numbers)(
+    'number %f must be Number',
+    (input) => {
+      expect(() => {
+        check(Number)(input);
+      }).not.toThrow();
+    }
+  );
+  test.each(numbers)(
+    'number %f is not Boolean',
+    (input) => {
+      expect(() => {
+        check(Boolean)(input);
+      }).toThrow();
+    }
+  );
+  test('BigInts against constructor', () => {
     expect(() => {
-      check(String)(33);
+      check(Number)(1n);
     }).toThrow();
+    expect(() => {
+      check(BigInt)(1n);
+    }).not.toThrow();
+
+  });
+  test('BigInts against primitive', () => {
+    expect(() => {
+      check(1n)(2n);
+    }).toThrow();
+    expect(() => {
+      check(1n)(1n);
+    }).not.toThrow();
+
+  });
+  test('BigInts against custom validator', () => {
+    expect(() => {
+      check((val) => val > 0)(33n);
+    }).not.toThrow();
 
     expect(() => {
-      check(Number)(33);
-    }).not.toThrow();
-    expect(() => {
-      check(Number)(NaN);
-    }).not.toThrow();
-    expect(() => {
-      check(Number)(Infinity);
-    }).not.toThrow();
-    expect(() => {
-      check(Number.isNaN)(NaN);
-    }).not.toThrow();
-    expect(() => {
-      check(Number.isNaN)(1);
+      check((val) => val < 0)(33n);
     }).toThrow();
+    expect(() => {
+      check((val) => val === 33)(33n);
+    }).toThrow();
+
   });
   test("check with custom validator", () => {
     expect(() => {

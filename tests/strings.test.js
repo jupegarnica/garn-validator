@@ -1,59 +1,42 @@
 import check from "garn-validator";
+import { strings } from "../data/data";
 describe("check strings", () => {
-  test("check with constructor", () => {
+  test.each(strings)("%s should be String", (input) => {
     expect(() => {
-      check(String)("a string");
+      check(String)(input);
     }).not.toThrow();
-
+  });
+  test.each(strings)("%s should not be Number", (input) => {
     expect(() => {
-      check(String)("");
-    }).not.toThrow();
-
-    expect(() => {
-      check(String)("");
-    }).not.toThrow();
-
-    expect(() => {
-      check(String)(``);
-    }).not.toThrow();
-
-    expect(() => {
-      check(Number)("a string");
+      check(Number)(input);
     }).toThrow();
   });
-  test("check with primitives", () => {
+  let [, ...strs] = strings;
+  test.each(strs)("value %s should be 'str'", (input) => {
     expect(() => {
-      check("a string")("a string");
+      check("str")(input.replace('"', ""));
     }).not.toThrow();
-
     expect(() => {
-      check("a string")("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check("not")("a string");
+      check("a")(input);
     }).toThrow();
   });
-  test("check with Regex", () => {
+  test.each(strs)("should match regex '/^str/' value %s  ", (input) => {
     expect(() => {
-      check(/string/)("a string");
+      check(/^str/)(input);
     }).not.toThrow();
-
     expect(() => {
-      check(/(string)$/)("a string");
-    }).not.toThrow();
-
-    expect(() => {
-      check(/^(string)/)("a string");
+      check(/string/)(input);
     }).toThrow();
   });
-  test("check with custom validator", () => {
-    expect(() => {
-      check((val) => val.length === 8)("a string");
-    }).not.toThrow();
 
+
+  test.each(strs)("custom validator value %s ", (input) => {
     expect(() => {
-      check((val) => val.includes("str"))("a string");
+      check(v => v.length === 3 ||  v.length === 4)(input);
     }).not.toThrow();
+    expect(() => {
+      check(v => v === '')(input);
+    }).toThrow();
+
   });
 });

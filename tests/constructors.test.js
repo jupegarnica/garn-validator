@@ -1,90 +1,56 @@
 import check from "garn-validator";
 
 describe("check with constructors", () => {
-  test("should work", () => {
-    expect(() => {
-      check(String)("a string");
-    }).not.toThrow();
+  class MyClass {}
 
-    expect(() => {
-      check(Number)(1);
-    }).not.toThrow();
+  test.each([
+    [String, "a string"],
+    [Number, 1],
+    [Boolean, true],
+    [RegExp, /\s/],
 
-    expect(() => {
-      check(Boolean)(true);
-    }).not.toThrow();
+    [Error, new Error()],
+    [RangeError, new RangeError()],
 
-    expect(() => {
-      check(RegExp)(/\s/);
-    }).not.toThrow();
+    [Array, []],
 
-    expect(() => {
-      check(Array)([]);
-    }).not.toThrow();
+    [Object, {}],
 
-    expect(() => {
-      check(Error)(new Error());
-    }).not.toThrow();
-    expect(() => {
-      check(RangeError)(new RangeError());
-    }).not.toThrow();
-    expect(() => {
-      check(Object)({});
-    }).not.toThrow();
-    expect(() => {
-      check(Date)(new Date());
-    }).not.toThrow();
+    [Proxy, new Proxy({}, {})],
+    [Proxy, new Proxy([], {})],
 
+    [Object, new Proxy({},{})],
+    [Array, new Proxy([],{})],
+
+
+    [Date, new Date()],
+    [Map, new Map()],
+    [Set, new Set()],
+    [Symbol, Symbol("my symbol")],
+    [MyClass, new MyClass()],
+  ])("should work check(%p)(%p)", (constructor, value) => {
     expect(() => {
-      check(Map)(new Map());
-    }).not.toThrow();
-    expect(() => {
-      check(Set)(new Set());
-    }).not.toThrow();
-    expect(() => {
-      check(Symbol)(Symbol("my symbol"));
-    }).not.toThrow();
-    expect(() => {
-      class MyClass {}
-      check(MyClass)(new MyClass());
+      check(constructor)(value);
     }).not.toThrow();
   });
-  test("should throw", () => {
-    expect(() => {
-      check(String)(1);
-    }).toThrow();
+  test.each([
+    [String, 1],
+    [Number, "1"],
+    [Boolean, null],
+    [RegExp, "/s/"],
 
+    [Error, new RangeError()],
+    [RangeError, new Error()],
+    [Object, []],
+    [Object, new Proxy([],{})],
+    [Object, null],
+    [Array, {}],
+    [Array, new Proxy({},{})],
+    [Map, new WeakMap()],
+    [Set, new WeakSet()],
+  ])("should throw check(%p)(%p)", (constructor, value) => {
     expect(() => {
-      check(Number)("1");
-    }).toThrow();
-
-    expect(() => {
-      check(Boolean)(null);
-    }).toThrow();
-
-    expect(() => {
-      check(RegExp)("/s/");
-    }).toThrow();
-
-    expect(() => {
-      check(Array)({});
-    }).toThrow();
-
-    expect(() => {
-      check(Error)(new RangeError());
-    }).toThrow();
-    expect(() => {
-      check(Object)([]);
-    }).toThrow();
-    expect(() => {
-      check(Object)(null);
-    }).toThrow();
-
-    expect(() => {
-      check(Map)(new WeakMap());
-    }).toThrow();
-    expect(() => {
-      check(Set)(new WeakSet());
+      check(constructor)(value);
     }).toThrow();
   });
 });

@@ -1,4 +1,4 @@
-const massiveObj = JSON.parse(
+export const massiveObj = JSON.parse(
   `[{"id":1,"first_name":"Cesya","last_name":"Corthes","email":"ccorthes0@netlog.com","gender":"Female","ip_address":"183.210.214.204","pet":"Phalacrocorax carbo"},
 {"id":2,"first_name":"Frederik","last_name":"Mattin","email":"fmattin1@mashable.com","gender":"Male","ip_address":"148.47.101.112","pet":"Manouria emys"},
 {"id":3,"first_name":"Sandra","last_name":"Grimm","email":"sgrimm2@technorati.com","gender":"Female","ip_address":"148.73.244.217","pet":"Francolinus swainsonii"},
@@ -10724,6 +10724,99 @@ const massiveObj = JSON.parse(
 {"id":1000,"first_name":"Addie","last_name":"Puttnam","email":"aputtnamrr@discovery.com","gender":"Female","ip_address":"35.66.190.197","pet":"Cercopithecus aethiops"}]`
 );
 
+export default massiveObj;
 
+export const constructors = [
+  Object,
+  Function,
+  Array,
+  Number,
+  Boolean,
+  String,
+  Symbol,
+  Date,
+  Promise,
+  RegExp,
 
-export default massiveObj
+  Error,
+  EvalError,
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError,
+  ArrayBuffer,
+
+  Uint8Array,
+  Int8Array,
+  Uint16Array,
+  Int16Array,
+  Uint32Array,
+  Int32Array,
+  Float32Array,
+  Float64Array,
+  Uint8ClampedArray,
+  BigUint64Array,
+  BigInt64Array,
+  DataView,
+  Map,
+  BigInt,
+  Set,
+  WeakMap,
+  WeakSet,
+  Proxy,
+  SharedArrayBuffer,
+  URL,
+  URLSearchParams,
+  TextEncoder,
+  TextDecoder,
+];
+
+export const notConstructors = [
+  Intl,
+  Reflect,
+  Atomics,
+  FinalizationRegistry,
+  WeakRef,
+  WebAssembly,
+  // Buffer,
+];
+
+export const numbers = [
+  1,
+  0,
+  0.1,
+  123e5,
+  123e-5,
+  9999999999999999, // 10000000000000000,
+  NaN,
+  Infinity,
+  -Infinity,
+  0xff,
+  // 051, // octal 41 // legacy,  not allowed in stric mode
+  0o51, //  octal 41
+  0b111, // binary 7
+  new Number(123),
+  new Number("123"),
+  Number("123"),
+  Math.PI,
+  Math.E,
+  Math.SQRT2,
+  Math.LOG2E,
+  Number.MAX_SAFE_INTEGER,
+  Number.MIN_SAFE_INTEGER,
+  Number.NaN,
+  Number.NEGATIVE_INFINITY,
+  Number.POSITIVE_INFINITY,
+  Number.EPSILON,
+];
+
+export const strings = [
+  String(12),
+  "str",
+  `str`,
+  'str"',
+  `${"str"}`,
+  new String("str"),
+  String("str"),
+];

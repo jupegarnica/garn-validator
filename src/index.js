@@ -1,27 +1,20 @@
 import {
   stringToRegExp,
-  isType,
-  isPrimitive,
-  isConstructor,
-  isCustomValidator,
+  checkConstructor,
   isRegExp,
   checkRegExp,
   stringify,
   isRequiredKey,
   isOptionalKey,
   optionalRegex,
+  parseToArray,
+  whatTypeIs
 } from "./utils.js";
 
-// AggregateError polyfill
-if (typeof AggregateError === "undefined") {
-  class AggregateError extends Error {
-    constructor(errors, message) {
-      super(message);
-      this.errors = errors;
-    }
-  }
-  global.AggregateError = AggregateError;
-}
+import './polyfills.js'
+
+// const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+// const GeneratorFunction = Object.getPrototypeOf( function*(){}).constructor
 
 const formatErrorMessage = (type, value, path = null) =>
   `${path ? `on path /${path.join("/")} ` : ""}value ${stringify(
@@ -49,7 +42,6 @@ const defaultConfiguration = {
 
 export const checkShapeCollectOneError = (conf, schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
-
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
 
   let areAllValid = optionalKeys.every((keyName) => {
@@ -98,13 +90,7 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   return conf.onError(null, { type: schema, value: object });
 };
 
-const parseToArray = (errorOrErrors) => {
-  if (Array.isArray(errorOrErrors)) {
-    return errorOrErrors;
-  } else {
-    return [errorOrErrors];
-  }
-};
+
 export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
@@ -203,17 +189,8 @@ const checkShape = (conf, ...args) =>
     ? checkShapeCollectAllErrors(conf, ...args)
     : checkShapeCollectOneError(conf, ...args);
 
-const whatKindIs = (type) => {
-  if (isType(Object)(type)) return "schema";
-  if (isPrimitive(type)) return "primitive";
-  if (isConstructor(type)) return "constructor";
-  if (isCustomValidator(type)) return "function";
-  if (isType(Array)(type)) return "enum";
-  if (isType(RegExp)(type)) return "regex";
-  throw new Error("Invalid type " + stringify(type));
-};
 
-export const isValidType = (
+const isValidType = (
   conf = defaultConfiguration,
   type,
   value,
@@ -221,14 +198,14 @@ export const isValidType = (
   keyName,
   path
 ) => {
-  const kind = whatKindIs(type);
+  const kind = whatTypeIs(type);
   switch (kind) {
     case "regex":
       return checkRegExp(type, value);
     case "primitive":
       return value === type;
     case "constructor":
-      return isType(type)(value);
+      return checkConstructor(type,value);
     case "enum":
       return type.some((_type) =>
         isValidType(conf, _type, value, rootValue, keyName)

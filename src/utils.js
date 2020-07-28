@@ -1,21 +1,41 @@
-export const isType = (type) => (val) =>
-  ![undefined, null].includes(val) && val.constructor === type;
+import util from "util";
+const isProxy = util.types.isProxy;
 
-export const isClass = fn => typeof fn === 'function' &&  /^\s*class\b/.test(fn.toString()) && !isFunctionHacked(fn);
+export const checkConstructor = (type, val) =>
+  (val !== undefined && val !== null && val.constructor === type) ||
+    (Proxy === type && isProxy(val))
 
-export const isFunction = fn => typeof fn === 'function' && !isFunctionHacked(fn) && !isClass(fn);
+export const isClass = (fn) =>
+  typeof fn === "function" &&
+  /^\s*class\b/.test(fn.toString()) &&
+  !isFunctionHacked(fn);
 
-export const isFunctionHacked = fn =>  typeof fn === 'function'  && fn.toString.toString() !== 'function toString() { [native code] }'
+export const isFunction = (fn) =>
+  typeof fn === "function" && !isClass(fn) && !isFunctionHacked(fn);
 
-export const isCustomValidator = (f) => f && typeof f === "function" && !isClass(f) && (!f.name || f.name[0] === f.name[0].toLowerCase());
+export const isFunctionHacked = (fn) =>
+  typeof fn === "function" &&
+  fn.toString.toString() !== "function toString() { [native code] }";
+
+export const isCustomValidator = (f) =>
+  f &&
+  typeof f === "function" &&
+  !isClass(f) &&
+  (!f.name || f.name[0] === f.name[0].toLowerCase());
 
 export function isConstructor(f) {
-  if(isClass(f)) return true;
-  // symbols are not created with new
-  if (f && f.name === "Symbol") return true;
-  if (f && f.name === "Promise") return true;
-  // detect is a normal function (anonymous or its name starts with lowercase)
+  if (!f) return false;
+  // Not created with new
+  if (f.name === "Symbol") return true;
+  if (f.name === "BigInt") return true;
+
+  // needs espacial params to be instantiated
+  if (f.name === "Promise") return true;
+  if (f.name === "DataView") return true;
+  if (f.name === "Proxy") return true;
+  // detect custom validator (anonymous or its name starts with lowercase)
   if (isCustomValidator(f)) return false;
+  if (isClass(f)) return true;
   try {
     new f();
     return true;
@@ -24,12 +44,31 @@ export function isConstructor(f) {
   }
 }
 
+export const whatTypeIs = (type) => {
+  if (checkConstructor(Object, type)) return "schema";
+  if (isPrimitive(type)) return "primitive";
+  if (isCustomValidator(type)) return "function";
+  if (Array.isArray(type)) return "enum";
+  if (checkConstructor(RegExp, type)) return "regex";
+  return "constructor";
+  // if (isConstructor(type)) return "constructor";
+  // throw new Error("Invalid type " + stringify(type));
+};
 
-export const isInstanceOf = (type) => (val) => val instanceof type;
-export const isPrimitive = (value) => !isInstanceOf(Object)(value)
-// export const isPrimitive = (value) => !(value instanceof Object);
-// export const isPrimitive = value => Object(value) !== value;
+export const parseToArray = (itemOrArray) => {
+  if (Array.isArray(itemOrArray)) {
+    return itemOrArray;
+  } else {
+    return [itemOrArray];
+  }
+};
 
+// fails in ArrayBuffer
+// export const isPrimitive = (value) => !(value instanceof Object) || (value.constructor === Number || value.constructor === String);
+export const isPrimitive = (value) =>
+  Object(value) !== value ||
+  value.constructor === Number ||
+  value.constructor === String;
 
 const parser = () => {
   const seen = new WeakMap();
@@ -47,18 +86,16 @@ const parser = () => {
     if (typeof value === "function") {
       return value.toString();
     }
-    if (isInstanceOf(RegExp)(value) ) {
+    if (checkConstructor(RegExp, value)) {
       return value.toString();
     }
     return value;
   };
 };
 
-export const optionalRegex = /[?$]$/
+export const optionalRegex = /[?$]$/;
 export const isOptionalKey = (key = "") => optionalRegex.test(key);
 export const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
-
-
 
 export const stringify = (val) => JSON.stringify(val, parser());
 export const checkRegExp = (regExp, value) => regExp.test(value);
