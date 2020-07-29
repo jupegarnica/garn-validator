@@ -1,5 +1,5 @@
 import check from "garn-validator";
-import { numbers } from "../data/data";
+import { numbers } from "./data.js";
 
 describe("check numbers", () => {
   test.each(numbers)(

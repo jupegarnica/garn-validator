@@ -1,5 +1,5 @@
-import check, { setOnError } from "garn-validator";
-import massiveObj1Mb from "../data/data.js";
+import check from "garn-validator";
+import {massiveObj1Mb} from "./data.js";
 
 describe("speed tests", () => {
   describe("check primitives", () => {

@@ -9,7 +9,7 @@ import {
   whatTypeIs,
 } from "../src/utils";
 
-import { constructors, numbers, strings, notConstructors } from "../data/data";
+import { constructors, numbers, strings, notConstructors } from "./data.js";
 
 class MyClass {}
 const noop = () => {};

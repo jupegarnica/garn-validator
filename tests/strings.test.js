@@ -1,5 +1,5 @@
 import check from "garn-validator";
-import { strings } from "../data/data";
+import { strings } from "./data.js";
 describe("check strings", () => {
   test.each(strings)("%s should be String", (input) => {
     expect(() => {
