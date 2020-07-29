@@ -235,4 +235,7 @@ export const isValidOrThrowAllErrors = config({
 });
 
 export const isValidOrThrow = config({});
+
+export const arrayOf = type => isValidOrThrow(Array, {[/^\d$/]: type})
+
 export default isValidOrThrow;

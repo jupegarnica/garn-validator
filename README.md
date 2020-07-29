@@ -211,6 +211,31 @@ is (Function) (async function(){}) ; // throws
 
 
 
+
+### arrayOf
+
+As we use the array `[]` as enum,  if you need to check the items of an array you should treat it as an object and check against and schema.
+
+```js
+import is from "garn-validator";
+
+is(Array, {[/\d/]: Number}) ([1,2,3]); // true
+is(Array, {[/\d/]: Number}) ([1,2,'3']); // throws
+
+```
+
+To not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
+
+`export const arrayOf = type => isValidOrThrow(Array, {[/^\d$/]: type})`
+
+```js
+import is, {arrayOf} from "garn-validator";
+
+is(arrayOf(Number)) ([1,2,3]); // true
+is(arrayOf(Number)) ([1,2,'3']); // throws
+
+```
+
 ## Roadmap
 
 - [x] Check value by constructor
