@@ -1,41 +1,41 @@
-import check from "garn-validator";
+import isValidOrThrow from "garn-validator";
 import { strings } from "./data.js";
 describe("check strings", () => {
   test.each(strings)("%s should be String", (input) => {
     expect(() => {
-      check(String)(input);
+      isValidOrThrow(String)(input);
     }).not.toThrow();
   });
   test.each(strings)("%s should not be Number", (input) => {
     expect(() => {
-      check(Number)(input);
+      isValidOrThrow(Number)(input);
     }).toThrow();
   });
   let [, ...strs] = strings;
   test.each(strs)("value %s should be 'str'", (input) => {
     expect(() => {
-      check("str")(input.replace('"', ""));
+      isValidOrThrow("str")(input.replace('"', ""));
     }).not.toThrow();
     expect(() => {
-      check("a")(input);
+      isValidOrThrow("a")(input);
     }).toThrow();
   });
   test.each(strs)("should match regex '/^str/' value %s  ", (input) => {
     expect(() => {
-      check(/^str/)(input);
+      isValidOrThrow(/^str/)(input);
     }).not.toThrow();
     expect(() => {
-      check(/string/)(input);
+      isValidOrThrow(/string/)(input);
     }).toThrow();
   });
 
 
   test.each(strs)("custom validator value %s ", (input) => {
     expect(() => {
-      check(v => v.length === 3 ||  v.length === 4)(input);
+      isValidOrThrow(v => v.length === 3 ||  v.length === 4)(input);
     }).not.toThrow();
     expect(() => {
-      check(v => v === '')(input);
+      isValidOrThrow(v => v === '')(input);
     }).toThrow();
 
   });

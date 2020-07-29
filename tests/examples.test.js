@@ -1,22 +1,22 @@
-import check, { hasErrors, isValid } from "garn-validator";
+import isValidOrThrow, { hasErrors, isValid } from "garn-validator";
 
 describe("check with constructors", () => {
   test("should work", () => {
     expect(() => {
-      check(RegExp)(/\s/);
+      isValidOrThrow(RegExp)(/\s/);
     }).not.toThrow();
 
     expect(() => {
-      check(Array)([]);
+      isValidOrThrow(Array)([]);
     }).not.toThrow();
 
     expect(() => {
-      check(RangeError)(new RangeError());
+      isValidOrThrow(RangeError)(new RangeError());
     }).not.toThrow();
 
     expect(() => {
       class MyClass {}
-      check(MyClass)(new MyClass());
+      isValidOrThrow(MyClass)(new MyClass());
     }).not.toThrow();
   });
 });
@@ -25,28 +25,28 @@ describe("check with constructors", () => {
 describe("check with custom validator", () => {
   test("cyou can return true or false", () => {
     expect(() => {
-      check(() => true)(33);
+      isValidOrThrow(() => true)(33);
     }).not.toThrow();
 
     expect(() => {
-      check(() => false)(33);
+      isValidOrThrow(() => false)(33);
     }).toThrow();
   });
   test("you can throw a custom message", () => {
     expect(() => {
-      check(() => {
+      isValidOrThrow(() => {
         throw "ups";
       })(33);
     }).toThrow("ups");
   });
   test("by default throws TypeError", () => {
     expect(() => {
-      check(Boolean)(33);
+      isValidOrThrow(Boolean)(33);
     }).toThrow(TypeError);
   });
   test("you can throw a custom type of error", () => {
     expect(() => {
-      check((v) => {
+      isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
     }).toThrow(RangeError);
@@ -55,15 +55,15 @@ describe("check with custom validator", () => {
 describe("check with enums", () => {
   test("Should be used as OR operator", () => {
     expect(() => {
-      check([1, 0])(1);
+      isValidOrThrow([1, 0])(1);
     }).not.toThrow();
 
     expect(() => {
-      check([Number, String])(0);
+      isValidOrThrow([Number, String])(0);
     }).not.toThrow();
 
     expect(() => {
-      check([undefined, 0])(null);
+      isValidOrThrow([undefined, 0])(null);
     }).toThrow();
   });
 });
@@ -71,21 +71,21 @@ describe("check with enums", () => {
 describe("check objects against a schema", () => {
   test("check with constructor", () => {
     expect(() => {
-      check({ a: Number })({
+      isValidOrThrow({ a: Number })({
         a: 1,
         b: 2,
       }); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      check({ a: Number, c: Number })({
+      isValidOrThrow({ a: Number, c: Number })({
         a: 1,
         b: 2,
       });
     }).toThrow();
 
     expect(() => {
-      check({ a: Number, c: undefined })({
+      isValidOrThrow({ a: Number, c: undefined })({
         a: 1,
         b: 2,
       });
@@ -93,31 +93,31 @@ describe("check objects against a schema", () => {
   });
   test("keys on the schema are required", () => {
     expect(() => {
-      check({ a: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ a: 1 })({ a: 1, b: 2 });
     }).not.toThrow();
 
     expect(() => {
-      check({ c: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ c: 1 })({ a: 1, b: 2 });
     }).toThrow();
   });
 
   test("check with custom function", () => {
     expect(() => {
-      check({ a: (val) => val < 0 })({
+      isValidOrThrow({ a: (val) => val < 0 })({
         a: 1,
       });
     }).toThrow();
   });
   test("check with custom function against the root object", () => {
     expect(() => {
-      check({ x: (val, rootObject, keyName) => rootObject.y === val })({
+      isValidOrThrow({ x: (val, rootObject, keyName) => rootObject.y === val })({
         x: "x",
         y: "x",
       });
     }).not.toThrow();
 
     expect(() => {
-      check({
+      isValidOrThrow({
         max: (val, rootObject, keyName) => val > rootObject.min,
         min: (val, rootObject, keyName) => val < rootObject.max,
       })({
@@ -127,7 +127,7 @@ describe("check objects against a schema", () => {
     }).not.toThrow();
 
     expect(() => {
-      check({
+      isValidOrThrow({
         "/./": (val, root, keyName) => keyName === val,
       })({
         x: "x",
@@ -136,7 +136,7 @@ describe("check objects against a schema", () => {
     }).not.toThrow();
 
     expect(() => {
-      check({
+      isValidOrThrow({
         "/./": (val, root, keyName) => keyName === val,
       })({
         x: "x",
@@ -147,7 +147,7 @@ describe("check objects against a schema", () => {
   describe("match key with regex", () => {
     test("should match all keys matching the regex", () => {
       expect(() => {
-        check({ [/[a-z]/]: Number })({
+        isValidOrThrow({ [/[a-z]/]: Number })({
           a: 1,
           b: 2,
         });
@@ -156,7 +156,7 @@ describe("check objects against a schema", () => {
 
     test("should throw", () => {
       expect(() => {
-        check({ [/[a-z]/]: 0 })({
+        isValidOrThrow({ [/[a-z]/]: 0 })({
           a: 1,
           b: 2,
         });
@@ -165,7 +165,7 @@ describe("check objects against a schema", () => {
 
     test("should throw only if the key is matched", () => {
       expect(() => {
-        check({ [/[A-Z]/]: Number })({
+        isValidOrThrow({ [/[A-Z]/]: Number })({
           a: 1,
           b: 2,
         });
@@ -174,7 +174,7 @@ describe("check objects against a schema", () => {
 
     test("not throws, all lowercase keys are numbers", () => {
       expect(() => {
-        check({ [/[a-z]/]: Number, a: 1 })({
+        isValidOrThrow({ [/[a-z]/]: Number, a: 1 })({
           a: 1,
           b: 2,
         }); //
@@ -183,7 +183,7 @@ describe("check objects against a schema", () => {
 
     test("should throw (a is not 2) ", () => {
       expect(() => {
-        check({ [/[a-z]/]: Number, a: 2 })({
+        isValidOrThrow({ [/[a-z]/]: Number, a: 2 })({
           a: 1,
           b: 2,
         });
@@ -209,7 +209,7 @@ describe("multiple validations in series", () => {
 
   test("should throw the error message related to the check failed", () => {
     expect(() => {
-      check(() => {
+      isValidOrThrow(() => {
         throw new Error();
       }, String)(2);
     }).toThrow(Error);
@@ -220,7 +220,7 @@ describe("multiple validations in series", () => {
       log: jest.fn(),
     };
     try {
-      check(
+      isValidOrThrow(
         () => {
           throw new Error();
         },
@@ -248,12 +248,12 @@ describe("collect all Error", () => {
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
-      check({ [/\d/]: Number })([1, 2]);
+      isValidOrThrow({ [/\d/]: Number })([1, 2]);
     }).not.toThrow();
   });
   test("objectOf", () => {
     expect(() => {
-      check({ [/\w/]: Number })({ a: 1 });
+      isValidOrThrow({ [/\w/]: Number })({ a: 1 });
     }).not.toThrow();
   });
 });
@@ -296,14 +296,14 @@ describe("check objects recursively", () => {
   };
   test("check big object", () => {
     expect(() => {
-      check(schema)(obj); // not throw, all ok
+      isValidOrThrow(schema)(obj); // not throw, all ok
     }).not.toThrow();
   });
 });
 
 describe("composable", () => {
   test("with complex schema", () => {
-    const isValidPassword = check(
+    const isValidPassword = isValidOrThrow(
       String,
       (str) => str.length >= 8,
       /[a-z]/,
@@ -311,14 +311,14 @@ describe("composable", () => {
       /[0-9]/,
       /[-_/!"·$%&/()]/
     );
-    const isValidName = check(String, (name) => name.length >= 3);
-    const isValidAge = check(
+    const isValidName = isValidOrThrow(String, (name) => name.length >= 3);
+    const isValidAge = isValidOrThrow(
       Number,
       (age) => age > 18,
       (age) => age < 40
     );
 
-    const validUser = check({
+    const validUser = isValidOrThrow({
       name: isValidName,
       age: isValidAge,
       password: isValidPassword,

@@ -1,11 +1,11 @@
-import check from "garn-validator";
-import {massiveObj1Mb} from "./data.js";
+import isValidOrThrow from "garn-validator";
+import { massiveObj1Mb } from "./data.js";
 
 describe("speed tests", () => {
   describe("check primitives", () => {
     test("check with constructor", () => {
       const start = Date.now();
-      check(Number)(2); // not throw, all ok
+      isValidOrThrow(Number)(2); // not throw, all ok
       const end = Date.now();
       const delta = end - start;
       // console.log("check with constructor", delta);
@@ -13,7 +13,7 @@ describe("speed tests", () => {
     });
     test("check with regex", () => {
       const start = Date.now();
-      check(/\d$/)("333"); // not throw, all ok
+      isValidOrThrow(/\d$/)("333"); // not throw, all ok
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with regex", delta);
@@ -21,7 +21,7 @@ describe("speed tests", () => {
     });
     test("check with custom validator", () => {
       const start = Date.now();
-      check((v) => v.length === 3)("333"); // not throw, all ok
+      isValidOrThrow((v) => v.length === 3)("333"); // not throw, all ok
       const end = Date.now();
       const delta = end - start;
       //  console.log("check with custom validator", delta);
@@ -69,7 +69,7 @@ describe("speed tests", () => {
     test("check big object with a valid schema", () => {
       const start = Date.now();
 
-      check(schema)(obj); // not throw, all ok
+      isValidOrThrow(schema)(obj); // not throw, all ok
       const end = Date.now();
       const delta = end - start;
       // console.log("check big object", delta);
@@ -83,7 +83,7 @@ describe("speed tests", () => {
       };
       const start = Date.now();
 
-      check(schema)(massiveObj1Mb); // not throw, all ok
+      isValidOrThrow(schema)(massiveObj1Mb); // not throw, all ok
       const end = Date.now();
       const delta = end - start;
       // console.log("check massive object", delta);
@@ -102,7 +102,7 @@ describe("speed tests", () => {
         a: () => console.log("I run?"),
       };
       try {
-        check(schema)({ a: 1, b: 2 });
+        isValidOrThrow(schema)({ a: 1, b: 2 });
       } catch (error) {}
       expect(global.console.log).not.toHaveBeenCalled();
     });
@@ -114,7 +114,7 @@ describe("speed tests", () => {
       const start = Date.now();
 
       try {
-        check(schema)(massiveObj1Mb);
+        isValidOrThrow(schema)(massiveObj1Mb);
       } catch (error) {}
       const end = Date.now();
       const delta = end - start;

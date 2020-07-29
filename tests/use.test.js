@@ -1,4 +1,4 @@
-import check, { isValid } from "garn-validator";
+import isValidOrThrow, { isValid } from "garn-validator";
 
 describe("isValid", () => {
   test.each([
@@ -20,25 +20,25 @@ describe("isValid", () => {
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
-      check({ [/\d/]: Number })([1, 2]);
+      isValidOrThrow({ [/\d/]: Number })([1, 2]);
     }).not.toThrow();
     expect(() => {
-      check({ [/\d/]: 0 })([1, 2]);
+      isValidOrThrow({ [/\d/]: 0 })([1, 2]);
     }).toThrow();
   });
   test("objectOf", () => {
     expect(() => {
-      check({ [/\w/]: Number })({ a: 1 });
+      isValidOrThrow({ [/\w/]: Number })({ a: 1 });
     }).not.toThrow();
     expect(() => {
-      check({ [/\w/]: 0 })({ a: 1 });
+      isValidOrThrow({ [/\w/]: 0 })({ a: 1 });
     }).toThrow();
   });
 });
 
 describe("composable", () => {
   test("simple", () => {
-    const isValidNumber = check(Number);
+    const isValidNumber = isValidOrThrow(Number);
     expect(() => {
       isValidNumber(2);
     }).not.toThrow();
@@ -49,7 +49,7 @@ describe("composable", () => {
   });
   test("multiple", () => {
     expect(() => {
-      const isGood = check(
+      const isGood = isValidOrThrow(
         Number,
         (v) => v < 1990,
         (v) => v > 1980,
@@ -65,7 +65,7 @@ describe("composable", () => {
     }).toThrow();
   });
   test("with schema", () => {
-    const validUser = check({
+    const validUser = isValidOrThrow({
       name: String,
       age: (v) => v > 18,
       password: String,
@@ -86,21 +86,21 @@ describe("composable", () => {
     }).toThrow();
   });
   test("with complex schema", () => {
-    const isValidPassword = check(
+    const isValidPassword = isValidOrThrow(
       String,
       /[a-z]/,
       /[A-Z]/,
       /[0-9]/,
       /[-_/!"·$%&/()]/
     );
-    const isValidName = check(String, (name) => name.length >= 3);
-    const isValidAge = check(
+    const isValidName = isValidOrThrow(String, (name) => name.length >= 3);
+    const isValidAge = isValidOrThrow(
       Number,
       (age) => age > 18,
       (age) => age < 40
     );
 
-    const validUser = check({
+    const validUser = isValidOrThrow({
       name: isValidName,
       age: isValidAge,
       password: isValidPassword,
@@ -121,14 +121,14 @@ describe("composable", () => {
     }).toThrow();
   });
   test("nested", () => {
-    const validUser = check({
-      name: check(String, (name) => name.length >= 3),
-      age: check(
+    const validUser = isValidOrThrow({
+      name: isValidOrThrow(String, (name) => name.length >= 3),
+      age: isValidOrThrow(
         Number,
         (age) => age > 18,
         (age) => age < 40
       ),
-      password: check(String, /[a-z]/, /[A-Z]/, /[0-9]/, /[-_/!"·$%&/()]/),
+      password: isValidOrThrow(String, /[a-z]/, /[A-Z]/, /[0-9]/, /[-_/!"·$%&/()]/),
     });
     expect(() => {
       validUser({

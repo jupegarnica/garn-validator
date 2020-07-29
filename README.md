@@ -44,45 +44,45 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 ### Basic Use
 
 ```js
-import check from "garn-validator"; // default export is isValidOrThrow
+import is from "garn-validator"; // default export is isValidOrThrow
 
 //check primitives against built-in constructors
-check(Number) (2); // doesn't throws, all ok
-check(String) (2); // will throw
+is(Number) (2); // doesn't throws, all ok
+is(String) (2); // will throw
 
 // check against regex
-check(/a*/) ("a"); // doesn't throws, all ok
-check(/a/) ("b"); // will throw
+is(/a*/) ("a"); // doesn't throws, all ok
+is(/a/) ("b"); // will throw
 
 // check against primitive
-check("a") ("a"); // doesn't throws, all ok
-check(true) (false); // will throw
+is("a") ("a"); // doesn't throws, all ok
+is(true) (false); // will throw
 
 // check against custom function
-check((value) => value > 0) (33); // doesn't throws, all ok
-check((value) => value > 0) (-1); // wil throw
-check(Number.isNaN) (NaN); // doesn't throws, all ok
+is((value) => value > 0) (33); // doesn't throws, all ok
+is((value) => value > 0) (-1); // wil throw
+is(Number.isNaN) (NaN); // doesn't throws, all ok
 
 // check against enums (OR operator)
-check(["a", "b"]) ("a"); // doesn't throws, all ok
-check(["a", "b"]) ("c"); // will throw
-check([Number, String]) ("18"); // doesn't throws
-check([null, undefined, false, (value) => value < 0]) (18); // will throw
+is(["a", "b"]) ("a"); // doesn't throws, all ok
+is(["a", "b"]) ("c"); // will throw
+is([Number, String]) ("18"); // doesn't throws
+is([null, undefined, false, (value) => value < 0]) (18); // will throw
 
 // check multiple validations (AND operator)
-check(Array.isArray, (val) => val.length > 1) ([1, 2]); // doesn't throws
-check(Array.isArray, (val) => val.includes(0)) ([1, 2]); // will throw
+is(Array.isArray, (val) => val.length > 1) ([1, 2]); // doesn't throws
+is(Array.isArray, (val) => val.includes(0)) ([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
-check(schema) (obj); // doesn't throws, all ok
+is(schema) (obj); // doesn't throws, all ok
 
-check({ a: 1 }) (obj); // doesn't throws, all keys on the schema are valid
-check({ c: 1 }) (obj); // will throw (c is missing)
+is({ a: 1 }) (obj); // doesn't throws, all keys on the schema are valid
+is({ c: 1 }) (obj); // will throw (c is missing)
 
 // check all keys that matches regex
-check({ [/[a-z]/]: Number }) ({
+is({ [/[a-z]/]: Number }) ({
   x: 1,
   y: 2,
   z: 3,
@@ -90,30 +90,30 @@ check({ [/[a-z]/]: Number }) ({
 }); // doesn't throws, all lowercase keys are numbers
 
 // optional keys
-check({ x$: Number }) ({ x: 1 }); // doesn't throws, x is present and is Number
-check({ x$: String }) ({ x: 1 }); // will throw, x is present but is not String
-check({ x$: String }) ({}); // doesn't throws, x is undefined
+is({ x$: Number }) ({ x: 1 }); // doesn't throws, x is present and is Number
+is({ x$: String }) ({ x: 1 }); // will throw, x is present but is not String
+is({ x$: String }) ({}); // doesn't throws, x is undefined
 
 // you can use key$ or 'key?',
 // it would be nicer to have key? without quotes but is not valid JS
 
-check({ "x?": String }) ({}); // doesn't throws
+is({ "x?": String }) ({}); // doesn't throws
 ```
 
 ### Composable
 
 ```js
 // Simple example
-const isPositive = check( v => v > 0 );
-const isNotBig = check( v => v < 100 );
+const isPositive = is( v => v > 0 );
+const isNotBig = is( v => v < 100 );
 
 isPositive(-2); // will throw
 
-check(isPositive,isNotBig) (200); // will throw
+is(isPositive,isNotBig) (200); // will throw
 
 
 // Real example
-const isValidPassword = check(
+const isValidPassword = is(
   String,
   (str) => str.length >= 8,
   /[a-z]/,
@@ -122,14 +122,14 @@ const isValidPassword = check(
   /[-_/!·$%&/()]/
 );
 
-const isValidName = check(String, (name) => name.length >= 3);
-const isValidAge = check(
+const isValidName = is(String, (name) => name.length >= 3);
+const isValidAge = is(
   Number,
   (age) => age > 18,
   (age) => age < 40
 );
 
-const isValidUser = check({
+const isValidUser = is({
   name: isValidName,
   age: isValidAge,
   password: isValidPassword,

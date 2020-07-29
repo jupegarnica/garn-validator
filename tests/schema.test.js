@@ -1,4 +1,4 @@
-import check, { isValid } from "garn-validator";
+import isValidOrThrow, { isValid } from "garn-validator";
 describe("check schema", () => {
   const value = {
     a: 1,
@@ -6,49 +6,49 @@ describe("check schema", () => {
   };
   test("check with constructor", () => {
     expect(() => {
-      check({ a: Number })(value); // not throw, all ok
+      isValidOrThrow({ a: Number })(value); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      check({ a: Number, c: Number })(value);
+      isValidOrThrow({ a: Number, c: Number })(value);
     }).toThrow();
     expect(() => {
-      check({ a: Number, c: undefined })(value);
+      isValidOrThrow({ a: Number, c: undefined })(value);
     }).not.toThrow();
   });
   test("keys on the schema are required", () => {
     expect(() => {
-      check({ a: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ a: 1 })({ a: 1, b: 2 });
     }).not.toThrow();
     expect(() => {
-      check({ c: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ c: 1 })({ a: 1, b: 2 });
     }).toThrow();
   });
 
   test("check with primitives", () => {
     expect(() => {
-      check({ a: 2 })(value);
+      isValidOrThrow({ a: 2 })(value);
     }).toThrow();
     expect(() => {
-      check({ a: 1 })(value);
+      isValidOrThrow({ a: 1 })(value);
     }).not.toThrow();
   });
   test("check with custom function", () => {
     expect(() => {
-      check({ a: (val) => val < 0 })(value);
+      isValidOrThrow({ a: (val) => val < 0 })(value);
     }).toThrow();
     expect(() => {
-      check({ a: (val) => val > 0 })(value);
+      isValidOrThrow({ a: (val) => val > 0 })(value);
     }).not.toThrow();
   });
   test("check with custom function", () => {
     let obj = { x: "x", y: "x" };
     expect(() => {
-      check({ x: (val, rootObject) => rootObject.y === val })(obj);
+      isValidOrThrow({ x: (val, rootObject) => rootObject.y === val })(obj);
     }).not.toThrow();
 
     expect(() => {
-      check({
+      isValidOrThrow({
         max: (val, rootObject) => val > rootObject.min,
         min: (val, rootObject) => val < rootObject.max,
       })({
@@ -57,7 +57,7 @@ describe("check schema", () => {
       });
     }).not.toThrow();
     expect(() => {
-      check({
+      isValidOrThrow({
         max: (val, rootObject) => val > rootObject.min,
         min: (val, rootObject) => val < rootObject.max,
       })({
@@ -67,7 +67,7 @@ describe("check schema", () => {
     }).toThrow();
 
     expect(() => {
-      check({
+      isValidOrThrow({
         "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
@@ -75,7 +75,7 @@ describe("check schema", () => {
       });
     }).not.toThrow();
     expect(() => {
-      check({
+      isValidOrThrow({
         "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
@@ -85,20 +85,20 @@ describe("check schema", () => {
   });
   test("match key with regex", () => {
     expect(() => {
-      check({ [/[a-z]/]: Number })(value);
+      isValidOrThrow({ [/[a-z]/]: Number })(value);
     }).not.toThrow();
     expect(() => {
-      check({ [/[a-z]/]: 0 })(value);
+      isValidOrThrow({ [/[a-z]/]: 0 })(value);
     }).toThrow();
     expect(() => {
       // only throws if the key is matched
-      check({ [/[A-Z]/]: Number })(value);
+      isValidOrThrow({ [/[A-Z]/]: Number })(value);
     }).not.toThrow();
     expect(() => {
-      check({ [/[a-z]/]: Number, a: 1 })(value); // not throw, all lowercase keys are numbers
+      isValidOrThrow({ [/[a-z]/]: Number, a: 1 })(value); // not throw, all lowercase keys are numbers
     }).not.toThrow();
     expect(() => {
-      check({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+      isValidOrThrow({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
     }).toThrow();
   });
 });
@@ -141,12 +141,12 @@ describe("check objects recursively", () => {
   };
   test("should work", () => {
     expect(() => {
-      check(schema)(obj); // not throw, all ok
+      isValidOrThrow(schema)(obj); // not throw, all ok
     }).not.toThrow();
   });
   test("should throw", () => {
     expect(() => {
-      check({ ...schema, a: String })(obj);
+      isValidOrThrow({ ...schema, a: String })(obj);
     }).toThrow();
   });
 });
