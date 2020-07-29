@@ -1,4 +1,4 @@
-import check from "garn-validator";
+import check , {AsyncFunction, GeneratorFunction }from "garn-validator";
 
 describe("check with constructors", () => {
   class MyClass {}
@@ -22,6 +22,8 @@ describe("check with constructors", () => {
     [Object, new Proxy({},{})],
     [Array, new Proxy([],{})],
 
+    [AsyncFunction, async ()=> {}],
+    [GeneratorFunction, function*(){}],
 
     [Date, new Date()],
     [Map, new Map()],
@@ -38,7 +40,9 @@ describe("check with constructors", () => {
     [Number, "1"],
     [Boolean, null],
     [RegExp, "/s/"],
-
+    [Function, async ()=> {}],
+    [Function, function*(){}],
+    [Function, new MyClass()],
     [Error, new RangeError()],
     [RangeError, new Error()],
     [Object, []],

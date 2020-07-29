@@ -13,8 +13,8 @@ import {
 
 import './polyfills.js'
 
-// const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-// const GeneratorFunction = Object.getPrototypeOf( function*(){}).constructor
+export const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+export const GeneratorFunction = Object.getPrototypeOf( function*(){}).constructor
 
 const formatErrorMessage = (type, value, path = null) =>
   `${path ? `on path /${path.join("/")} ` : ""}value ${stringify(
