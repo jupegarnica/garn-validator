@@ -49,8 +49,8 @@ export const notConstructors = [
   Reflect,
   Atomics,
   // FinalizationRegistry, // ReferenceError: FinalizationRegistry is not defined
-  WeakRef,
-  WebAssembly,
+  // WeakRef, //   ReferenceError: WeakRef is not defined
+  // WebAssembly, //  ReferenceError: WebAssembly is not defined
   // Buffer,
 ];
 
