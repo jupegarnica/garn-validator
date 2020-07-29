@@ -33,6 +33,7 @@ export function isConstructor(f) {
   if (f.name === "Promise") return true;
   if (f.name === "DataView") return true;
   if (f.name === "Proxy") return true;
+  if (f.name === "URL") return true;
   // detect custom validator (anonymous or its name starts with lowercase)
   if (isCustomValidator(f)) return false;
   if (isClass(f)) return true;
