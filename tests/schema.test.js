@@ -1,4 +1,4 @@
-import isValidOrThrow, { isValid } from "garn-validator";
+import isValidOrThrow, { isValid, hasErrors } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -226,16 +226,29 @@ describe("optional keys", () => {
       })
     ).toBe(false);
   });
-  describe.skip("special cases", () => {
+  describe("special cases", () => {
     test("required keys are more important than optional", () => {
-      expect(
+      expect(() => {
         isValidOrThrow({
           a: String,
           a$: Number,
         })({
-          a: '2',
-        })
-      ).toBe(true);
+          a: "2",
+        });
+      }).not.toThrow();
+    });
+    test("required keys are more important than optional or regex", () => {
+
+      expect(() => {
+        isValidOrThrow({
+          a: String,
+          a$: Number,
+          [/a/]:Boolean
+        })({
+          a: "2",
+          // aa: Boolean,
+        });
+      }).not.toThrow()
     });
   });
 });

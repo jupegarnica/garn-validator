@@ -3,7 +3,7 @@ const isProxy = util.types.isProxy;
 
 export const checkConstructor = (type, val) =>
   (val !== undefined && val !== null && val.constructor === type) ||
-    (Proxy === type && isProxy(val))
+  (Proxy === type && isProxy(val));
 
 export const isClass = (fn) =>
   typeof fn === "function" &&

@@ -5,16 +5,19 @@ import {
   checkRegExp,
   stringify,
   isRequiredKey,
+  isNotRequiredKey,
   isOptionalKey,
   optionalRegex,
   parseToArray,
-  whatTypeIs
+  whatTypeIs,
 } from "./utils.js";
 
-import './polyfills.js'
+import "./polyfills.js";
 
-export const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-export const GeneratorFunction = Object.getPrototypeOf( function*(){}).constructor
+export const AsyncFunction = Object.getPrototypeOf(async function () {})
+  .constructor;
+export const GeneratorFunction = Object.getPrototypeOf(function* () {})
+  .constructor;
 
 const formatErrorMessage = (type, value, path = null) =>
   `${path ? `on path /${path.join("/")} ` : ""}value ${stringify(
@@ -44,7 +47,13 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   const optionalKeys = Object.keys(schema).filter(isOptionalKey);
 
-  let areAllValid = optionalKeys.every((keyName) => {
+  let areAllValid = requiredKeys.every((keyName) =>
+    isValidType(conf, schema[keyName], object[keyName], object, keyName)
+  );
+
+  if (!areAllValid) return conf.onError(null, { type: schema, value: object });
+
+  areAllValid = optionalKeys.every((keyName) => {
     const keyNameStripped = keyName.replace(optionalRegex, "");
     return isValidType(
       conf,
@@ -54,16 +63,6 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
       keyNameStripped
     );
   });
-
-  if (!areAllValid)
-    return conf.onError(null, {
-      type: schema[keyName],
-      value: object[keyNameStripped],
-    });
-
-  areAllValid = requiredKeys.every((keyName) =>
-    isValidType(conf, schema[keyName], object[keyName], object, keyName)
-  );
 
   if (!areAllValid) return conf.onError(null, { type: schema, value: object });
 
@@ -90,18 +89,37 @@ export const checkShapeCollectOneError = (conf, schema, object) => {
   return conf.onError(null, { type: schema, value: object });
 };
 
-
 export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
+
+  let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
-  const optionalKeys = Object.keys(schema).filter(isOptionalKey);
-  const regexKeys = Object.keys(schema).filter(isRegExp);
-  const untestedKeys = Object.keys(object)
-    .filter((key) => !requiredKeys.includes(key))
-    .filter(
-      (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
-    );
+  for (const keyName of requiredKeys) {
+    try {
+      const currentPath = [...path, keyName];
+      let valid = isValidType(
+        conf,
+        schema[keyName],
+        object[keyName],
+        object,
+        keyName,
+        currentPath
+      );
+      if (valid) continue;
+      return conf.onError(null, {
+        type: schema[keyName],
+        value: object[keyName],
+        path: currentPath,
+      });
+    } catch (error) {
+      requiredErrors.push(...parseToArray(error));
+    }
+  }
   const optionalError = [];
+  const optionalKeys = Object.keys(schema)
+    .filter(isOptionalKey)
+    .filter(
+      (key) => !requiredKeys.includes(key.replace(optionalRegex, ""))
+    );
   for (const keyName of optionalKeys) {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
@@ -124,31 +142,14 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
       optionalError.push(...parseToArray(error));
     }
   }
-
-  let requiredErrors = [];
-  for (const keyName of requiredKeys) {
-    try {
-      const currentPath = [...path, keyName];
-      let valid = isValidType(
-        conf,
-        schema[keyName],
-        object[keyName],
-        object,
-        keyName,
-        currentPath
-      );
-      if (valid) continue;
-      return conf.onError(null, {
-        type: schema[keyName],
-        value: object[keyName],
-        path: currentPath,
-      });
-    } catch (error) {
-      requiredErrors.push(...parseToArray(error));
-    }
-  }
-
   let regexErrors = [];
+  const regexKeys = Object.keys(schema).filter(isRegExp);
+  const untestedKeys = Object.keys(object)
+    .filter((key) => !requiredKeys.includes(key))
+    .filter(
+      (key) =>
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
+    );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
       stringToRegExp(regexpString).test(keyName)
@@ -176,7 +177,7 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
       }
     }
   }
-
+  console.log(requiredKeys,optionalKeys,regexKeys);
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
   if (errors.length > 0) {
     throw errors;
@@ -188,7 +189,6 @@ const checkShape = (conf, ...args) =>
   conf.collectAllErrors
     ? checkShapeCollectAllErrors(conf, ...args)
     : checkShapeCollectOneError(conf, ...args);
-
 
 const isValidType = (
   conf = defaultConfiguration,
@@ -205,7 +205,7 @@ const isValidType = (
     case "primitive":
       return value === type;
     case "constructor":
-      return checkConstructor(type,value);
+      return checkConstructor(type, value);
     case "enum":
       return type.some((_type) =>
         isValidType(conf, _type, value, rootValue, keyName)
@@ -248,7 +248,6 @@ const config = ({
   onFinishWithErrors = onFinishWithErrorsDefault,
 } = defaultConfiguration) =>
   run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
-
 
 const logOnErrorAndReturnFalse = (err, { type, value, path }) =>
   console.error(err || formatErrorMessage(type, value, path)) || false;
