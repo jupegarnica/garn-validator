@@ -237,7 +237,7 @@ describe("optional keys", () => {
         });
       }).not.toThrow();
     });
-    test("required keys are more important than optional or regex", () => {
+    test("required regExp keys do not check optional or required", () => {
 
       expect(() => {
         isValidOrThrow({

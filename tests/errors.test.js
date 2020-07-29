@@ -63,7 +63,7 @@ describe("check errors", () => {
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow('value {"b":33} do not match type {"a":"Number"}');
+    }).toThrow('on path /a value undefined do not match type "Number"');
   });
 });
 

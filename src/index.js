@@ -5,7 +5,6 @@ import {
   checkRegExp,
   stringify,
   isRequiredKey,
-  isNotRequiredKey,
   isOptionalKey,
   optionalRegex,
   parseToArray,
@@ -43,54 +42,10 @@ const defaultConfiguration = {
   onFinishWithErrors: onFinishWithErrorsDefault,
 };
 
-export const checkShapeCollectOneError = (conf, schema, object) => {
-  const requiredKeys = Object.keys(schema).filter(isRequiredKey);
-  const optionalKeys = Object.keys(schema).filter(isOptionalKey);
 
-  let areAllValid = requiredKeys.every((keyName) =>
-    isValidType(conf, schema[keyName], object[keyName], object, keyName)
-  );
-
-  if (!areAllValid) return conf.onError(null, { type: schema, value: object });
-
-  areAllValid = optionalKeys.every((keyName) => {
-    const keyNameStripped = keyName.replace(optionalRegex, "");
-    return isValidType(
-      conf,
-      [undefined, schema[keyName]],
-      object[keyNameStripped],
-      object,
-      keyNameStripped
-    );
-  });
-
-  if (!areAllValid) return conf.onError(null, { type: schema, value: object });
-
-  const regexKeys = Object.keys(schema).filter(isRegExp);
-
-  const untestedKeys = Object.keys(object).filter(
-    (key) => !requiredKeys.includes(key)
-  );
-
-  areAllValid = regexKeys.every((regexpString) =>
-    untestedKeys
-      .filter((keyName) => stringToRegExp(regexpString).test(keyName))
-      .every((keyName) =>
-        isValidType(
-          conf,
-          schema[regexpString],
-          object[keyName],
-          object,
-          keyName
-        )
-      )
-  );
-  if (areAllValid) return true;
-  return conf.onError(null, { type: schema, value: object });
-};
-
-export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
-
+export const checkShape = (conf, schema, object, path = []) => {
+  // if (!isValidType(conf, [Object,Array,String], object))
+  //   return conf.onError(null, { type: schema, value: object });
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
@@ -111,15 +66,16 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         path: currentPath,
       });
     } catch (error) {
+      if (!conf.collectAllErrors) {
+        throw parseToArray(error);
+      }
       requiredErrors.push(...parseToArray(error));
     }
   }
   const optionalError = [];
   const optionalKeys = Object.keys(schema)
     .filter(isOptionalKey)
-    .filter(
-      (key) => !requiredKeys.includes(key.replace(optionalRegex, ""))
-    );
+    .filter((key) => !requiredKeys.includes(key.replace(optionalRegex, "")));
   for (const keyName of optionalKeys) {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
@@ -139,6 +95,9 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
         path: currentPath,
       });
     } catch (error) {
+      if (!conf.collectAllErrors) {
+        throw parseToArray(error);
+      }
       optionalError.push(...parseToArray(error));
     }
   }
@@ -173,22 +132,19 @@ export const checkShapeCollectAllErrors = (conf, schema, object, path = []) => {
           path: currentPath,
         });
       } catch (error) {
+        if (!conf.collectAllErrors) {
+          throw parseToArray(error);
+        }
         regexErrors.push(...parseToArray(error));
       }
     }
   }
-  console.log(requiredKeys,optionalKeys,regexKeys);
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
   if (errors.length > 0) {
     throw errors;
   }
   return true;
 };
-
-const checkShape = (conf, ...args) =>
-  conf.collectAllErrors
-    ? checkShapeCollectAllErrors(conf, ...args)
-    : checkShapeCollectOneError(conf, ...args);
 
 const isValidType = (
   conf = defaultConfiguration,
