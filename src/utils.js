@@ -7,7 +7,7 @@ export const checkConstructor = (type, val) =>
 
 export const isClass = (fn) =>
   typeof fn === "function" &&
-  /^\s*class\b/.test(fn.toString()) &&
+  /^\bclass(?!\$)\b/.test(fn.toString()) &&
   !isFunctionHacked(fn);
 
 export const isFunction = (fn) =>
@@ -25,11 +25,12 @@ export const isCustomValidator = (f) =>
 
 export function isConstructor(f) {
   if (!f) return false;
+  if (!f.constructor) return false;
   // Not created with new
   if (f.name === "Symbol") return true;
   if (f.name === "BigInt") return true;
 
-  // needs espacial params to be instantiated
+  // needs especial params to be instantiated
   if (f.name === "Promise") return true;
   if (f.name === "DataView") return true;
   if (f.name === "Proxy") return true;
@@ -37,6 +38,7 @@ export function isConstructor(f) {
   // detect custom validator (anonymous or its name starts with lowercase)
   if (isCustomValidator(f)) return false;
   if (isClass(f)) return true;
+  // TODO: try to not instantiate
   try {
     new f();
     return true;
@@ -51,6 +53,7 @@ export const whatTypeIs = (type) => {
   if (isCustomValidator(type)) return "function";
   if (Array.isArray(type)) return "enum";
   if (checkConstructor(RegExp, type)) return "regex";
+  // try to avoid isConstructor
   return "constructor";
   // if (isConstructor(type)) return "constructor";
   // throw new Error("Invalid type " + stringify(type));

@@ -199,11 +199,16 @@ describe("isClass", () => {
     ["class {}", false],
     [hack, false],
     [(classArg) => classArg, false],
+    [class_ => class_, false],
+    [class$ => class$, false],
     [Object, false],
     [Error, false],
     [undefined, false],
   ])("input %p should return %p", (input, expected) => {
-    expect(isClass(input)).toBe(expected);
+    let r = isClass(input);
+    r !== expected && console.warn(input.toString(), expected)
+    expect(r).toBe(expected);
+
   });
 });
 
