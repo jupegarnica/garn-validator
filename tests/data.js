@@ -41,8 +41,8 @@ export const constructors = [
   SharedArrayBuffer,
   URL,
   URLSearchParams,
-  TextEncoder,
-  TextDecoder,
+  // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
+  // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ];
 
 export const notConstructors = [
