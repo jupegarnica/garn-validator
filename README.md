@@ -265,7 +265,7 @@ Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/t
 [schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
 
 ```js
-import isValidOrThrow, { isValid } from "garn-validator";
+import isValidOrThrow, { isValid, hasErrors } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -493,17 +493,78 @@ describe("optional keys", () => {
       })
     ).toBe(false);
   });
-  describe.skip("special cases", () => {
-    test("required keys are more important than optional", () => {
-      expect(
-        isValidOrThrow({
-          a: String,
-          a$: Number,
-        })({
-          a: '2',
-        })
-      ).toBe(true);
-    });
+});
+describe("special cases", () => {
+  test("required keys are more important than optional", () => {
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+      })({
+        a: "2",
+      });
+    }).not.toThrow();
+  });
+  test("required regExp keys do not check optional or required", () => {
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+        [/a/]: Boolean,
+      })({
+        a: "2",
+      });
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+        [/a/]: Boolean,
+      })({
+        a: "2",
+        aa: 12,
+      });
+    }).toThrow();
+  });
+});
+describe("check String or Array against an schema", () => {
+  test("should check an string as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+      })("Lorem");
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+        2: "R",
+      })("Lorem");
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow({
+        99: 'a',
+      })("Lorem");
+    }).toThrow();
+  });
+  test("should check an Array as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: Number,
+        1: Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        "/d/": Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: String,
+      })([1, 2]);
+    }).toThrow();
   });
 });
 
@@ -619,7 +680,7 @@ describe("check errors", () => {
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow('value {"b":33} do not match type {"a":"Number"}');
+    }).toThrow('on path /a value undefined do not match type "Number"');
   });
 });
 
