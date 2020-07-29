@@ -44,12 +44,11 @@ export const constructors = [
   // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ];
-
 export const notConstructors = [
   Intl,
   Reflect,
   Atomics,
-  FinalizationRegistry,
+  // FinalizationRegistry, // ReferenceError: FinalizationRegistry is not defined
   WeakRef,
   WebAssembly,
   // Buffer,
