@@ -234,8 +234,8 @@ is (Function) (async function(){}) ; // throws
 
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
+#### schema.test.js
 ```js
-// schema.test.js
 import isValidOrThrow, { isValid } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
@@ -477,6 +477,4 @@ describe("optional keys", () => {
     });
   });
 });
-
-// errors.test.js
 ```
