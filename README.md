@@ -191,7 +191,7 @@ hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 ```
 ## Especial cases
 
-### AsyncFunction && GeneratorFunction
+### AsyncFunction & GeneratorFunction
 
 `AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you con import them from garn-validator.
 
