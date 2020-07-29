@@ -1,19 +1,24 @@
 import isValidOrThrow, { isValid } from "garn-validator";
 describe("check schema", () => {
-  const value = {
-    a: 1,
-    b: 2,
-  };
   test("check with constructor", () => {
     expect(() => {
-      isValidOrThrow({ a: Number })(value); // not throw, all ok
+      isValidOrThrow({ a: Number })({
+        a: 1,
+        b: 2,
+      }); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      isValidOrThrow({ a: Number, c: Number })(value);
+      isValidOrThrow({ a: Number, c: Number })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: Number, c: undefined })(value);
+      isValidOrThrow({ a: Number, c: undefined })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
   });
   test("keys on the schema are required", () => {
@@ -27,18 +32,30 @@ describe("check schema", () => {
 
   test("check with primitives", () => {
     expect(() => {
-      isValidOrThrow({ a: 2 })(value);
+      isValidOrThrow({ a: 2 })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: 1 })(value);
+      isValidOrThrow({ a: 1 })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
   });
   test("check with custom function", () => {
     expect(() => {
-      isValidOrThrow({ a: (val) => val < 0 })(value);
+      isValidOrThrow({ a: (val) => val < 0 })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: (val) => val > 0 })(value);
+      isValidOrThrow({ a: (val) => val > 0 })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
   });
   test("check with custom function", () => {
@@ -85,23 +102,39 @@ describe("check schema", () => {
   });
   test("match key with regex", () => {
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number })(value);
+      isValidOrThrow({ [/[a-z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: 0 })(value);
+      isValidOrThrow({ [/[a-z]/]: 0 })({
+        a: 1,
+        b: 2,
+      });
     }).toThrow();
     expect(() => {
       // only throws if the key is matched
-      isValidOrThrow({ [/[A-Z]/]: Number })(value);
+      isValidOrThrow({ [/[A-Z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number, a: 1 })(value); // not throw, all lowercase keys are numbers
+      isValidOrThrow({ [/[a-z]/]: Number, a: 1 })({
+        a: 1,
+        b: 2,
+      }); // not throw, all lowercase keys are numbers
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number, a: 2 })(value); // will throw (a is not 2)
+      isValidOrThrow({ [/[a-z]/]: Number, a: 2 })({
+        a: 1,
+        b: 2,
+      }); // will throw (a is not 2)
     }).toThrow();
   });
 });
+
 describe("check objects recursively", () => {
   const obj = {
     a: 1,
@@ -160,12 +193,12 @@ describe("optional keys", () => {
   test("if the key doesn't exists should be valid", () => {
     expect(isValid({ a$: Number })({})).toBe(true);
   });
-  test("shold work ending with $ or ?", () => {
-    expect(isValid({ 'a?': Number })({ a: 1 })).toBe(true);
-    expect(isValid({ 'a?': String })({ a: 1 })).toBe(false);
+  test("should work ending with $ or ?", () => {
+    expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
+    expect(isValid({ "a?": String })({ a: 1 })).toBe(false);
   });
 
-  test("complex example shold work", () => {
+  test("complex example should work", () => {
     expect(
       isValid({
         a$: Number,
@@ -192,6 +225,17 @@ describe("optional keys", () => {
         c: true,
       })
     ).toBe(false);
-
+  });
+  describe.skip("special cases", () => {
+    test("required keys are more important than optional", () => {
+      expect(
+        isValidOrThrow({
+          a: String,
+          a$: Number,
+        })({
+          a: '2',
+        })
+      ).toBe(true);
+    });
   });
 });

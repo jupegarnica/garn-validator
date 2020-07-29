@@ -1,15 +1,16 @@
 import isValidOrThrow from "garn-validator";
 
 describe("check with custom validator", () => {
-  test("can return true or false ", () => {
+  test("you can return true or false", () => {
     expect(() => {
       isValidOrThrow(() => true)(33);
     }).not.toThrow();
+
     expect(() => {
       isValidOrThrow(() => false)(33);
     }).toThrow();
   });
-  test("can throw a custom error", () => {
+  test("you can throw a custom message", () => {
     expect(() => {
       isValidOrThrow(() => {
         throw "ups";
@@ -21,7 +22,7 @@ describe("check with custom validator", () => {
       isValidOrThrow(Boolean)(33);
     }).toThrow(TypeError);
   });
-  test("can throw a custom type of error", () => {
+  test("you can throw a custom type of error", () => {
     expect(() => {
       isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");

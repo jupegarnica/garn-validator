@@ -17,6 +17,8 @@ describe("isValid", () => {
   });
 });
 
+
+
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
@@ -144,24 +146,5 @@ describe("composable", () => {
         password: "1234",
       });
     }).toThrow();
-  });
-});
-
-describe("multiple validations in series", () => {
-  test("should pass every validation as an and operator", () => {
-    expect(isValid(Number, String)(2)).toBe(false);
-  });
-  test("should pass every validation not matter how many", () => {
-    expect(isValid((val) => val > 0, Number, 2, "2")(2)).toBe(false);
-  });
-  test("should pass every validation not matter how many", () => {
-    expect(
-      isValid(
-        (val) => val > 0,
-        Number,
-        2,
-        (val) => val === 2
-      )(2)
-    ).toBe(true);
   });
 });

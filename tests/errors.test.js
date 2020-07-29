@@ -51,6 +51,7 @@ describe("check errors", () => {
       )(33);
     } catch (error) {
       // error is AggregateError
+      expect(error).toBeInstanceOf(AggregateError);
       expect(error.errors).toEqual([1, 2]);
     }
   });
@@ -65,7 +66,8 @@ describe("check errors", () => {
     }).toThrow('value {"b":33} do not match type {"a":"Number"}');
   });
 });
-describe("check error in serie", () => {
+
+describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       isValidOrThrow(Number, String)(2);
@@ -95,6 +97,18 @@ describe("check error in serie", () => {
 });
 
 describe("hasErrors", () => {
+  test("should return null", () => {
+    expect(
+      hasErrors({ num: Number, str: String })({ num: 2, str: "str" })
+    ).toBe(null);
+  });
+  test("should return array of errors", () => {
+    expect(
+      hasErrors({ num: Number, str: String })( { num: "2", str: "str" })
+    ).toEqual([
+      new TypeError('on path /num value "2" do not match type "Number"'),
+    ]);
+  });
   describe("in serie", () => {
     test.each([
       [Number, (v) => v > 0, 2, null],
@@ -291,7 +305,7 @@ describe("hasErrors", () => {
   });
 });
 
-describe("isValidOrThrowAllErrors configured to throw all errors as AggregateError ", () => {
+describe("isValidOrThrowAllErrors ", () => {
   test("should throw AggregateError with all errors", () => {
     expect(() => {
       isValidOrThrowAllErrors(Number, String)(true);
@@ -310,7 +324,7 @@ describe("isValidOrThrowAllErrors configured to throw all errors as AggregateErr
     }
   });
 });
-describe("isValidOrLogAllErrors configured to log all  errors and return true or false ", () => {
+describe("isValidOrLogAllErrors", () => {
   test("should return true or false", () => {
     expect(isValidOrLogAllErrors(Number, String)(true)).toBe(false);
 
