@@ -42,10 +42,9 @@ const defaultConfiguration = {
   onFinishWithErrors: onFinishWithErrorsDefault,
 };
 
-
 export const checkShape = (conf, schema, object, path = []) => {
-  // if (!isValidType(conf, [Object,Array,String], object))
-  //   return conf.onError(null, { type: schema, value: object });
+  if (!isValidType(conf, [Object, Array, String], object))
+    return conf.onError(null, { type: schema, value: object });
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
@@ -67,7 +66,7 @@ export const checkShape = (conf, schema, object, path = []) => {
       });
     } catch (error) {
       if (!conf.collectAllErrors) {
-        throw parseToArray(error);
+        throw error;
       }
       requiredErrors.push(...parseToArray(error));
     }
@@ -96,7 +95,7 @@ export const checkShape = (conf, schema, object, path = []) => {
       });
     } catch (error) {
       if (!conf.collectAllErrors) {
-        throw parseToArray(error);
+        throw error;
       }
       optionalError.push(...parseToArray(error));
     }
@@ -133,7 +132,7 @@ export const checkShape = (conf, schema, object, path = []) => {
         });
       } catch (error) {
         if (!conf.collectAllErrors) {
-          throw parseToArray(error);
+          throw error;
         }
         regexErrors.push(...parseToArray(error));
       }

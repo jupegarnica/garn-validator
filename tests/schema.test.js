@@ -226,29 +226,77 @@ describe("optional keys", () => {
       })
     ).toBe(false);
   });
-  describe("special cases", () => {
-    test("required keys are more important than optional", () => {
-      expect(() => {
-        isValidOrThrow({
-          a: String,
-          a$: Number,
-        })({
-          a: "2",
-        });
-      }).not.toThrow();
-    });
-    test("required regExp keys do not check optional or required", () => {
-
-      expect(() => {
-        isValidOrThrow({
-          a: String,
-          a$: Number,
-          [/a/]:Boolean
-        })({
-          a: "2",
-          // aa: Boolean,
-        });
-      }).not.toThrow()
-    });
+});
+describe("special cases", () => {
+  test("required keys are more important than optional", () => {
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+      })({
+        a: "2",
+      });
+    }).not.toThrow();
+  });
+  test("required regExp keys do not check optional or required", () => {
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+        [/a/]: Boolean,
+      })({
+        a: "2",
+      });
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        a: String,
+        a$: Number,
+        [/a/]: Boolean,
+      })({
+        a: "2",
+        aa: 12,
+      });
+    }).toThrow();
+  });
+});
+describe("check String or Array against an schema", () => {
+  test("should check an string as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+      })("Lorem");
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+        2: "R",
+      })("Lorem");
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow({
+        99: 'a',
+      })("Lorem");
+    }).toThrow();
+  });
+  test("should check an Array as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: Number,
+        1: Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        "/d/": Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: String,
+      })([1, 2]);
+    }).toThrow();
   });
 });
