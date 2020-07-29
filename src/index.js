@@ -249,8 +249,10 @@ const config = ({
 } = defaultConfiguration) =>
   run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
+
 const logOnErrorAndReturnFalse = (err, { type, value, path }) =>
   console.error(err || formatErrorMessage(type, value, path)) || false;
+
 export const isValid = config({
   onFinishWithErrors: () => false,
   // collectAllErrors: false, // default
