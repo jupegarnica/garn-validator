@@ -234,10 +234,11 @@ is (Function) (async function(){}) ; // throws
 
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
----
-
+<!-- inject tests -->
 #### schema.test.js
-[tests](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
+
+[schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
+
 ```js
 import isValidOrThrow, { isValid } from "garn-validator";
 describe("check schema", () => {
@@ -484,7 +485,9 @@ describe("optional keys", () => {
 ```
 
 #### custom-validator.test.js
-[tests](https://github.com/jupegarnica/garn-validator/tree/master/tests/custom-validator.test.js)
+
+[custom-validator.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/custom-validator.test.js)
+
 ```js
 import isValidOrThrow from "garn-validator";
 
@@ -522,7 +525,9 @@ describe("check with custom validator", () => {
 ```
 
 #### errors.test.js
-[tests](https://github.com/jupegarnica/garn-validator/tree/master/tests/errors.test.js)
+
+[errors.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/errors.test.js)
+
 ```js
 import {
   isValidOrThrow,
