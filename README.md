@@ -14,11 +14,7 @@ Ultra fast runtime type validator for vanilla JS without dependencies.
 
 # Get started
 
-## Node.js
-
-The library is tested in node 8.x to 14.x
-
-### Install
+## Install
 
 ```bash
 npm install garn-validator
@@ -70,8 +66,8 @@ is([Number, String]) ("18"); // doesn't throws
 is([null, undefined, false, (value) => value < 0]) (18); // will throw
 
 // check multiple validations (AND operator)
-is(Array.isArray, (val) => val.length > 1) ([1, 2]); // doesn't throws
-is(Array.isArray, (val) => val.includes(0)) ([1, 2]); // will throw
+is(Array, (val) => val.length > 1) ([1, 2]); // doesn't throws
+is(Array, (val) => val.includes(0)) ([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
@@ -133,18 +129,21 @@ const isValidUser = is({
   name: isValidName,
   age: isValidAge,
   password: isValidPassword,
+  country:['ES','UK']
 });
 
 isValidUser({
   name: "garn",
   age: 38,
   password: "12345aA-",
+  country: 'ES'
 }); // ok
 
 isValidUser({
   name: "garn",
-  age: 18,
-  password: "1234",
+  age: 38,
+  password: "1234", // incorrect
+  country: 'ES'
 }); // will throw
 ```
 
@@ -153,15 +152,14 @@ isValidUser({
 
 There are 5 behaviors you can import:
 
-- isValidOrThrow (returns true of throw on first error)
-- hasErrors (return null or array of errors, doesn't throw)
-- isValid (returns true or false, doesn't throw)
-- isValidOrLog (returns true or false and log first error)
-- isValidOrLogAllErrors  (returns true or false and log all errors)
-- isValidOrThrowAllErrors (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
-
-
-The default export is isValidOrThrow
+- `isValidOrThrow` (returns true of throw on first error)
+- `hasErrors` (return null or array of errors, never throws)
+- `isValid` (returns true or false, never throws)
+- `isValidOrLog` (returns true or false and log first error, never throws)
+- `isValidOrLogAllErrors`  (returns true or false and log all errors, never throws)
+- `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
+``
+The default export is `isValidOrThrow`
 
 Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/errors.test.js)
 
@@ -191,6 +189,26 @@ hasErrors(/[a-z]/) ("g"); // null
 hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 
 ```
+## Especial cases
+
+### AsyncFunction && GeneratorFunction
+
+`AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you con import them from garn-validator.
+
+>  Note:  Async functions and generators are not normal function, so it will fail against Function constructor
+
+```js
+
+import is , {AsyncFunction,GeneratorFunction } from 'garn-validator';
+
+is (AsyncFunction) (async ()=>{}) ; // true
+is (GeneratorFunction) (function*(){}) ; // true
+
+is (Function) (function*(){}) ; // throws
+is (Function) (async function(){}) ; // throws
+
+```
+
 
 
 ## Roadmap
@@ -210,97 +228,32 @@ hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
 - [ ] Support for deno
 - [ ] Support for browser
 
-## All it can do
+
+
+### More examples
+
+Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
 ```js
-import check, { hasErrors, isValid } from "garn-validator";
-
-describe("check with constructors", () => {
-  test("should work", () => {
-    expect(() => {
-      check(RegExp)(/\s/);
-    }).not.toThrow();
-
-    expect(() => {
-      check(Array)([]);
-    }).not.toThrow();
-
-    expect(() => {
-      check(RangeError)(new RangeError());
-    }).not.toThrow();
-
-    expect(() => {
-      class MyClass {}
-      check(MyClass)(new MyClass());
-    }).not.toThrow();
-  });
-});
-
-
-describe("check with custom validator", () => {
-  test("cyou can return true or false", () => {
-    expect(() => {
-      check(() => true)(33);
-    }).not.toThrow();
-
-    expect(() => {
-      check(() => false)(33);
-    }).toThrow();
-  });
-  test("you can throw a custom message", () => {
-    expect(() => {
-      check(() => {
-        throw "ups";
-      })(33);
-    }).toThrow("ups");
-  });
-  test("by default throws TypeError", () => {
-    expect(() => {
-      check(Boolean)(33);
-    }).toThrow(TypeError);
-  });
-  test("you can throw a custom type of error", () => {
-    expect(() => {
-      check((v) => {
-        if (v > 10) throw new RangeError("ups");
-      })(33);
-    }).toThrow(RangeError);
-  });
-});
-describe("check with enums", () => {
-  test("Should be used as OR operator", () => {
-    expect(() => {
-      check([1, 0])(1);
-    }).not.toThrow();
-
-    expect(() => {
-      check([Number, String])(0);
-    }).not.toThrow();
-
-    expect(() => {
-      check([undefined, 0])(null);
-    }).toThrow();
-  });
-});
-
-describe("check objects against a schema", () => {
+// schema.test.js
+import isValidOrThrow, { isValid } from "garn-validator";
+describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
-      check({ a: Number })({
+      isValidOrThrow({ a: Number })({
         a: 1,
         b: 2,
       }); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      check({ a: Number, c: Number })({
+      isValidOrThrow({ a: Number, c: Number })({
         a: 1,
         b: 2,
       });
     }).toThrow();
-
     expect(() => {
-      check({ a: Number, c: undefined })({
+      isValidOrThrow({ a: Number, c: undefined })({
         a: 1,
         b: 2,
       });
@@ -308,170 +261,118 @@ describe("check objects against a schema", () => {
   });
   test("keys on the schema are required", () => {
     expect(() => {
-      check({ a: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ a: 1 })({ a: 1, b: 2 });
     }).not.toThrow();
-
     expect(() => {
-      check({ c: 1 })({ a: 1, b: 2 });
+      isValidOrThrow({ c: 1 })({ a: 1, b: 2 });
     }).toThrow();
   });
 
+  test("check with primitives", () => {
+    expect(() => {
+      isValidOrThrow({ a: 2 })({
+        a: 1,
+        b: 2,
+      });
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow({ a: 1 })({
+        a: 1,
+        b: 2,
+      });
+    }).not.toThrow();
+  });
   test("check with custom function", () => {
     expect(() => {
-      check({ a: (val) => val < 0 })({
+      isValidOrThrow({ a: (val) => val < 0 })({
         a: 1,
+        b: 2,
       });
     }).toThrow();
-  });
-  test("check with custom function against the root object", () => {
     expect(() => {
-      check({ x: (val, rootObject, keyName) => rootObject.y === val })({
-        x: "x",
-        y: "x",
+      isValidOrThrow({ a: (val) => val > 0 })({
+        a: 1,
+        b: 2,
       });
+    }).not.toThrow();
+  });
+  test("check with custom function", () => {
+    let obj = { x: "x", y: "x" };
+    expect(() => {
+      isValidOrThrow({ x: (val, rootObject) => rootObject.y === val })(obj);
     }).not.toThrow();
 
     expect(() => {
-      check({
-        max: (val, rootObject, keyName) => val > rootObject.min,
-        min: (val, rootObject, keyName) => val < rootObject.max,
+      isValidOrThrow({
+        max: (val, rootObject) => val > rootObject.min,
+        min: (val, rootObject) => val < rootObject.max,
       })({
         max: 1,
         min: -1,
       });
     }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        max: (val, rootObject) => val > rootObject.min,
+        min: (val, rootObject) => val < rootObject.max,
+      })({
+        max: 1,
+        min: 10,
+      });
+    }).toThrow();
 
     expect(() => {
-      check({
-        "/./": (val, root, keyName) => keyName === val,
+      isValidOrThrow({
+        "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
         y: "y",
       });
     }).not.toThrow();
-
     expect(() => {
-      check({
-        "/./": (val, root, keyName) => keyName === val,
+      isValidOrThrow({
+        "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
         y: "x",
       });
     }).toThrow();
   });
-  describe("match key with regex", () => {
-    test("should match all keys matching the regex", () => {
-      expect(() => {
-        check({ [/[a-z]/]: Number })({
-          a: 1,
-          b: 2,
-        });
-      }).not.toThrow();
-    });
-
-    test("should throw", () => {
-      expect(() => {
-        check({ [/[a-z]/]: 0 })({
-          a: 1,
-          b: 2,
-        });
-      }).toThrow();
-    });
-
-    test("should throw only if the key is matched", () => {
-      expect(() => {
-        check({ [/[A-Z]/]: Number })({
-          a: 1,
-          b: 2,
-        });
-      }).not.toThrow();
-    });
-
-    test("not throws, all lowercase keys are numbers", () => {
-      expect(() => {
-        check({ [/[a-z]/]: Number, a: 1 })({
-          a: 1,
-          b: 2,
-        }); //
-      }).not.toThrow();
-    });
-
-    test("should throw (a is not 2) ", () => {
-      expect(() => {
-        check({ [/[a-z]/]: Number, a: 2 })({
-          a: 1,
-          b: 2,
-        });
-      }).toThrow();
-    });
-  });
-});
-
-describe("multiple validations in series", () => {
-  test("should pass every validation as an AND operator", () => {
-    expect(isValid(Number, String)(2)).toBe(false);
-  });
-  test("should pass every validation not matter how many", () => {
-    expect(
-      isValid(
-        (val) => val > 0,
-        Number,
-        2,
-        (val) => val === 2
-      )(2)
-    ).toBe(true);
-  });
-
-  test("should throw the error message related to the check failed", () => {
+  test("match key with regex", () => {
     expect(() => {
-      check(() => {
-        throw new Error();
-      }, String)(2);
-    }).toThrow(Error);
-  });
-
-  test("should check only until the first check fails", () => {
-    global.console = {
-      log: jest.fn(),
-    };
-    try {
-      check(
-        () => {
-          throw new Error();
-        },
-        () => console.log("I run?")
-      )(2);
-    } catch (err) {}
-    expect(global.console.log).not.toHaveBeenCalled();
-  });
-});
-describe("collect all Error", () => {
-  test("should return null", () => {
-    expect(
-      hasErrors({ num: Number, str: String })({ num: 2, str: "str" })
-    ).toBe(null);
-  });
-  test("should return array of errors", () => {
-    expect(
-      hasErrors({ num: Number, str: String })( { num: "2", str: "str" })
-    ).toEqual([
-      new TypeError('on path /num value "2" do not match type "Number"'),
-    ]);
-  });
-
-});
-describe("ArrayOf and objectOf", () => {
-  test("ArrayOf", () => {
-    expect(() => {
-      check({ [/\d/]: Number })([1, 2]);
+      isValidOrThrow({ [/[a-z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
-  });
-  test("objectOf", () => {
     expect(() => {
-      check({ [/\w/]: Number })({ a: 1 });
+      isValidOrThrow({ [/[a-z]/]: 0 })({
+        a: 1,
+        b: 2,
+      });
+    }).toThrow();
+    expect(() => {
+      // only throws if the key is matched
+      isValidOrThrow({ [/[A-Z]/]: Number })({
+        a: 1,
+        b: 2,
+      });
     }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({ [/[a-z]/]: Number, a: 1 })({
+        a: 1,
+        b: 2,
+      }); // not throw, all lowercase keys are numbers
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({ [/[a-z]/]: Number, a: 2 })({
+        a: 1,
+        b: 2,
+      }); // will throw (a is not 2)
+    }).toThrow();
   });
 });
+
 describe("check objects recursively", () => {
   const obj = {
     a: 1,
@@ -509,56 +410,72 @@ describe("check objects recursively", () => {
       },
     },
   };
-  test("check big object", () => {
+  test("should work", () => {
     expect(() => {
-      check(schema)(obj); // not throw, all ok
+      isValidOrThrow(schema)(obj); // not throw, all ok
     }).not.toThrow();
   });
-});
-
-describe("composable", () => {
-  test("with complex schema", () => {
-    const isValidPassword = check(
-      String,
-      (str) => str.length >= 8,
-      /[a-z]/,
-      /[A-Z]/,
-      /[0-9]/,
-      /[-_/!"·$%&/()]/
-    );
-    const isValidName = check(String, (name) => name.length >= 3);
-    const isValidAge = check(
-      Number,
-      (age) => age > 18,
-      (age) => age < 40
-    );
-
-    const validUser = check({
-      name: isValidName,
-      age: isValidAge,
-      password: isValidPassword,
-    });
-
+  test("should throw", () => {
     expect(() => {
-      validUser({
-        name: "garn",
-        age: 38,
-        password: "12345aA-",
-      });
-    }).not.toThrow();
-    expect(() => {
-      validUser({
-        name: "garn",
-        age: 38,
-        password: "1234",
-      });
+      isValidOrThrow({ ...schema, a: String })(obj);
     }).toThrow();
   });
 });
+
+describe("optional keys", () => {
+  test("if the key exists should be check", () => {
+    expect(isValid({ a$: Number })({ a: 1 })).toBe(true);
+    expect(isValid({ a$: String })({ a: 1 })).toBe(false);
+  });
+
+  test("if the key doesn't exists should be valid", () => {
+    expect(isValid({ a$: Number })({})).toBe(true);
+  });
+  test("should work ending with $ or ?", () => {
+    expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
+    expect(isValid({ "a?": String })({ a: 1 })).toBe(false);
+  });
+
+  test("complex example should work", () => {
+    expect(
+      isValid({
+        a$: Number,
+        b: 2,
+        c$: (v, r, key) => key === "c",
+        d$: String,
+      })({
+        a: 1,
+        b: 2,
+        c: true,
+      })
+    ).toBe(true);
+  });
+  test("complex example should fail", () => {
+    expect(
+      isValid({
+        a$: Number,
+        b: 2,
+        c$: (v, r, key) => key === "c",
+        d$: String,
+      })({
+        a: true,
+        b: 2,
+        c: true,
+      })
+    ).toBe(false);
+  });
+  describe.skip("special cases", () => {
+    test("required keys are more important than optional", () => {
+      expect(
+        isValidOrThrow({
+          a: String,
+          a$: Number,
+        })({
+          a: '2',
+        })
+      ).toBe(true);
+    });
+  });
+});
+// errors.test.js
 ```
-
-### More examples
-
-Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
-
-The most interesting test is [use.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/use.test.js)
