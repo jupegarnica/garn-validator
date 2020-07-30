@@ -1,4 +1,4 @@
-import isValidOrThrow, { isValid, arrayOf } from "garn-validator";
+import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -306,6 +306,9 @@ describe("arrayOf", () => {
     expect(() => {
       isValidOrThrow(arrayOf(Number))([1,2,3]);
     }).not.toThrow();
+    expect(() => {
+      isValidOrThrow(arrayOf(n => n > 0))([1,2,3]);
+    }).not.toThrow();
 
   });
   test("should throw", () => {
@@ -315,7 +318,33 @@ describe("arrayOf", () => {
 
     }).toThrow();
     expect(() => {
+      isValidOrThrow(arrayOf(n => n > 0))([1,2,-3]);
+    }).toThrow();
+
+    expect(() => {
       isValidOrThrow(arrayOf(Number))({0:1,1:2});
+    }).toThrow();
+  });
+});
+
+describe("objectOf", () => {
+  test("should work", () => {
+    expect(() => {
+      isValidOrThrow(objectOf(Number))({a:1,b:2});
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow(objectOf(n => n > 0))({a:1,b:2});
+    }).not.toThrow();
+
+  });
+  test("should throw", () => {
+
+    expect(() => {
+      isValidOrThrow(objectOf(Number))({a:1,b:'2'});
+
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(objectOf(n => n > 0))({a:1,b:-2});
     }).toThrow();
   });
 });

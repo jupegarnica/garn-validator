@@ -233,6 +233,21 @@ is(arrayOf(Number)) ([1,2,'3']); // throws
 
 ```
 
+### objectOf
+
+
+You can import `objectOf` from garn-validator as a shortcut to:
+
+`export const objectOf = type => isValidOrThrow(Array, {[/^\d$/]: type})`
+
+```js
+import is, {objectOf} from "garn-validator";
+
+is(objectOf(Number)) ([1,2,3]); // true
+is(objectOf(Number)) ([1,2,'3']); // throws
+
+```
+
 ## Roadmap
 
 - [x] Check value by constructor
