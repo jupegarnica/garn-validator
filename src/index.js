@@ -42,6 +42,9 @@ const defaultConfiguration = {
   onFinishWithErrors: onFinishWithErrorsDefault,
 };
 
+
+
+
 export const checkShape = (conf, schema, object, path = []) => {
   if (!isValidType(conf, [Object, Array, String], object))
     return conf.onError(null, { type: schema, value: object });

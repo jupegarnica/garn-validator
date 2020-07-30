@@ -1,4 +1,4 @@
-import isValidOrThrow, { isValid, hasErrors } from "garn-validator";
+import isValidOrThrow, { isValid, arrayOf } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -297,6 +297,25 @@ describe("check String or Array against an schema", () => {
       isValidOrThrow({
         0: String,
       })([1, 2]);
+    }).toThrow();
+  });
+});
+
+describe("arrayOf", () => {
+  test("should work", () => {
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))([1,2,3]);
+    }).not.toThrow();
+
+  });
+  test("should throw", () => {
+
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))([1,2,'3']);
+
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))({0:1,1:2});
     }).toThrow();
   });
 });
