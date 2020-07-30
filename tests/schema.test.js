@@ -277,8 +277,42 @@ describe("check String or Array against an schema", () => {
     }).toThrow();
     expect(() => {
       isValidOrThrow({
-        99: 'a',
+        99: "a",
       })("Lorem");
+    }).toThrow();
+  });
+  test("should check an Array as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: Number,
+        1: Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        "/d/": Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: String,
+      })([1, 2]);
+    }).toThrow();
+  });
+});
+
+describe("check a function against an schema", () => {
+  test("should check an function as an object", () => {
+    let fn = function () {};
+    expect(() => {
+      isValidOrThrow({
+        toString: Function,
+      })(fn);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        toString: Boolean,
+      })(fn);
     }).toThrow();
   });
   test("should check an Array as an object", () => {
@@ -304,25 +338,22 @@ describe("check String or Array against an schema", () => {
 describe("arrayOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1,2,3]);
+      isValidOrThrow(arrayOf(Number))([1, 2, 3]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(n => n > 0))([1,2,3]);
+      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, 3]);
     }).not.toThrow();
-
   });
   test("should throw", () => {
-
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1,2,'3']);
-
+      isValidOrThrow(arrayOf(Number))([1, 2, "3"]);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(n => n > 0))([1,2,-3]);
+      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, -3]);
     }).toThrow();
 
     expect(() => {
-      isValidOrThrow(arrayOf(Number))({0:1,1:2});
+      isValidOrThrow(arrayOf(Number))({ 0: 1, 1: 2 });
     }).toThrow();
   });
 });
@@ -330,62 +361,53 @@ describe("arrayOf", () => {
 describe("objectOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(objectOf(Number))({a:1,b:2});
+      isValidOrThrow(objectOf(Number))({ a: 1, b: 2 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(objectOf(n => n > 0))({a:1,b:2});
+      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: 2 });
     }).not.toThrow();
-
   });
   test("should throw", () => {
-
     expect(() => {
-      isValidOrThrow(objectOf(Number))({a:1,b:'2'});
-
+      isValidOrThrow(objectOf(Number))({ a: 1, b: "2" });
     }).toThrow();
     expect(() => {
-      isValidOrThrow(objectOf(n => n > 0))({a:1,b:-2});
+      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: -2 });
     }).toThrow();
   });
 });
 
-describe('should check instances', () => {
+describe("should check instances", () => {
   class MyClass {
     constructor() {
       this.date = new Date();
-      this.name = 'Garn';
-      this.valid = false
+      this.name = "Garn";
+      this.valid = false;
     }
   }
-  test('should work', () => {
+  test("should work", () => {
     expect(() => {
       isValidOrThrow({
         date: Date,
         name: String,
-        valid: Boolean
-      })(new MyClass())
-
+        valid: Boolean,
+      })(new MyClass());
     }).not.toThrow();
-
   });
-  test('should throw', () => {
+  test("should throw", () => {
     expect(() => {
       isValidOrThrow({
         date: Date,
         name: String,
-        valid: Number
-      })(new MyClass())
-
+        valid: Number,
+      })(new MyClass());
     }).toThrow();
     expect(() => {
-      isValidOrThrow(Object,{
+      isValidOrThrow(Object, {
         date: Date,
         name: String,
-        valid: Boolean
-      })(new MyClass())
-
+        valid: Boolean,
+      })(new MyClass());
     }).toThrow();
-
   });
-
 });
