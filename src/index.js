@@ -46,8 +46,10 @@ const defaultConfiguration = {
 
 
 export const checkShape = (conf, schema, object, path = []) => {
-  if (!isValidType(conf, [Object, Array, String], object))
+  if (!isValidType(conf, [v => v instanceof Object, String], object))
     return conf.onError(null, { type: schema, value: object });
+
+
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {

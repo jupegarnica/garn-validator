@@ -348,3 +348,44 @@ describe("objectOf", () => {
     }).toThrow();
   });
 });
+
+describe('should check instances', () => {
+  class MyClass {
+    constructor() {
+      this.date = new Date();
+      this.name = 'Garn';
+      this.valid = false
+    }
+  }
+  test('should work', () => {
+    expect(() => {
+      isValidOrThrow({
+        date: Date,
+        name: String,
+        valid: Boolean
+      })(new MyClass())
+
+    }).not.toThrow();
+
+  });
+  test('should throw', () => {
+    expect(() => {
+      isValidOrThrow({
+        date: Date,
+        name: String,
+        valid: Number
+      })(new MyClass())
+
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(Object,{
+        date: Date,
+        name: String,
+        valid: Boolean
+      })(new MyClass())
+
+    }).toThrow();
+
+  });
+
+});
