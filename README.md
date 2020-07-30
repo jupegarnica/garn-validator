@@ -238,13 +238,13 @@ is(arrayOf(Number)) ([1,2,'3']); // throws
 
 You can import `objectOf` from garn-validator as a shortcut to:
 
-`export const objectOf = type => isValidOrThrow(Array, {[/^\d$/]: type})`
+`export const objectOf = type => isValidOrThrow(Object, {[/./]: type})`
 
 ```js
 import is, {objectOf} from "garn-validator";
 
-is(objectOf(Number)) ([1,2,3]); // true
-is(objectOf(Number)) ([1,2,'3']); // throws
+is(objectOf(Number)) ({a:1,b:2}); // true
+is(objectOf(Number)) ({a:1,b:'2'}); // throws
 
 ```
 
@@ -277,7 +277,7 @@ Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/t
 [schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
 
 ```js
-import isValidOrThrow, { isValid, hasErrors } from "garn-validator";
+import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
@@ -576,6 +576,54 @@ describe("check String or Array against an schema", () => {
       isValidOrThrow({
         0: String,
       })([1, 2]);
+    }).toThrow();
+  });
+});
+
+describe("arrayOf", () => {
+  test("should work", () => {
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))([1,2,3]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow(arrayOf(n => n > 0))([1,2,3]);
+    }).not.toThrow();
+
+  });
+  test("should throw", () => {
+
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))([1,2,'3']);
+
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(arrayOf(n => n > 0))([1,2,-3]);
+    }).toThrow();
+
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))({0:1,1:2});
+    }).toThrow();
+  });
+});
+
+describe("objectOf", () => {
+  test("should work", () => {
+    expect(() => {
+      isValidOrThrow(objectOf(Number))({a:1,b:2});
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow(objectOf(n => n > 0))({a:1,b:2});
+    }).not.toThrow();
+
+  });
+  test("should throw", () => {
+
+    expect(() => {
+      isValidOrThrow(objectOf(Number))({a:1,b:'2'});
+
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(objectOf(n => n > 0))({a:1,b:-2});
     }).toThrow();
   });
 });
