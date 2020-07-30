@@ -74,6 +74,7 @@ export const isPrimitive = (value) =>
   value.constructor === Number ||
   value.constructor === String;
 
+const addStripMark = (str) => `__strip__${str}__strip__`;
 const parser = () => {
   const seen = new WeakMap();
   return (key, value) => {
@@ -85,13 +86,13 @@ const parser = () => {
       seen.set(value, key);
     }
     if (typeof value === "function" && isConstructor(value)) {
-      return value.name;
+      return addStripMark(value.name);
     }
     if (typeof value === "function") {
-      return value.toString();
+      return addStripMark(value.toString());
     }
     if (checkConstructor(RegExp, value)) {
-      return value.toString();
+      return addStripMark(value.toString());
     }
     return value;
   };
@@ -101,7 +102,11 @@ export const optionalRegex = /[?$]$/;
 export const isOptionalKey = (key = "") => optionalRegex.test(key);
 export const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
 
-export const stringify = (val) => JSON.stringify(val, parser());
+export const stringify = (val) => {
+  let str = JSON.stringify(val, parser());
+  return str && str.replace(/("__strip__)|(__strip__")/g, "");
+}
+
 export const checkRegExp = (regExp, value) => regExp.test(value);
 // export const stringToRegExp = (string) =>isRegExp(string) && new RegExp(eval(string));
 export const stringToRegExp = (string) => new RegExp(eval(string));

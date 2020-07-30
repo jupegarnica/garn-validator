@@ -58,12 +58,12 @@ describe("check errors", () => {
   test("should format the schema", () => {
     expect(() => {
       isValidOrThrow({ a: Number })(33);
-    }).toThrow('value 33 do not match type {"a":"Number"}');
+    }).toThrow('value 33 do not match type {"a":Number}');
   });
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow('on path /a value undefined do not match type "Number"');
+    }).toThrow('on path /a value undefined do not match type Number');
   });
 });
 
@@ -71,7 +71,7 @@ describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       isValidOrThrow(Number, String)(2);
-    }).toThrow('value 2 do not match type "String"');
+    }).toThrow('value 2 do not match type String');
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
@@ -106,7 +106,7 @@ describe("hasErrors", () => {
     expect(
       hasErrors({ num: Number, str: String })( { num: "2", str: "str" })
     ).toEqual([
-      new TypeError('on path /num value "2" do not match type "Number"'),
+      new TypeError('on path /num value "2" do not match type Number'),
     ]);
   });
   describe("in serie", () => {
@@ -116,15 +116,15 @@ describe("hasErrors", () => {
         Number,
         (v) => v > 100,
         2,
-        [new TypeError('value 2 do not match type "v=>v>100"')],
+        [new TypeError('value 2 do not match type v=>v>100')],
       ],
       [
         String,
         (v) => v > 100,
         2,
         [
-          new TypeError('value 2 do not match type "String"'),
-          new TypeError('value 2 do not match type "v=>v>100"'),
+          new TypeError('value 2 do not match type String'),
+          new TypeError('value 2 do not match type v=>v>100'),
         ],
       ],
     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
@@ -145,14 +145,14 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [new TypeError('on path /num value "2" do not match type "Number"')],
+        [new TypeError('on path /num value "2" do not match type Number')],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeError('on path /num value "2" do not match type "Number"'),
-          new TypeError('on path /str value null do not match type "String"'),
+          new TypeError('on path /num value "2" do not match type Number'),
+          new TypeError('on path /str value null do not match type String'),
         ],
       ],
     ])(
@@ -175,7 +175,7 @@ describe("hasErrors", () => {
         { obj: { num: "2", str: "str" } },
         [
           new TypeError(
-            'on path /obj/num value "2" do not match type "Number"'
+            'on path /obj/num value "2" do not match type Number'
           ),
         ],
       ],
@@ -193,10 +193,10 @@ describe("hasErrors", () => {
         { obj: { num: "2", str: null } },
         [
           new TypeError(
-            'on path /obj/num value "2" do not match type "Number"'
+            'on path /obj/num value "2" do not match type Number'
           ),
           new TypeError(
-            'on path /obj/str value null do not match type "String"'
+            'on path /obj/str value null do not match type String'
           ),
         ],
       ],
@@ -256,21 +256,21 @@ describe("hasErrors", () => {
       };
       expect(hasErrors(schema)(obj)).toEqual([
         new TypeError(
-          'on path /noValidKey value 1 do not match type "()=>false"'
+          'on path /noValidKey value 1 do not match type ()=>false'
         ),
         new TypeError(
-          'on path /name value "Garn" do not match type "/^[a-z]{3,}$/"'
+          'on path /name value "Garn" do not match type /^[a-z]{3,}$/'
         ),
-        new TypeError('on path /age value 18 do not match type "age=>age>18"'),
+        new TypeError('on path /age value 18 do not match type age=>age>18'),
         new EvalError("unexpected key"),
         new TypeError(
           'on path /car/brand value "Honda" do not match type ["honda","toyota"]'
         ),
         new TypeError(
-          'on path /car/date value "1982-01-01" do not match type "Date"'
+          'on path /car/date value "1982-01-01" do not match type Date'
         ),
         new TypeError(
-          'on path /car/country/name value undefined do not match type "String"'
+          'on path /car/country/name value undefined do not match type String'
         ),
         new TypeError("on path /optional value false do not match type true"),
       ]);
@@ -291,13 +291,13 @@ describe("hasErrors", () => {
       }
       expect(hasErrors(schema1,schema2)(obj)).toEqual([
         new TypeError(
-          'on path /x value true do not match type "Number"'
+          'on path /x value true do not match type Number'
         ),
         new TypeError(
-          'on path /y value 1 do not match type "Boolean"'
+          'on path /y value 1 do not match type Boolean'
         ),
         new TypeError(
-          'on path /z value undefined do not match type "Function"'
+          'on path /z value undefined do not match type Function'
         ),
 
       ]);
@@ -340,10 +340,10 @@ describe("isValidOrLogAllErrors", () => {
     isValidOrLogAllErrors(Number, Boolean, String)(true);
 
     expect(global.console.error).toHaveBeenCalledWith(
-      'value true do not match type "Number"'
+      'value true do not match type Number'
     );
     expect(global.console.error).toHaveBeenCalledWith(
-      'value true do not match type "String"'
+      'value true do not match type String'
     );
   });
   test("should log meaningful errors in schemas", () => {
@@ -355,11 +355,11 @@ describe("isValidOrLogAllErrors", () => {
     )({ x: 1, y: 2, z: 3 });
 
     expect(global.console.error).toHaveBeenCalledWith(
-      "on path /y value 2 do not match type \"Boolean\""
+      "on path /y value 2 do not match type Boolean"
 
     );
     expect(global.console.error).toHaveBeenCalledWith(
-      "on path /y value 2 do not match type \"Boolean\""
+      "on path /y value 2 do not match type Boolean"
     );
   });
 });

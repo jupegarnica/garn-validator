@@ -232,7 +232,7 @@ describe("stringify", () => {
     expect(stringify({ a: 1 })).toBe(`{"a":1}`);
   });
   test.each([
-    [/.*/, '"/.*/"'],
+    [/.*/, '/.*/'],
     [1, "1"],
     [true, "true"],
     [null, "null"],
@@ -257,7 +257,7 @@ describe("stringify", () => {
     );
   });
   test("should parse functions to strings", () => {
-    expect(stringify((x) => x * 2)).toBe(`"x=>x*2"`);
+    expect(stringify((x) => x * 2)).toBe(`x=>x*2`);
   });
 
   test("should parse functions to strings", () => {
@@ -271,7 +271,7 @@ describe("stringify", () => {
       myClass: class MyClass {},
     };
     expect(stringify(obj)).toBe(
-      `{"x":1,"f":"x=>x*2","constructor":"Number","classical":"function classical(arg){return arg}","myClass":"MyClass"}`
+      `{"x":1,"f":x=>x*2,"constructor":Number,"classical":function classical(arg){return arg},"myClass":MyClass}`
     );
   });
 });
