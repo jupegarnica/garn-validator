@@ -11,7 +11,6 @@ import {
   whatTypeIs,
 } from "./utils.js";
 
-
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
   .constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
@@ -22,7 +21,7 @@ const formatErrorMessage = (type, value, path = null) =>
     value
   )} do not match type ${stringify(type)}`;
 
-const onErrorDefault = (err, { type, value, path }) => {
+const onErrorDefault = (err, { type, value, path } = {}) => {
   if (err) throw err;
   throw new TypeError(formatErrorMessage(type, value, path));
 };
@@ -34,6 +33,22 @@ const onFinishWithErrorsDefault = (errors) => {
   throw new AggregateError(errors, "aggregateError");
 };
 
+const checkEnum = (conf, type, value, root, keyName, path) => {
+  let errors = [];
+  let valid = type.some((_type) => {
+    try {
+      let valid = isValidType(conf, _type, value, root, keyName, path);
+      if (valid) return true;
+      conf.onError(null, {type:_type, value, root, keyName, path});
+    } catch (error) {
+      errors.push(error);
+      return false;
+    }
+  })
+  if (valid) return true;
+  throw (errors);
+};
+
 const defaultConfiguration = {
   onError: onErrorDefault,
   collectAllErrors: false,
@@ -41,13 +56,10 @@ const defaultConfiguration = {
   onFinishWithErrors: onFinishWithErrorsDefault,
 };
 
-
-
-
 export const checkShape = (conf, schema, object, path = []) => {
-  if (!isValidType(conf, [v => v instanceof Object, String], object))
+  if (!(object instanceof Object ||  typeof object === "string")) {
     return conf.onError(null, { type: schema, value: object });
-
+  }
 
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
@@ -153,7 +165,7 @@ const isValidType = (
   conf = defaultConfiguration,
   type,
   value,
-  rootValue,
+  root,
   keyName,
   path
 ) => {
@@ -166,15 +178,13 @@ const isValidType = (
     case "constructor":
       return checkConstructor(type, value);
     case "enum":
-      return type.some((_type) =>
-        isValidType(conf, _type, value, rootValue, keyName)
-      );
+      return checkEnum(conf, type, value, root, keyName, path);
     case "schema":
       checkShape(conf, type, value, path);
       // checkSchema will throw if invalid in each each key
       return true;
     case "function":
-      return type(value, rootValue, keyName);
+      return type(value, root, keyName);
 
     default:
       return false;
@@ -240,7 +250,7 @@ export const isValidOrThrowAllErrors = config({
 
 export const isValidOrThrow = config({});
 
-export const arrayOf = type => isValidOrThrow(Array, {[/^\d$/]: type})
-export const objectOf = type => isValidOrThrow(Object, {[/./]: type})
+export const arrayOf = (type) => isValidOrThrow(Array, { [/^\d$/]: type });
+export const objectOf = (type) => isValidOrThrow(Object, { [/./]: type });
 
 export default isValidOrThrow;

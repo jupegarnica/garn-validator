@@ -95,6 +95,26 @@ describe("check errors in serie", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
+describe('checking enums', () => {
+  test("should throw AggregateError if none pass", () => {
+    try {
+      isValidOrThrow([()=> {throw 'ups'}, String])(1);
+      throw 'mec';
+    } catch (error) {
+      expect(error).toEqual(
+        new AggregateError([
+          'ups',
+          new TypeError(
+            'value 1 do not match type String'
+          ),
+        ],'aggregateError')
+      );
+    }
+
+  });
+
+
+});
 
 describe("hasErrors", () => {
   test("should return null", () => {
@@ -264,7 +284,10 @@ describe("hasErrors", () => {
         new TypeError('on path /age value 18 do not match type age=>age>18'),
         new EvalError("unexpected key"),
         new TypeError(
-          'on path /car/brand value "Honda" do not match type ["honda","toyota"]'
+          'on path /car/brand value "Honda" do not match type "honda"'
+        ),
+        new TypeError(
+          'on path /car/brand value "Honda" do not match type "toyota"'
         ),
         new TypeError(
           'on path /car/date value "1982-01-01" do not match type Date'
@@ -272,6 +295,7 @@ describe("hasErrors", () => {
         new TypeError(
           'on path /car/country/name value undefined do not match type String'
         ),
+        new TypeError("on path /optional value false do not match type undefined"),
         new TypeError("on path /optional value false do not match type true"),
       ]);
     });

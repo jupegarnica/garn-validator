@@ -22,4 +22,21 @@ describe("check with enums", () => {
       isValidOrThrow([String, Number])(true);
     }).toThrow();
   });
+  test("should pass even if some throws", () => {
+    expect(() => {
+      isValidOrThrow([()=> {throw 'ups'}, Number])(1);
+    }).not.toThrow();
+
+  });
+  test("should throw AggregateError if none pass", () => {
+    expect(() => {
+      try {
+        isValidOrThrow([()=> {throw 'ups'}, String])(1);
+      } catch (error) {
+        expect(error.errors.length).toBe(2)
+        throw error
+      }
+    }).toThrow(AggregateError);
+
+  });
 });
