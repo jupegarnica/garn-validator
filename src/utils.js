@@ -1,6 +1,5 @@
-import util from "util";
-const isProxy = util.types.isProxy;
-
+import "./polyfills.js";
+const isProxy = Proxy.isProxy;
 export const checkConstructor = (type, val) =>
   (val !== undefined && val !== null && val.constructor === type) ||
   (Proxy === type && isProxy(val));
@@ -105,7 +104,7 @@ export const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
 export const stringify = (val) => {
   let str = JSON.stringify(val, parser());
   return str && str.replace(/("__strip__)|(__strip__")/g, "");
-}
+};
 
 export const checkRegExp = (regExp, value) => regExp.test(value);
 // export const stringToRegExp = (string) =>isRegExp(string) && new RegExp(eval(string));

@@ -11,7 +11,6 @@ import {
   whatTypeIs,
 } from "./utils.js";
 
-import "./polyfills.js";
 
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
   .constructor;
