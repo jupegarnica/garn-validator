@@ -1,48 +1,3 @@
-// only work in node
-// import util from "util";
-// const isProxy = util.types.isProxy;
-
-// Proxy.isProxy  intercepts the creation of Proxy
-// from: http://jsfiddle.net/Xotic750/ybhs5Lph/
-if (typeof Proxy.isProxy === "undefined") {
-  let proxyDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Proxy");
-  let $Proxy = proxyDescriptor.value;
-  let revocableDescriptor = Object.getOwnPropertyDescriptor(
-    $Proxy,
-    "revocable"
-  );
-  let $revocable = revocableDescriptor.value;
-
-  let proxySymbol = Symbol("proxy");
-
-  proxyDescriptor.value = function Proxy(target, handler) {
-    target[proxySymbol] = true;
-    let proxy = new $Proxy(target, handler);
-    return proxy;
-  };
-
-  revocableDescriptor.value = function revocable(target, handler) {
-    target[proxySymbol] = true;
-    let revocableProxy = $revocable(target, handler);
-    return revocableProxy;
-  };
-  Object.defineProperty(
-    proxyDescriptor.value,
-    "revocable",
-    revocableDescriptor
-  );
-
-  let isProxyDescriptor = {
-    value: function isProxy(obj) {
-      return obj[proxySymbol] || false;
-    },
-  };
-
-  Object.defineProperty(proxyDescriptor.value, "isProxy", isProxyDescriptor);
-
-  Object.defineProperty(globalThis, "Proxy", proxyDescriptor);
-}
-
 
 // globalThis polyfill
 if (typeof globalThis === 'undefined') {
@@ -54,6 +9,62 @@ if (typeof globalThis === 'undefined') {
   };
   var globalThis = getGlobal()
 }
+
+// only work in node
+// import util from "util";
+// const isProxy = util.types.isProxy;
+
+// Proxy.isProxy  intercepts the creation of Proxy
+// from: http://jsfiddle.net/Xotic750/ybhs5Lph/
+if (typeof Proxy === 'function') {
+  if (typeof Proxy.isProxy !== "function") {
+    let proxyDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Proxy");
+    let $Proxy = proxyDescriptor.value;
+    let revocableDescriptor = Object.getOwnPropertyDescriptor(
+      $Proxy,
+      "revocable"
+    );
+    let $revocable = revocableDescriptor.value;
+
+    let proxySymbol = Symbol("proxy");
+
+    proxyDescriptor.value = function Proxy(target, handler) {
+      target[proxySymbol] = true;
+      let proxy = new $Proxy(target, handler);
+      return proxy;
+    };
+
+    revocableDescriptor.value = function revocable(target, handler) {
+      target[proxySymbol] = true;
+      let revocableProxy = $revocable(target, handler);
+      return revocableProxy;
+    };
+    Object.defineProperty(
+      proxyDescriptor.value,
+      "revocable",
+      revocableDescriptor
+    );
+
+    let isProxyDescriptor = {
+      value: function isProxy(obj) {
+        return obj[proxySymbol] || false;
+      },
+    };
+
+    Object.defineProperty(proxyDescriptor.value, "isProxy", isProxyDescriptor);
+
+    Object.defineProperty(globalThis, "Proxy", proxyDescriptor);
+  }
+} else {
+  globalThis.Proxy = {
+    isProxy() {
+      return false;
+    }
+  }
+}
+
+
+
 // Custom AggregateError polyfill
 // TODO test it
 if (typeof AggregateError === "undefined") {
