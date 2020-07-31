@@ -7,9 +7,9 @@ Ultra fast runtime type validator for vanilla JS without dependencies.
 # Features
 
 - Ultra light and **fast**: 3kB unzip (1.5 gzipped) with **0 dependencies**
-- Support for checking primitives values and objects with schemas
+- Support for checking primitives or and objects with schemas
 - Easy to use and simple to learn but powerful
-- Custom behaviors (4 built-in: isValid, isValidOrThrow  isValidOrLog and hasErrors)
+- 5 behaviors (`isValid`, `isValidOrThrow`, `isValidOrLogAllErrors`, `isValidOrLog` and `hasErrors`)
 - Works with ESModules or CommonJS from node 8.x to latests
 
 # Get started
@@ -43,42 +43,42 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 import is from "garn-validator"; // default export is isValidOrThrow
 
 //check primitives against built-in constructors
-is(Number) (2); // doesn't throws, all ok
-is(String) (2); // will throw
+is(Number)(2); // doesn't throws, all ok
+is(String)(2); // will throw
 
 // check against regex
-is(/a*/) ("a"); // doesn't throws, all ok
-is(/a/) ("b"); // will throw
+is(/a*/)("a"); // doesn't throws, all ok
+is(/a/)("b"); // will throw
 
 // check against primitive
-is("a") ("a"); // doesn't throws, all ok
-is(true) (false); // will throw
+is("a")("a"); // doesn't throws, all ok
+is(true)(false); // will throw
 
 // check against custom function
-is((value) => value > 0) (33); // doesn't throws, all ok
-is((value) => value > 0) (-1); // wil throw
-is(Number.isNaN) (NaN); // doesn't throws, all ok
+is((value) => value > 0)(33); // doesn't throws, all ok
+is((value) => value > 0)(-1); // wil throw
+is(Number.isNaN)(NaN); // doesn't throws, all ok
 
 // check against enums (OR operator)
-is(["a", "b"]) ("a"); // doesn't throws, all ok
-is(["a", "b"]) ("c"); // will throw
-is([Number, String]) ("18"); // doesn't throws
-is([null, undefined, false, (value) => value < 0]) (18); // will throw
+is(["a", "b"])("a"); // doesn't throws, all ok
+is(["a", "b"])("c"); // will throw
+is([Number, String])("18"); // doesn't throws
+is([null, undefined, false, (value) => value < 0])(18); // will throw
 
 // check multiple validations (AND operator)
-is(Array, (val) => val.length > 1) ([1, 2]); // doesn't throws
-is(Array, (val) => val.includes(0)) ([1, 2]); // will throw
+is(Array, (val) => val.length > 1)([1, 2]); // doesn't throws
+is(Array, (val) => val.includes(0))([1, 2]); // will throw
 
 // check objects
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
-is(schema) (obj); // doesn't throws, all ok
+is(schema)(obj); // doesn't throws, all ok
 
-is({ a: 1 }) (obj); // doesn't throws, all keys on the schema are valid
-is({ c: 1 }) (obj); // will throw (c is missing)
+is({ a: 1 })(obj); // doesn't throws, all keys on the schema are valid
+is({ c: 1 })(obj); // will throw (c is missing)
 
 // check all keys that matches regex
-is({ [/[a-z]/]: Number }) ({
+is({ [/[a-z]/]: Number })({
   x: 1,
   y: 2,
   z: 3,
@@ -86,27 +86,26 @@ is({ [/[a-z]/]: Number }) ({
 }); // doesn't throws, all lowercase keys are numbers
 
 // optional keys
-is({ x$: Number }) ({ x: 1 }); // doesn't throws, x is present and is Number
-is({ x$: String }) ({ x: 1 }); // will throw, x is present but is not String
-is({ x$: String }) ({}); // doesn't throws, x is undefined
+is({ x$: Number })({ x: 1 }); // doesn't throws, x is present and is Number
+is({ x$: String })({ x: 1 }); // will throw, x is present but is not String
+is({ x$: String })({}); // doesn't throws, x is undefined
 
 // you can use key$ or 'key?',
 // it would be nicer to have key? without quotes but is not valid JS
 
-is({ "x?": String }) ({}); // doesn't throws
+is({ "x?": String })({}); // doesn't throws
 ```
 
 ### Composable
 
 ```js
 // Simple example
-const isPositive = is( v => v > 0 );
-const isNotBig = is( v => v < 100 );
+const isPositive = is((v) => v > 0);
+const isNotBig = is((v) => v < 100);
 
 isPositive(-2); // will throw
 
-is(isPositive,isNotBig) (200); // will throw
-
+is(isPositive, isNotBig)(200); // will throw
 
 // Real example
 const isValidPassword = is(
@@ -129,37 +128,36 @@ const isValidUser = is({
   name: isValidName,
   age: isValidAge,
   password: isValidPassword,
-  country:['ES','UK']
+  country: ["ES", "UK"],
 });
 
 isValidUser({
   name: "garn",
   age: 38,
   password: "12345aA-",
-  country: 'ES'
+  country: "ES",
 }); // ok
 
 isValidUser({
   name: "garn",
   age: 38,
   password: "1234", // incorrect
-  country: 'ES'
+  country: "ES",
 }); // will throw
 ```
-
 
 ### Behaviors
 
 There are 5 behaviors you can import:
 
-- `isValidOrThrow` (returns true of throw on first error)
+- `isValidOrThrow` (returns true of throw the first error found)
 - `hasErrors` (return null or array of errors, never throws)
 - `isValid` (returns true or false, never throws)
 - `isValidOrLog` (returns true or false and log first error, never throws)
-- `isValidOrLogAllErrors`  (returns true or false and log all errors, never throws)
+- `isValidOrLogAllErrors` (returns true or false and log all errors, never throws)
 - `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
-``
-The default export is `isValidOrThrow`
+  ``
+  The default export is `isValidOrThrow`
 
 Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/errors.test.js)
 
@@ -167,17 +165,16 @@ Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blo
 import { isValid } from "garn-validator";
 
 // stops in first Error
-isValid(/[a-z]/) ("g"); // returns true
-isValid(/[a-z]/) ("G"); // returns false, doesn't throws
+isValid(/[a-z]/)("g"); // returns true
+isValid(/[a-z]/)("G"); // returns false, doesn't throws
 ```
 
 ```js
 import { isValidOrLog } from "garn-validator";
 
 // stops in first Error
-isValidOrLog(/[a-z]/) ("g"); // do nothing (but also returns true)
-isValidOrLog(/[a-z]/) ("G"); // logs error and return false
-
+isValidOrLog(/[a-z]/)("g"); // do nothing (but also returns true)
+isValidOrLog(/[a-z]/)("G"); // logs error and return false
 ```
 
 ```js
@@ -185,40 +182,145 @@ import { hasErrors } from "garn-validator";
 
 // return null or array or errors
 // checks until the end
-hasErrors(/[a-z]/) ("g"); // null
-hasErrors(/[a-z]/, Number) ("G"); // [TypeError, TypeError]
-
+hasErrors(/[a-z]/)("g"); // null
+hasErrors(/[a-z]/, Number)("G"); // [TypeError, TypeError]
 ```
+
+## Errors
+
+If an validation fails by default it will throw `new TypeError(meaningfulMessage)`;
+If using a custom validator you throw an error , this error will be thrown.
+
+
+
+### SchemaValidationError using `isValidOrThrowAllErrors`
+
+
+If more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
+
+If only one key fail it will throw only this Error (not an AggregateError)
+
+SchemaValidationError inherits from AggregateError,
+
+> But if using `isValidOrThrow`  only the first Error will be thrown.
+```js
+
+// more than 2 keys fails
+try {
+  isValidOrThrowAllErrors({a:1,b:2})({});
+} catch (error) {
+  console.log(error instanceof SchemaValidationError); // true
+  console.log(error instanceof AggregateError); // true
+  console.log(error.errors.length); // 2
+
+}
+try {
+  isValidOrThrow({a:1,b:2})({});
+} catch (error) {
+  console.log(error instanceof SchemaValidationError); // false
+  console.log(error instanceof TypeError); // true
+
+}
+
+
+// only 1 key fails
+try {
+  isValidOrThrowAllErrors({a:1})({});
+} catch (error) {
+  console.log(error instanceof TypeError); // true
+  console.log(error instanceof SchemaValidationError); // false
+
+}
+```
+
+### EnumValidationError
+
+If fails all items of an enum, it will throw a EnumValidationError with all Errors aggregated in error.errors
+EnumValidationError inherits from AggregateError.
+But if the length of the enum is 1. it will throw only this error.
+```js
+try {
+  isValidOrThrow([
+    Boolean,
+    String,
+  ])(1);
+} catch (error) {
+  console.log(error instanceof EnumValidationError); // true
+  console.log(error instanceof AggregateError); // true
+}
+
+try {
+  isValidOrThrow([
+    Boolean,
+  ])(1);
+} catch (error) {
+  console.log(error instanceof EnumValidationError); // false
+  console.log(error instanceof TypeError); // true
+}
+```
+
+
+### SeriesValidationError using `isValidOrThrowAllErrors`
+
+If fails all items of an serie, it will throw a SeriesValidationError with all Errors aggregated in error.errors
+SeriesValidationError inherits from AggregateError.
+But if the length of the enum is 1. it will throw only this error.
+
+```js
+try {
+  isValidOrThrowAllErrors(
+    Boolean,
+    String,
+  )(1);
+} catch (error) {
+  console.log(error instanceof SeriesValidationError); // true
+  console.log(error instanceof AggregateError); // true
+}
+
+try {
+  isValidOrThrow(
+    Boolean,
+  )(1);
+} catch (error) {
+  console.log(error instanceof SeriesValidationError); // false
+  console.log(error instanceof TypeError); // true
+}
+```
+
+### hasErrors
+
+hasError will flatMap all errors found.  No AggregateError will be in the array returned.
+
+
+
+
 ## Especial cases
 
 ### AsyncFunction & GeneratorFunction
 
 `AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you con import them from garn-validator.
 
->  Note:  Async functions and generators are not normal function, so it will fail against Function constructor
+> Note: Async functions and generators are not normal function, so it will fail against Function constructor
 
 ```js
+import is, { AsyncFunction, GeneratorFunction } from "garn-validator";
 
-import is , {AsyncFunction,GeneratorFunction } from 'garn-validator';
+is(AsyncFunction)(async () => {}); // true
+is(GeneratorFunction)(function* () {}); // true
 
-is (AsyncFunction) (async ()=>{}) ; // true
-is (GeneratorFunction) (function*(){}) ; // true
-
-is (Function) (function*(){}) ; // throws
-is (Function) (async function(){}) ; // throws
-
+is(Function)(function* () {}); // throws
+is(Function)(async function () {}); // throws
 ```
 
 ### arrayOf
 
-As we use the array `[]` as enum,  if you need to check the items of an array you should treat it as an object and check against and schema.
+As we use the array `[]` as enum, if you need to check the items of an array you should treat it as an object and check against an schema.
 
 ```js
 import is from "garn-validator";
 
-is(Array, {[/\d/]: Number}) ([1,2,3]); // true
-is(Array, {[/\d/]: Number}) ([1,2,'3']); // throws
-
+is(Array, { [/\d/]: Number })([1, 2, 3]); // true
+is(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
 ```
 
 To not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
@@ -226,26 +328,23 @@ To not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
 `export const arrayOf = type => isValidOrThrow(Array, {[/^\d$/]: type})`
 
 ```js
-import is, {arrayOf} from "garn-validator";
+import is, { arrayOf } from "garn-validator";
 
-is(arrayOf(Number)) ([1,2,3]); // true
-is(arrayOf(Number)) ([1,2,'3']); // throws
-
+is(arrayOf(Number))([1, 2, 3]); // true
+is(arrayOf(Number))([1, 2, "3"]); // throws
 ```
 
 ### objectOf
-
 
 You can import `objectOf` from garn-validator as a shortcut to:
 
 `export const objectOf = type => isValidOrThrow(Object, {[/./]: type})`
 
 ```js
-import is, {objectOf} from "garn-validator";
+import is, { objectOf } from "garn-validator";
 
-is(objectOf(Number)) ({a:1,b:2}); // true
-is(objectOf(Number)) ({a:1,b:'2'}); // throws
-
+is(objectOf(Number))({ a: 1, b: 2 }); // true
+is(objectOf(Number))({ a: 1, b: "2" }); // throws
 ```
 
 ## Roadmap
@@ -264,8 +363,6 @@ is(objectOf(Number)) ({a:1,b:'2'}); // throws
 - [ ] Async validation support
 - [ ] Support for deno
 - [ ] Support for browser
-
-
 
 ### More examples
 
@@ -547,17 +644,51 @@ describe("check String or Array against an schema", () => {
         1: (char) => char === "o",
       })("Lorem");
     }).not.toThrow();
+    // expect(() => {
+    //   isValidOrThrow({
+    //     0: /[lL]/,
+    //     1: (char) => char === "o",
+    //     2: "R",
+    //   })("Lorem");
+    // }).toThrow();
+    // expect(() => {
+    //   isValidOrThrow({
+    //     99: "a",
+    //   })("Lorem");
+    // }).toThrow();
+  });
+  test("should check an Array as an object", () => {
     expect(() => {
       isValidOrThrow({
-        0: /[lL]/,
-        1: (char) => char === "o",
-        2: "R",
-      })("Lorem");
+        0: Number,
+        1: Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        "/d/": Number,
+      })([1, 2]);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: String,
+      })([1, 2]);
     }).toThrow();
+  });
+});
+
+describe("check a function against an schema", () => {
+  test("should check an function as an object", () => {
+    let fn = function () {};
     expect(() => {
       isValidOrThrow({
-        99: 'a',
-      })("Lorem");
+        toString: Function,
+      })(fn);
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        toString: Boolean,
+      })(fn);
     }).toThrow();
   });
   test("should check an Array as an object", () => {
@@ -583,25 +714,22 @@ describe("check String or Array against an schema", () => {
 describe("arrayOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1,2,3]);
+      isValidOrThrow(arrayOf(Number))([1, 2, 3]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(n => n > 0))([1,2,3]);
+      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, 3]);
     }).not.toThrow();
-
   });
   test("should throw", () => {
-
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1,2,'3']);
-
+      isValidOrThrow(arrayOf(Number))([1, 2, "3"]);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(n => n > 0))([1,2,-3]);
+      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, -3]);
     }).toThrow();
 
     expect(() => {
-      isValidOrThrow(arrayOf(Number))({0:1,1:2});
+      isValidOrThrow(arrayOf(Number))({ 0: 1, 1: 2 });
     }).toThrow();
   });
 });
@@ -609,21 +737,53 @@ describe("arrayOf", () => {
 describe("objectOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(objectOf(Number))({a:1,b:2});
+      isValidOrThrow(objectOf(Number))({ a: 1, b: 2 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(objectOf(n => n > 0))({a:1,b:2});
+      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: 2 });
     }).not.toThrow();
-
   });
   test("should throw", () => {
-
     expect(() => {
-      isValidOrThrow(objectOf(Number))({a:1,b:'2'});
-
+      isValidOrThrow(objectOf(Number))({ a: 1, b: "2" });
     }).toThrow();
     expect(() => {
-      isValidOrThrow(objectOf(n => n > 0))({a:1,b:-2});
+      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: -2 });
+    }).toThrow();
+  });
+});
+
+describe("should check instances", () => {
+  class MyClass {
+    constructor() {
+      this.date = new Date();
+      this.name = "Garn";
+      this.valid = false;
+    }
+  }
+  test("should work", () => {
+    expect(() => {
+      isValidOrThrow({
+        date: Date,
+        name: String,
+        valid: Boolean,
+      })(new MyClass());
+    }).not.toThrow();
+  });
+  test("should throw", () => {
+    expect(() => {
+      isValidOrThrow({
+        date: Date,
+        name: String,
+        valid: Number,
+      })(new MyClass());
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(Object, {
+        date: Date,
+        name: String,
+        valid: Boolean,
+      })(new MyClass());
     }).toThrow();
   });
 });
@@ -680,7 +840,116 @@ import {
   hasErrors,
   isValidOrLogAllErrors,
   isValidOrThrowAllErrors,
+  SchemaValidationError,
+  EnumValidationError,
+  SeriesValidationError,
 } from "garn-validator";
+
+describe("AggregateError", () => {
+  test.each([AggregateError, SchemaValidationError, Error])(
+    "if schema fails with more than 2 errors should throw %p",
+    (ErrorType) => {
+      expect(() => {
+        isValidOrThrowAllErrors({ a: Number, b: String })({});
+      }).toThrow(ErrorType);
+    }
+  );
+  test.each([AggregateError, EnumValidationError, Error])(
+    "if enums fails with more than 2 errors should throw %p",
+    (ErrorType) => {
+      expect(() => {
+        isValidOrThrowAllErrors([Number, String])(true);
+      }).toThrow(ErrorType);
+    }
+  );
+  test.each([AggregateError, SeriesValidationError, Error])(
+    "if Series fails with more than 2 errors should throw %p",
+    (ErrorType) => {
+      expect(() => {
+        isValidOrThrowAllErrors(Number, String)(true);
+      }).toThrow(ErrorType);
+    }
+  );
+  test('checking schema should throw SchemaValidationError or TypeError', () => {
+    try {
+      isValidOrThrowAllErrors({a:1,b:2})({});
+    } catch (error) {
+      expect(error instanceof SchemaValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+      expect(error.errors.length).toBe(2);
+
+    }
+    try {
+      isValidOrThrow({a:1,b:2})({});
+    } catch (error) {
+      expect(error instanceof SchemaValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+
+    }
+
+
+    // only 1 key fails
+    try {
+      isValidOrThrowAllErrors({a:1})({});
+    } catch (error) {
+      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof SchemaValidationError).toBe(false);
+
+    }
+
+  });
+  test('checking enum should throw EnumValidationError or TypeError', () => {
+    try {
+      isValidOrThrow([
+        Boolean,
+        String,
+      ])(1);
+    } catch (error) {
+      expect(error instanceof EnumValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+    }
+
+    try {
+      isValidOrThrow([
+        Boolean,
+      ])(1);
+    } catch (error) {
+      expect(error instanceof EnumValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+    }
+  });
+  test('checking series should throw SeriesValidationError or TypeError ', () => {
+    try {
+      isValidOrThrowAllErrors(
+        Boolean,
+        String,
+      )(1);
+    } catch (error) {
+      expect(error instanceof SeriesValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+    }
+
+    try {
+      isValidOrThrow(
+        Boolean,
+      )(1);
+    } catch (error) {
+      expect(error instanceof SeriesValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+    }
+  });
+
+});
+
+describe("hasErrors", () => {
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1 }, () => false)(true).length).toBe(3);
+  });
+
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1, y: 2 }, [1, 2])({}).length).toBe(5);
+  });
+});
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -735,12 +1004,12 @@ describe("check errors", () => {
   test("should format the schema", () => {
     expect(() => {
       isValidOrThrow({ a: Number })(33);
-    }).toThrow('value 33 do not match type {"a":"Number"}');
+    }).toThrow('value 33 do not match type {"a":Number}');
   });
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow('on path /a value undefined do not match type "Number"');
+    }).toThrow("on path /a value undefined do not match type Number");
   });
 });
 
@@ -748,7 +1017,7 @@ describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       isValidOrThrow(Number, String)(2);
-    }).toThrow('value 2 do not match type "String"');
+    }).toThrow("value 2 do not match type String");
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
@@ -758,9 +1027,7 @@ describe("check errors in serie", () => {
     }).toThrow(Error);
   });
   test("should check only until the first check fails", () => {
-    global.console = {
-      log: jest.fn(),
-    };
+    jest.spyOn(global.console, "log");
     try {
       isValidOrThrow(
         () => {
@@ -772,6 +1039,22 @@ describe("check errors in serie", () => {
     expect(global.console.log).not.toHaveBeenCalled();
   });
 });
+describe("checking enums", () => {
+  test("should throw AggregateError (EnumValidationError) if none pass", () => {
+    try {
+      isValidOrThrow([
+        () => {
+          throw "ups";
+        },
+        String,
+      ])(1);
+      throw "mec";
+    } catch (error) {
+      expect(error).toBeInstanceOf(EnumValidationError);
+      expect(error).toBeInstanceOf(AggregateError);
+    }
+  });
+});
 
 describe("hasErrors", () => {
   test("should return null", () => {
@@ -781,9 +1064,9 @@ describe("hasErrors", () => {
   });
   test("should return array of errors", () => {
     expect(
-      hasErrors({ num: Number, str: String })( { num: "2", str: "str" })
+      hasErrors({ num: Number, str: String })({ num: "2", str: "str" })
     ).toEqual([
-      new TypeError('on path /num value "2" do not match type "Number"'),
+      new TypeError('on path /num value "2" do not match type Number'),
     ]);
   });
   describe("in serie", () => {
@@ -793,15 +1076,15 @@ describe("hasErrors", () => {
         Number,
         (v) => v > 100,
         2,
-        [new TypeError('value 2 do not match type "v=>v>100"')],
+        [new TypeError("value 2 do not match type v=>v>100")],
       ],
       [
         String,
         (v) => v > 100,
         2,
         [
-          new TypeError('value 2 do not match type "String"'),
-          new TypeError('value 2 do not match type "v=>v>100"'),
+          new TypeError("value 2 do not match type String"),
+          new TypeError("value 2 do not match type v=>v>100"),
         ],
       ],
     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
@@ -822,15 +1105,24 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [new TypeError('on path /num value "2" do not match type "Number"')],
+        [new TypeError('on path /num value "2" do not match type Number')],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeError('on path /num value "2" do not match type "Number"'),
-          new TypeError('on path /str value null do not match type "String"'),
-        ],
+          new TypeError('on path /num value "2" do not match type Number'),
+          new TypeError("on path /str value null do not match type String"),
+        ]
+        // [
+        //   new AggregateError(
+        //     [
+        //       new TypeError('on path /num value "2" do not match type Number'),
+        //       new TypeError("on path /str value null do not match type String"),
+        //     ],
+        //     'value {"num":"2","str":null} do not match type {"num":Number,"str":String}'
+        //   ),
+        // ],
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
@@ -850,11 +1142,7 @@ describe("hasErrors", () => {
       [
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: "str" } },
-        [
-          new TypeError(
-            'on path /obj/num value "2" do not match type "Number"'
-          ),
-        ],
+        [new TypeError('on path /obj/num value "2" do not match type Number')],
       ],
       [
         {
@@ -869,18 +1157,22 @@ describe("hasErrors", () => {
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: null } },
         [
-          new TypeError(
-            'on path /obj/num value "2" do not match type "Number"'
-          ),
-          new TypeError(
-            'on path /obj/str value null do not match type "String"'
-          ),
+          new TypeError('on path /obj/num value "2" do not match type Number'),
+          new TypeError("on path /obj/str value null do not match type String"),
         ],
+        // [new AggregateError([
+        //   new TypeError(
+        //     'on path /obj/num value "2" do not match type Number'
+        //   ),
+        //   new TypeError(
+        //     'on path /obj/str value null do not match type String'
+        //   ),
+        // ],'value {"num":"2","str":null} do not match type {"num":Number,"str":String}')],
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
       (schema, obj, expected) => {
-        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+        expect(hasErrors(schema)(obj)).toEqual(expected);
       }
     );
   });
@@ -933,23 +1225,29 @@ describe("hasErrors", () => {
       };
       expect(hasErrors(schema)(obj)).toEqual([
         new TypeError(
-          'on path /noValidKey value 1 do not match type "()=>false"'
+          "on path /noValidKey value 1 do not match type ()=>false"
         ),
         new TypeError(
-          'on path /name value "Garn" do not match type "/^[a-z]{3,}$/"'
+          'on path /name value "Garn" do not match type /^[a-z]{3,}$/'
         ),
-        new TypeError('on path /age value 18 do not match type "age=>age>18"'),
+        new TypeError("on path /age value 18 do not match type age=>age>18"),
         new EvalError("unexpected key"),
         new TypeError(
-          'on path /car/brand value "Honda" do not match type ["honda","toyota"]'
+          'on path /car/brand value "Honda" do not match type "honda"'
         ),
         new TypeError(
-          'on path /car/date value "1982-01-01" do not match type "Date"'
+          'on path /car/brand value "Honda" do not match type "toyota"'
         ),
         new TypeError(
-          'on path /car/country/name value undefined do not match type "String"'
+          'on path /car/date value "1982-01-01" do not match type Date'
         ),
-        new TypeError("on path /optional value false do not match type true"),
+        new TypeError(
+          "on path /car/country/name value undefined do not match type String"
+        ),
+        new TypeError(
+          "on path /optional value false do not match type undefined"
+        ),
+        new TypeError("on path /optional value false do not match type true")
       ]);
     });
   });
@@ -964,19 +1262,12 @@ describe("hasErrors", () => {
       };
       const obj = {
         x: true,
-        y: 1
-      }
-      expect(hasErrors(schema1,schema2)(obj)).toEqual([
-        new TypeError(
-          'on path /x value true do not match type "Number"'
-        ),
-        new TypeError(
-          'on path /y value 1 do not match type "Boolean"'
-        ),
-        new TypeError(
-          'on path /z value undefined do not match type "Function"'
-        ),
-
+        y: 1,
+      };
+      expect(hasErrors(schema1, schema2)(obj)).toEqual([
+        new TypeError("on path /x value true do not match type Number"),
+        new TypeError("on path /y value 1 do not match type Boolean"),
+        new TypeError("on path /z value undefined do not match type Function"),
       ]);
     });
   });
@@ -997,18 +1288,17 @@ describe("isValidOrThrowAllErrors ", () => {
       isValidOrThrowAllErrors(Number, Boolean, String)(true);
     } catch (error) {
       expect(error.errors.length).toBe(2);
-      // error.errors.forEach(e => console.warn(e.name, e.message))
     }
   });
 });
 describe("isValidOrLogAllErrors", () => {
+  jest.spyOn(global.console, "error");
   test("should return true or false", () => {
     expect(isValidOrLogAllErrors(Number, String)(true)).toBe(false);
 
     expect(isValidOrLogAllErrors(Boolean, true)(true)).toBe(true);
   });
   test("should log 2 errors", () => {
-    global.console.error = jest.fn();
     isValidOrLogAllErrors(Number, Boolean, String)(true);
     expect(global.console.error).toHaveBeenCalledTimes(2);
   });
@@ -1017,14 +1307,14 @@ describe("isValidOrLogAllErrors", () => {
     isValidOrLogAllErrors(Number, Boolean, String)(true);
 
     expect(global.console.error).toHaveBeenCalledWith(
-      'value true do not match type "Number"'
+      new TypeError("value true do not match type Number")
     );
     expect(global.console.error).toHaveBeenCalledWith(
-      'value true do not match type "String"'
+      new TypeError("value true do not match type String")
     );
   });
   test("should log meaningful errors in schemas", () => {
-    global.console.error = jest.fn();
+    jest.spyOn(global.console, "error");
     isValidOrLogAllErrors(
       { x: Number },
       { y: Boolean },
@@ -1032,11 +1322,10 @@ describe("isValidOrLogAllErrors", () => {
     )({ x: 1, y: 2, z: 3 });
 
     expect(global.console.error).toHaveBeenCalledWith(
-      "on path /y value 2 do not match type \"Boolean\""
-
+      new TypeError("on path /y value 2 do not match type Boolean")
     );
     expect(global.console.error).toHaveBeenCalledWith(
-      "on path /y value 2 do not match type \"Boolean\""
+      new TypeError("on path /z value 3 do not match type String")
     );
   });
 });
