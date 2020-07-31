@@ -10,8 +10,14 @@ import { isValidOrThrowAllErrors,isValidOrThrow } from "garn-validator";
 //   console.log(error.toString());
 // }
 
-debugger;
-isValidOrThrow(Boolean)(33);
+isValidOrThrow([
+  () => {
+    throw "ups";
+  },
+  String,
+])(1);
+
+// isValidOrThrow({ obj: { num: Number, str: String } })({ obj: { num: "2", str: "str" } });
 
 
 // const schema = {
