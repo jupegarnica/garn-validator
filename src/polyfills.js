@@ -83,3 +83,10 @@ if (typeof AggregateError === "undefined") {
 
   globalThis.AggregateError = AggregateError;
 }
+
+// Array.prototype.flatMap polyfill
+if (!Array.prototype.flatMap) {
+  Array.prototype.flatMap = function() {
+    return Array.prototype.map.apply(this, arguments).flat(1);
+  };
+}
