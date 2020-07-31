@@ -277,7 +277,7 @@ try {
 }
 
 try {
-  isValidOrThrow(
+  isValidOrThrowAllErrors(
     Boolean,
   )(1);
 } catch (error) {
