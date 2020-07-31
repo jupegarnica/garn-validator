@@ -16,7 +16,7 @@
     "test:watch": "jest tests --watch",
     "test:raw": "node tests/raw.debug.mjs",
     "test:prod": "jest tests",
-    "test:coverage": "jest tests --coverage",
+    "test:coverage": "jest tests --coverage --watch",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
     "prerelease": "npm run readme",
     "release": "npm version patch",

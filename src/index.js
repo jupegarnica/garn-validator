@@ -21,45 +21,29 @@ const formatErrorMessage = (type, value, path = []) =>
     value
   )} do not match type ${stringify(type)}`;
 
-
 const throwError = ({ type, value, path }) => {
   throw new TypeError(formatErrorMessage(type, value, path));
+};
+const throwErrors = (errors, { type, value, path }) => {
+  if (errors.length === 1) throw errors[0];
+  throw new AggregateError(errors, formatErrorMessage(type, value, path));
+};
 
-}
-const throwAggregateError = (errors,{ type, value, path }) => {
-  if (errors.length === 1) throw errors[0]
-  throw new AggregateError(errors,formatErrorMessage(type, value, path));
-
-}
-
+const validOrThrow = (input, data) => {
+  if (input) return true;
+  throwError(data);
+};
 
 const onFinishSuccessDefault = () => true;
-
-
-const checkEnum = (conf, type, value, root, keyName, path) => {
-  let errors = [];
-  let valid = type.some((_type) => {
-    try {
-      let valid = isValidType(conf, _type, value, root, keyName, path);
-      if (valid) return true;
-      throwError({type:_type, value, root, keyName, path});
-    } catch (error) {
-      errors.push(error);
-      return false;
-    }
-  })
-  if (valid) return true;
-  throwAggregateError(errors,{ type, value, path , kind:'enum'});
-};
 
 const defaultConfiguration = {
   collectAllErrors: false,
   onFinishSuccess: onFinishSuccessDefault,
-  onFinishWithErrors: throwAggregateError,
+  onFinishWithErrors: throwErrors,
 };
 
-export const checkShape = (conf, schema, object, path = []) => {
-  if (!(object instanceof Object ||  typeof object === "string")) {
+export const validSchemaOrThrow = (conf, schema, object, path = []) => {
+  if (!(object instanceof Object || typeof object === "string")) {
     return throwError({ type: schema, value: object });
   }
 
@@ -68,7 +52,7 @@ export const checkShape = (conf, schema, object, path = []) => {
   for (const keyName of requiredKeys) {
     try {
       const currentPath = [...path, keyName];
-      let valid = isValidType(
+      isValidTypeOrThrow(
         conf,
         schema[keyName],
         object[keyName],
@@ -76,12 +60,6 @@ export const checkShape = (conf, schema, object, path = []) => {
         keyName,
         currentPath
       );
-      if (valid) continue;
-      return throwError({
-        type: schema[keyName],
-        value: object[keyName],
-        path: currentPath,
-      });
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -97,7 +75,7 @@ export const checkShape = (conf, schema, object, path = []) => {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       const currentPath = [...path, keyNameStripped];
-      let valid = isValidType(
+      isValidTypeOrThrow(
         conf,
         [undefined, schema[keyName]],
         object[keyNameStripped],
@@ -105,12 +83,6 @@ export const checkShape = (conf, schema, object, path = []) => {
         keyNameStripped,
         currentPath
       );
-      if (valid) continue;
-      return throwError({
-        type: schema[keyName],
-        value: object[keyNameStripped],
-        path: currentPath,
-      });
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -133,8 +105,7 @@ export const checkShape = (conf, schema, object, path = []) => {
     for (const keyName of keys) {
       try {
         const currentPath = [...path, keyName];
-
-        let valid = isValidType(
+        isValidTypeOrThrow(
           conf,
           schema[regexpString],
           object[keyName],
@@ -142,12 +113,6 @@ export const checkShape = (conf, schema, object, path = []) => {
           keyName,
           currentPath
         );
-        if (valid) continue;
-        return throwError({
-          type: schema[regexpString],
-          value: object[keyName],
-          path: currentPath,
-        });
       } catch (error) {
         if (!conf.collectAllErrors) {
           throw error;
@@ -158,41 +123,80 @@ export const checkShape = (conf, schema, object, path = []) => {
   }
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
   if (errors.length === 1) {
-    throw errors[0] ;
+    throw errors[0];
   }
   if (errors.length > 0) {
-    throwAggregateError(errors,{ type:schema, value:object, kind:'schema' }) ;
+    throwErrors(errors, {
+      type: schema,
+      value: object,
+      kind: "schema",
+    });
   }
   return true;
 };
 
-const isValidType = (
-  conf = defaultConfiguration,
+const validCustomValidatorOrThrow = (fn, value, root, keyName, path) =>
+  validOrThrow(fn(value, root, keyName), {
+    type: fn,
+    value,
+    root,
+    keyName,
+    path,
+  });
+const validConstructorOrThrow = (type, value, root, keyName, path) =>
+  validOrThrow(checkConstructor(type, value), {
+    type,
+    value,
+    root,
+    keyName,
+    path,
+  });
+const validPrimitiveOrThrow = (type, value, root, keyName, path) =>
+  validOrThrow(value === type, { type, value, root, keyName, path });
+
+const validRegExpOrThrow = (type, value, root, keyName, path) =>
+  validOrThrow(checkRegExp(type, value), { type, value, root, keyName, path });
+
+const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
+  let errors = [];
+  let valid = types.some((_type) => {
+    try {
+      return validOrThrow(
+        isValidTypeOrThrow(conf, _type, value, root, keyName, path),
+        { type: _type, value, root, keyName, path }
+      );
+    } catch (error) {
+      errors.push(error);
+      return false;
+    }
+  });
+  if (valid) return true;
+  throwErrors(errors, { type: types, value, path, kind: "enum" });
+};
+const isValidTypeOrThrow = (
+  conf,
   type,
   value,
   root,
   keyName,
   path
 ) => {
-  const kind = whatTypeIs(type);
-  switch (kind) {
+  switch (whatTypeIs(type)) {
     case "regex":
-      return checkRegExp(type, value);
+      return validRegExpOrThrow(type, value, root, keyName, path);
     case "primitive":
-      return value === type;
+      return validPrimitiveOrThrow(type, value, root, keyName, path);
     case "constructor":
-      return checkConstructor(type, value);
+      return validConstructorOrThrow(type, value, root, keyName, path);
     case "enum":
-      return checkEnum(conf, type, value, root, keyName, path);
+      return validEnumOrThrow(conf, type, value, root, keyName, path);
     case "schema":
-      checkShape(conf, type, value, path);
-      // checkSchema will throw if invalid in each each key
-      return true;
+      return validSchemaOrThrow(conf, type, value, root, keyName, path);
     case "function":
-      return type(value, root, keyName);
+      return validCustomValidatorOrThrow(type, value, root, keyName, path);
 
-    default:
-      return false;
+    // default:
+    //   throw new Error("this never happens");
   }
 };
 
@@ -200,17 +204,14 @@ const run = (conf) => (...types) => (value) => {
   const errors = [];
   for (const type of types) {
     try {
-      const valid = isValidType(conf, type, value);
-      if (valid) continue;
-      throw throwError({ type, value });
+      isValidTypeOrThrow(conf, type, value);
     } catch (error) {
       errors.push(...parseToArray(error));
-
       if (!conf.collectAllErrors) break;
     }
   }
   if (errors.length > 0) {
-    return conf.onFinishWithErrors(errors,{type:types, value});
+    return conf.onFinishWithErrors(errors, { type: types, value });
   }
   return conf.onFinishSuccess();
 };
@@ -218,16 +219,14 @@ const run = (conf) => (...types) => (value) => {
 const config = ({
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
-  onFinishWithErrors = throwAggregateError,
+  onFinishWithErrors = throwErrors,
 } = defaultConfiguration) =>
-  run({  collectAllErrors, onFinishSuccess, onFinishWithErrors });
-
+  run({ collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
 const logErrorsAndReturnFalse = (errors) => {
-  errors.forEach(e => console.error(e) );
+  errors.forEach((e) => console.error(e));
   return false;
-}
-
+};
 
 export const isValid = config({
   onFinishWithErrors: () => false,
@@ -255,7 +254,7 @@ export const isValidOrThrowAllErrors = config({
   collectAllErrors: true,
 });
 
-export const isValidOrThrow = config({});
+export const isValidOrThrow = config();
 
 export const arrayOf = (type) => isValidOrThrow(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValidOrThrow(Object, { [/./]: type });
