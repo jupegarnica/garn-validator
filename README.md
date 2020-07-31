@@ -156,8 +156,8 @@ There are 5 behaviors you can import:
 - `isValidOrLog` (returns true or false and log first error, never throws)
 - `isValidOrLogAllErrors` (returns true or false and log all errors, never throws)
 - `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
-  ``
-  The default export is `isValidOrThrow`
+
+The default export is `isValidOrThrow`
 
 Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/errors.test.js)
 
@@ -188,7 +188,8 @@ hasErrors(/[a-z]/, Number)("G"); // [TypeError, TypeError]
 
 ## Errors
 
-If an validation fails by default it will throw `new TypeError(meaningfulMessage)`;
+If a validation fails by default it will throw `new TypeError(meaningfulMessage)`;
+
 If using a custom validator you throw an error , this error will be thrown.
 
 
@@ -235,8 +236,11 @@ try {
 ### EnumValidationError
 
 If fails all items of an enum, it will throw a EnumValidationError with all Errors aggregated in error.errors
-EnumValidationError inherits from AggregateError.
+
 But if the length of the enum is 1. it will throw only this error.
+
+EnumValidationError inherits from AggregateError.
+
 ```js
 try {
   isValidOrThrow([
@@ -261,9 +265,12 @@ try {
 
 ### SeriesValidationError using `isValidOrThrowAllErrors`
 
-If fails all items of an serie, it will throw a SeriesValidationError with all Errors aggregated in error.errors
-SeriesValidationError inherits from AggregateError.
+If fails all items of a serie of validations, it will throw a SeriesValidationError with all Errors aggregated in error.errors
+
 But if the length of the enum is 1. it will throw only this error.
+
+SeriesValidationError inherits from AggregateError.
+
 
 ```js
 try {
