@@ -43,6 +43,17 @@ if (typeof Proxy.isProxy === "undefined") {
   Object.defineProperty(globalThis, "Proxy", proxyDescriptor);
 }
 
+
+// globalThis polyfill
+if (typeof globalThis === 'undefined') {
+  let getGlobal = function () {
+    if (typeof self !== 'undefined') { return self; }
+    if (typeof window !== 'undefined') { return window; }
+    if (typeof global !== 'undefined') { return global; }
+    throw new Error('unable to locate global object');
+  };
+  var globalThis = getGlobal()
+}
 // Custom AggregateError polyfill
 // TODO test it
 if (typeof AggregateError === "undefined") {
