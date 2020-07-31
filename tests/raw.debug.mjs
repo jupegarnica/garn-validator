@@ -1,6 +1,15 @@
 // import { hasErrors } from "garn-validator";
-import { isValidOrThrow } from "garn-validator";
-isValidOrThrow([String, Number])(true);
+import { isValidOrThrowAllErrors } from "garn-validator";
+// isValidOrThrow([String, Number])(true);
+// isValidOrLog([String,Number, 1])(true)
+// isValidOrThrow([undefined, 0])(undefined);
+
+try {
+  isValidOrThrowAllErrors({ obj: { num: Number, str: String } })({ obj: { num: "2", str: null } });
+} catch (error) {
+  console.log(error.toString());
+}
+
 
 // const schema = {
 //   name: /^[a-z]{3,}$/,

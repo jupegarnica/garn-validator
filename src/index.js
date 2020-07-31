@@ -16,22 +16,25 @@ export const AsyncFunction = Object.getPrototypeOf(async function () {})
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
   .constructor;
 
-const formatErrorMessage = (type, value, path = null) =>
-  `${path ? `on path /${path.join("/")} ` : ""}value ${stringify(
+const formatErrorMessage = (type, value, path = []) =>
+  `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
     value
   )} do not match type ${stringify(type)}`;
 
-const onErrorDefault = (err, { type, value, path } = {}) => {
-  if (err) throw err;
+
+const throwError = ({ type, value, path }) => {
   throw new TypeError(formatErrorMessage(type, value, path));
-};
+
+}
+const throwAggregateError = (errors,{ type, value, path }) => {
+  if (errors.length === 1) throw errors[0]
+  throw new AggregateError(errors,formatErrorMessage(type, value, path));
+
+}
+
 
 const onFinishSuccessDefault = () => true;
 
-const onFinishWithErrorsDefault = (errors) => {
-  if (errors.length === 1) throw errors[0];
-  throw new AggregateError(errors, "aggregateError");
-};
 
 const checkEnum = (conf, type, value, root, keyName, path) => {
   let errors = [];
@@ -39,26 +42,25 @@ const checkEnum = (conf, type, value, root, keyName, path) => {
     try {
       let valid = isValidType(conf, _type, value, root, keyName, path);
       if (valid) return true;
-      conf.onError(null, {type:_type, value, root, keyName, path});
+      throwError({type:_type, value, root, keyName, path});
     } catch (error) {
       errors.push(error);
       return false;
     }
   })
   if (valid) return true;
-  throw (errors);
+  throwAggregateError(errors,{ type, value, path , kind:'enum'});
 };
 
 const defaultConfiguration = {
-  onError: onErrorDefault,
   collectAllErrors: false,
   onFinishSuccess: onFinishSuccessDefault,
-  onFinishWithErrors: onFinishWithErrorsDefault,
+  onFinishWithErrors: throwAggregateError,
 };
 
 export const checkShape = (conf, schema, object, path = []) => {
   if (!(object instanceof Object ||  typeof object === "string")) {
-    return conf.onError(null, { type: schema, value: object });
+    return throwError({ type: schema, value: object });
   }
 
   let requiredErrors = [];
@@ -75,7 +77,7 @@ export const checkShape = (conf, schema, object, path = []) => {
         currentPath
       );
       if (valid) continue;
-      return conf.onError(null, {
+      return throwError({
         type: schema[keyName],
         value: object[keyName],
         path: currentPath,
@@ -104,7 +106,7 @@ export const checkShape = (conf, schema, object, path = []) => {
         currentPath
       );
       if (valid) continue;
-      return conf.onError(null, {
+      return throwError({
         type: schema[keyName],
         value: object[keyNameStripped],
         path: currentPath,
@@ -141,7 +143,7 @@ export const checkShape = (conf, schema, object, path = []) => {
           currentPath
         );
         if (valid) continue;
-        return conf.onError(null, {
+        return throwError({
           type: schema[regexpString],
           value: object[keyName],
           path: currentPath,
@@ -155,8 +157,11 @@ export const checkShape = (conf, schema, object, path = []) => {
     }
   }
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
+  if (errors.length === 1) {
+    throw errors[0] ;
+  }
   if (errors.length > 0) {
-    throw errors;
+    throwAggregateError(errors,{ type:schema, value:object, kind:'schema' }) ;
   }
   return true;
 };
@@ -197,7 +202,7 @@ const run = (conf) => (...types) => (value) => {
     try {
       const valid = isValidType(conf, type, value);
       if (valid) continue;
-      throw conf.onError(null, { type, value });
+      throw throwError({ type, value });
     } catch (error) {
       errors.push(...parseToArray(error));
 
@@ -205,21 +210,24 @@ const run = (conf) => (...types) => (value) => {
     }
   }
   if (errors.length > 0) {
-    return conf.onFinishWithErrors(errors);
+    return conf.onFinishWithErrors(errors,{type:types, value});
   }
   return conf.onFinishSuccess();
 };
 
 const config = ({
-  onError = onErrorDefault,
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
-  onFinishWithErrors = onFinishWithErrorsDefault,
+  onFinishWithErrors = throwAggregateError,
 } = defaultConfiguration) =>
-  run({ onError, collectAllErrors, onFinishSuccess, onFinishWithErrors });
+  run({  collectAllErrors, onFinishSuccess, onFinishWithErrors });
 
-const logOnErrorAndReturnFalse = (err, { type, value, path }) =>
-  console.error(err || formatErrorMessage(type, value, path)) || false;
+
+const logErrorsAndReturnFalse = (errors) => {
+  errors.forEach(e => console.error(e) );
+  return false;
+}
+
 
 export const isValid = config({
   onFinishWithErrors: () => false,
@@ -227,7 +235,7 @@ export const isValid = config({
 });
 
 export const isValidOrLog = config({
-  onError: logOnErrorAndReturnFalse,
+  onFinishWithErrors: logErrorsAndReturnFalse,
   // collectAllErrors: false, // default
 });
 
@@ -238,9 +246,8 @@ export const hasErrors = config({
 });
 
 export const isValidOrLogAllErrors = config({
-  onFinishWithErrors: () => false,
+  onFinishWithErrors: logErrorsAndReturnFalse,
   // onFinishSuccess: () => true, // default
-  onError: logOnErrorAndReturnFalse,
   collectAllErrors: true,
 });
 

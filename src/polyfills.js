@@ -50,10 +50,13 @@ if (typeof AggregateError === "undefined") {
     constructor(errors = [], message) {
       super(message);
       this.errors = errors;
+      this.name = 'AggregateError';
     }
+
     push(err){
       this.errors.push(err)
     }
+
   }
 
   globalThis.AggregateError = AggregateError;

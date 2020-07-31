@@ -92,9 +92,8 @@ describe("speed tests", () => {
   });
   describe("Stops in first fail", () => {
     beforeAll(() => {
-      global.console = {
-        log: jest.fn(),
-      };
+
+      jest.spyOn(global.console, 'log')
     });
     test("should stops in first fail", () => {
       const schema = {
