@@ -1,11 +1,11 @@
-import isValidOrThrow, { isValid } from "garn-validator";
+import isValidOrThrow, { isValid, arrayOf, objectOf,AsyncFunction,GeneratorFunction } from "garn-validator";
 
 describe("isValid", () => {
   test.each([
     [Function, function () {}],
     [Function, () => {}],
-    // [Function, function* () {}],
-    // [Function, async () => {}],
+    [GeneratorFunction, function* () {}],
+    [AsyncFunction, async () => {}],
     [Promise, (async () => {})()],
     [Promise, new Promise(() => {})],
     [Promise, Promise.resolve()],
@@ -15,6 +15,19 @@ describe("isValid", () => {
   ])("isValid(%p)(%p) return true", (a, b) => {
     expect(isValid(a)(b)).toBe(true);
   });
+  test.each([
+    [AsyncFunction, function () {}],
+    [GeneratorFunction,  () => {}],
+    [Function, function* () {}],
+    [Function, async () => {}],
+    [Promise, {then(){},catch(){}}],
+    [Promise, Promise],
+    [Object, []],
+    [Number, '2'],
+    [String, 2],
+  ])("isValid(%p)(%p) return false", (a, b) => {
+    expect(isValid(a)(b)).toBe(false);
+  });
 });
 
 
@@ -22,18 +35,21 @@ describe("isValid", () => {
 describe("ArrayOf and objectOf", () => {
   test("ArrayOf", () => {
     expect(() => {
-      isValidOrThrow({ [/\d/]: Number })([1, 2]);
+      isValidOrThrow(arrayOf(Number))([1, 2]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/\d/]: 0 })([1, 2]);
+      isValidOrThrow(arrayOf(Number))([1, 2,'3']);
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(arrayOf(Number))(['1', 2,3]);
     }).toThrow();
   });
   test("objectOf", () => {
     expect(() => {
-      isValidOrThrow({ [/\w/]: Number })({ a: 1 });
+      isValidOrThrow(objectOf(Number))({ a: 1 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/\w/]: 0 })({ a: 1 });
+      isValidOrThrow(objectOf(Number))({ a: 1 , b:'b'});
     }).toThrow();
   });
 });

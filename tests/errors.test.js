@@ -33,6 +33,75 @@ describe("AggregateError", () => {
       }).toThrow(ErrorType);
     }
   );
+  test('checking schema should throw SchemaValidationError or TypeError', () => {
+    try {
+      isValidOrThrowAllErrors({a:1,b:2})({});
+    } catch (error) {
+      expect(error instanceof SchemaValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+      expect(error.errors.length).toBe(2);
+
+    }
+    try {
+      isValidOrThrow({a:1,b:2})({});
+    } catch (error) {
+      expect(error instanceof SchemaValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+
+    }
+
+
+    // only 1 key fails
+    try {
+      isValidOrThrowAllErrors({a:1})({});
+    } catch (error) {
+      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof SchemaValidationError).toBe(false);
+
+    }
+
+  });
+  test('checking enum should throw EnumValidationError or TypeError', () => {
+    try {
+      isValidOrThrow([
+        Boolean,
+        String,
+      ])(1);
+    } catch (error) {
+      expect(error instanceof EnumValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+    }
+
+    try {
+      isValidOrThrow([
+        Boolean,
+      ])(1);
+    } catch (error) {
+      expect(error instanceof EnumValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+    }
+  });
+  test('checking series should throw SeriesValidationError or TypeError ', () => {
+    try {
+      isValidOrThrowAllErrors(
+        Boolean,
+        String,
+      )(1);
+    } catch (error) {
+      expect(error instanceof SeriesValidationError).toBe(true);
+      expect(error instanceof AggregateError).toBe(true);
+    }
+
+    try {
+      isValidOrThrow(
+        Boolean,
+      )(1);
+    } catch (error) {
+      expect(error instanceof SeriesValidationError).toBe(false);
+      expect(error instanceof TypeError).toBe(true);
+    }
+  });
+
 });
 
 describe("hasErrors", () => {
