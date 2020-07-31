@@ -929,7 +929,7 @@ describe("AggregateError", () => {
     }
 
     try {
-      isValidOrThrow(
+      isValidOrThrowAllErrors(
         Boolean,
       )(1);
     } catch (error) {
