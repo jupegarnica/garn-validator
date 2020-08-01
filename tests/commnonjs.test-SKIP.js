@@ -1,4 +1,5 @@
 const validator = require('garn-validator/commonjs');
+require( './inject-deno-test-global.js');
 
 describe('Should work using require commonjs',()=> {
   test('default export works', () => {

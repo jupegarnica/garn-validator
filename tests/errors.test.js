@@ -8,6 +8,7 @@ import {
   SeriesValidationError,
 } from "garn-validator";
 
+
 describe("AggregateError", () => {
   test.each([AggregateError, SchemaValidationError, Error])(
     "if schema fails with more than 2 errors should throw %p",
@@ -104,15 +105,6 @@ describe("AggregateError", () => {
 
 });
 
-describe("hasErrors", () => {
-  test("should flat all aggregated Errors", () => {
-    expect(hasErrors(Number, { x: 1 }, () => false)(true).length).toBe(3);
-  });
-
-  test("should flat all aggregated Errors", () => {
-    expect(hasErrors(Number, { x: 1, y: 2 }, [1, 2])({}).length).toBe(5);
-  });
-});
 
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -190,7 +182,7 @@ describe("check errors in serie", () => {
     }).toThrow(Error);
   });
   test("should check only until the first check fails", () => {
-    jest.spyOn(global.console, "log");
+    jest.spyOn(globalThis.console, "log");
     try {
       isValidOrThrow(
         () => {
@@ -199,7 +191,7 @@ describe("check errors in serie", () => {
         () => console.log("I run?")
       )(2);
     } catch (err) {}
-    expect(global.console.log).not.toHaveBeenCalled();
+    expect(globalThis.console.log).not.toHaveBeenCalled();
   });
 });
 describe("checking enums", () => {
@@ -232,6 +224,13 @@ describe("hasErrors", () => {
       new TypeError('on path /num value "2" do not match type Number'),
     ]);
   });
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1 }, () => false)(true).length).toBe(3);
+  });
+
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1, y: 2 }, [1, 2])({}).length).toBe(5);
+  });
   describe("in serie", () => {
     test.each([
       [Number, (v) => v > 0, 2, null],
@@ -251,7 +250,7 @@ describe("hasErrors", () => {
         ],
       ],
     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
-      expect(hasErrors(a, b)(input)).toStrictEqual(expected);
+      expect(hasErrors(a, b)(input)).toEqual(expected);
     });
   });
   describe("in schema", () => {
@@ -261,7 +260,7 @@ describe("hasErrors", () => {
     ])(
       "should return null : hasErrors(%p)(%p) === %p",
       (schema, obj, expected) => {
-        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+        expect(hasErrors(schema)(obj)).toEqual(expected);
       }
     );
     test.each([
@@ -290,7 +289,7 @@ describe("hasErrors", () => {
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
       (schema, obj, expected) => {
-        expect(hasErrors(schema)(obj)).toStrictEqual(expected);
+        expect(hasErrors(schema)(obj)).toEqual(expected);
       }
     );
   });
@@ -299,7 +298,7 @@ describe("hasErrors", () => {
       [{ obj: { num: Number } }, { obj: { num: 2 } }],
       [{ obj: { num: Number, str: String } }, { obj: { num: 2, str: "str" } }],
     ])("should return null : hasErrors(%p)(%p) === %p", (schema, obj) => {
-      expect(hasErrors(schema)(obj)).toStrictEqual(null);
+      expect(hasErrors(schema)(obj)).toEqual(null);
     });
     test.each([
       [
@@ -323,14 +322,6 @@ describe("hasErrors", () => {
           new TypeError('on path /obj/num value "2" do not match type Number'),
           new TypeError("on path /obj/str value null do not match type String"),
         ],
-        // [new AggregateError([
-        //   new TypeError(
-        //     'on path /obj/num value "2" do not match type Number'
-        //   ),
-        //   new TypeError(
-        //     'on path /obj/str value null do not match type String'
-        //   ),
-        // ],'value {"num":"2","str":null} do not match type {"num":Number,"str":String}')],
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
@@ -455,39 +446,41 @@ describe("isValidOrThrowAllErrors ", () => {
   });
 });
 describe("isValidOrLogAllErrors", () => {
-  jest.spyOn(global.console, "error");
   test("should return true or false", () => {
+    jest.spyOn(globalThis.console, "error");
     expect(isValidOrLogAllErrors(Number, String)(true)).toBe(false);
 
     expect(isValidOrLogAllErrors(Boolean, true)(true)).toBe(true);
   });
   test("should log 2 errors", () => {
+    jest.spyOn(globalThis.console, "error");
+
     isValidOrLogAllErrors(Number, Boolean, String)(true);
-    expect(global.console.error).toHaveBeenCalledTimes(2);
+    expect(globalThis.console.error).toHaveBeenCalledTimes(2);
   });
   test("should log meaningful errors", () => {
-    global.console.error = jest.fn();
+    jest.spyOn(globalThis.console, "error");
     isValidOrLogAllErrors(Number, Boolean, String)(true);
 
-    expect(global.console.error).toHaveBeenCalledWith(
+    expect(globalThis.console.error).toHaveBeenCalledWith(
       new TypeError("value true do not match type Number")
     );
-    expect(global.console.error).toHaveBeenCalledWith(
+    expect(globalThis.console.error).toHaveBeenCalledWith(
       new TypeError("value true do not match type String")
     );
   });
   test("should log meaningful errors in schemas", () => {
-    jest.spyOn(global.console, "error");
+    jest.spyOn(globalThis.console, "error");
     isValidOrLogAllErrors(
       { x: Number },
       { y: Boolean },
       { z: String }
     )({ x: 1, y: 2, z: 3 });
 
-    expect(global.console.error).toHaveBeenCalledWith(
+    expect(globalThis.console.error).toHaveBeenCalledWith(
       new TypeError("on path /y value 2 do not match type Boolean")
     );
-    expect(global.console.error).toHaveBeenCalledWith(
+    expect(globalThis.console.error).toHaveBeenCalledWith(
       new TypeError("on path /z value 3 do not match type String")
     );
   });

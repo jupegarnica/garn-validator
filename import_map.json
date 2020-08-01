@@ -1,0 +1,5 @@
+{
+  "imports": {
+     "garn-validator": "./src/index.js"
+  }
+}

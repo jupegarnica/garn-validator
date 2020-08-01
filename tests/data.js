@@ -45,7 +45,7 @@ export const constructors = [
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ];
 export const notConstructors = [
-  Intl,
+  // Intl, // not suported in deno
   Reflect,
   Atomics,
   // FinalizationRegistry, // ReferenceError: FinalizationRegistry is not defined
@@ -1161,7 +1161,7 @@ export const strings = [
 
 
 
-export const massiveObj = JSON.parse(
+export const massiveObj1Mb = JSON.parse(
   `[{"id":1,"first_name":"Cesya","last_name":"Corthes","email":"ccorthes0@netlog.com","gender":"Female","ip_address":"183.210.214.204","pet":"Phalacrocorax carbo"},
 {"id":2,"first_name":"Frederik","last_name":"Mattin","email":"fmattin1@mashable.com","gender":"Male","ip_address":"148.47.101.112","pet":"Manouria emys"},
 {"id":3,"first_name":"Sandra","last_name":"Grimm","email":"sgrimm2@technorati.com","gender":"Female","ip_address":"148.73.244.217","pet":"Francolinus swainsonii"},

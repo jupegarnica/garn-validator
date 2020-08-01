@@ -1,5 +1,6 @@
 import "./polyfills.js";
 const isProxy = Proxy.isProxy;
+
 export const checkConstructor = (type, val) =>
   (val !== undefined && val !== null && val.constructor === type) ||
   (Proxy === type && isProxy(val));
@@ -58,13 +59,7 @@ export const whatTypeIs = (type) => {
   // throw new Error("Invalid type " + stringify(type));
 };
 
-export const parseToArray = (itemOrArray) => {
-  if (Array.isArray(itemOrArray)) {
-    return itemOrArray;
-  } else {
-    return [itemOrArray];
-  }
-};
+
 
 // fails in ArrayBuffer
 // export const isPrimitive = (value) => !(value instanceof Object) || (value.constructor === Number || value.constructor === String);

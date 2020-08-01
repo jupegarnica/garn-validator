@@ -12,10 +12,13 @@
   ],
   "scripts": {
     "run:docker": "docker-compose run node",
+    "run:deno": "deno run --importmap=import_map.json --unstable tests/deno.js",
+    "run:deno:ts": "deno run --importmap=import_map.json --unstable tests/deno.ts",
     "test": "npm run test:watch",
     "test:watch": "jest tests --watch",
     "test:raw": "node tests/raw.debug.mjs",
     "test:prod": "jest tests",
+    "test:deno": "deno run --importmap=import_map.json --allow-all --unstable tests/run-deno-tests.js",
     "test:coverage": "jest tests --coverage --watch",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
     "prerelease": "npm run readme",

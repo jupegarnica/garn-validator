@@ -1,6 +1,7 @@
 import isValidOrThrow from "garn-validator";
 import { massiveObj1Mb } from "./data.js";
 
+
 describe("speed tests", () => {
   describe("check primitives", () => {
     test("check with constructor", () => {
@@ -91,10 +92,7 @@ describe("speed tests", () => {
     });
   });
   describe("Stops in first fail", () => {
-    beforeAll(() => {
-
-      jest.spyOn(global.console, 'log')
-    });
+    jest.spyOn(globalThis.console, 'log')
     test("should stops in first fail", () => {
       const schema = {
         b: () => false,
@@ -103,7 +101,7 @@ describe("speed tests", () => {
       try {
         isValidOrThrow(schema)({ a: 1, b: 2 });
       } catch (error) {}
-      expect(global.console.log).not.toHaveBeenCalled();
+      expect(globalThis.console.log).not.toHaveBeenCalled();
     });
     test.skip("should be fast", () => {
       const schema = {
@@ -117,7 +115,7 @@ describe("speed tests", () => {
       } catch (error) {}
       const end = Date.now();
       const delta = end - start;
-      expect(global.console.log).not.toHaveBeenCalled();
+      expect(globalThis.console.log).not.toHaveBeenCalled();
       expect(delta).toBeLessThanOrEqual(50);
     });
   });

@@ -1,6 +1,7 @@
 import isValidOrThrow from "garn-validator";
 import { numbers } from "./data.js";
 
+
 describe("check numbers", () => {
   test.each(numbers)(
     'number %f must be Number',

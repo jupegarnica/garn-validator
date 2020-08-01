@@ -1,5 +1,6 @@
 import isValidOrThrow, { isValid, arrayOf, objectOf,AsyncFunction,GeneratorFunction } from "garn-validator";
 
+
 describe("isValid", () => {
   test.each([
     [Function, function () {}],

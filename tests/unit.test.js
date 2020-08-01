@@ -7,7 +7,8 @@ import {
   stringify,
   isClass,
   whatTypeIs,
-} from "../src/utils";
+} from "../src/utils.js";
+
 
 import { constructors, numbers, strings, notConstructors } from "./data.js";
 
