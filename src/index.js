@@ -233,12 +233,33 @@ const run = (conf) => (...types) => (value) => {
   return conf.onFinishSuccess();
 };
 
+
+
+const asyncRun = (conf) => (...types) => async (value) => {
+  try {
+    await validSeriesOrThrow(conf, types, value);
+  } catch (error) {
+    return conf.onFinishWithError(error);
+  }
+
+  return conf.onFinishSuccess();
+};
+
 const config = ({
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
   onFinishWithError = onFinishWithErrorDefault,
-} = defaultConfiguration) =>
+  returnPromise = false,
+} = defaultConfiguration) => returnPromise ? asyncRun({ collectAllErrors, onFinishSuccess, onFinishWithError }) :
   run({ collectAllErrors, onFinishSuccess, onFinishWithError });
+
+
+// const config = ({
+//   collectAllErrors = false,
+//   onFinishSuccess = onFinishSuccessDefault,
+//   onFinishWithError = onFinishWithErrorDefault,
+// } = defaultConfiguration) =>
+//   run({ collectAllErrors, onFinishSuccess, onFinishWithError });
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
@@ -282,6 +303,14 @@ export const isValidOrThrowAllErrors = config({
 });
 
 export const isValidOrThrow = config();
+
+
+
+export const isValidOrThrowAllErrorsAsync = config({
+  collectAllErrors: true,
+  returnPromise: true
+
+})
 
 export const arrayOf = (type) => isValidOrThrow(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValidOrThrow(Object, { [/./]: type });
