@@ -92,6 +92,7 @@ export const validSchemaOrThrow = ({
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       const currentPath = [...path, keyNameStripped];
+      // TODO do not validat with enum
       isValidTypeOrThrow(
         conf,
         [undefined, schema[keyName]],
@@ -169,7 +170,7 @@ const validPrimitiveOrThrow = (type, value, root, keyName, path) =>
   validOrThrow(value === type, { type, value, root, keyName, path });
 
 const validRegExpOrThrow = (type, value, root, keyName, path) =>
-  validOrThrow(checkRegExp(type, value), { type, value, root, keyName, path });
+  validOrThrow( value.constructor === String && checkRegExp(type, value), { type, value, root, keyName, path });
 
 const validSeriesOrThrow = (conf, types, value) => {
   const errors = [];

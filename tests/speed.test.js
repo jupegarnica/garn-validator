@@ -92,8 +92,7 @@ describe("speed tests", () => {
   });
   describe("Stops in first fail", () => {
     beforeAll(() => {
-
-      jest.spyOn(global.console, 'log')
+      jest.spyOn(global.console, "log");
     });
     test("should stops in first fail", () => {
       const schema = {
@@ -119,6 +118,47 @@ describe("speed tests", () => {
       const delta = end - start;
       expect(global.console.log).not.toHaveBeenCalled();
       expect(delta).toBeLessThanOrEqual(50);
+    });
+  });
+
+  describe.skip("1000 validations", () => {
+    test.each([
+      [Number, 2],
+      [String, "str"],
+      ["str", "str"],
+      [/./, "str"],
+      [() => true, ""],
+      [{ a: 1 }, { a: 1 }],
+      [[Number, String], 1],
+    ])("not failing with %p", (type, value) => {
+      const start = Date.now();
+      for (let index = 0; index < 1000; index++) {
+        isValidOrThrow(type)(value);
+      }
+      const end = Date.now();
+      const delta = end - start;
+      // console.log("check with constructor", delta);
+      expect(delta).toBeLessThanOrEqual(2);
+    });
+    test.each([
+      [Number, true],
+      [String, true],
+      ["str", true],
+      [/./, true],
+      [() => true, true],
+      [{ a: 1 }, true],
+      [[Number, String], true],
+    ])(" failing with %p", (type, value) => {
+      const start = Date.now();
+      for (let index = 0; index < 1000; index++) {
+        try {
+          isValidOrThrow(type)(value);
+        } catch (error) {}
+      }
+      const end = Date.now();
+      const delta = end - start;
+      // console.log("check with constructor", delta);
+      expect(delta).toBeLessThanOrEqual(2);
     });
   });
 });

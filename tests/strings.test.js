@@ -6,6 +6,15 @@ describe("check strings", () => {
       isValidOrThrow(String)(input);
     }).not.toThrow();
   });
+  test('works with regex', () => {
+    expect(() => {
+      isValidOrThrow(/./)(true);
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow(/./)('true');
+    }).not.toThrow();
+
+  });
   test.each(strings)("%s should not be Number", (input) => {
     expect(() => {
       isValidOrThrow(Number)(input);
