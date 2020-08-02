@@ -1,6 +1,6 @@
 import { expect } from "https://deno.land/x/expect@9effa6/mod.ts";
 import * as mock from "https://deno.land/x/expect@9effa6/mock.ts";
-import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
+
 const test = (msg, fn) => {
   return Deno.test(msg, fn);
 };

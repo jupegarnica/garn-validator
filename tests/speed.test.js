@@ -30,7 +30,7 @@ describe("speed tests", () => {
     });
   });
 
-  describe("check objects recursively", () => {
+  describe.skip("check objects recursively", () => {
     const obj = {
       a: 1,
       deep: {
@@ -76,7 +76,7 @@ describe("speed tests", () => {
       // console.log("check big object", delta);
       expect(delta).toBeLessThanOrEqual(2);
     });
-    test.skip("check massive object with a valid schema", () => {
+    test("check massive object with a valid schema", () => {
       const schema = {
         [/./]: {
           [/./]: () => true,
