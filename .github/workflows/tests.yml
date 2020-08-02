@@ -10,7 +10,7 @@ on:
       - 'tests/*'
 
 jobs:
-  build:
+  test-node:
 
     runs-on: ubuntu-latest
 
@@ -30,5 +30,23 @@ jobs:
         npm run build
         npm run test:prod
         npm run test:prod:dom
+      env:
+        CI: true
+  test-deno:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deno-version: [ v1.0, v1.1, v1.x]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use deno ${{ matrix.deno-version }}
+      uses: denolib/setup-deno@v2
+      with:
+        deno-version: ${{ matrix.deno-version }}
+    - name: build and test
+      run: |
+        npm run test:deno
+        npm run test:raw:deno
+        npm run test:raw:deno:ts
       env:
         CI: true
