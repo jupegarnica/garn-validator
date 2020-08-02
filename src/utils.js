@@ -1,8 +1,15 @@
 import "./polyfills.js";
 const isProxy = Proxy.isProxy;
 
+
+export const AsyncFunction = Object.getPrototypeOf(async function () {})
+  .constructor;
+export const GeneratorFunction = Object.getPrototypeOf(function* () {})
+  .constructor;
+export const isNullish = (val) => val === undefined || val === null;
+
 export const checkConstructor = (type, val) =>
-  (val !== undefined && val !== null && val.constructor === type) ||
+  (!isNullish(val) && val.constructor === type) ||
   (Proxy === type && isProxy(val));
 
 export const isClass = (fn) =>
@@ -11,20 +18,24 @@ export const isClass = (fn) =>
   !isFunctionHacked(fn);
 
 export const isFunction = (fn) =>
+  // checkConstructor(Function, fn)
   typeof fn === "function" && !isClass(fn) && !isFunctionHacked(fn);
 
 export const isFunctionHacked = (fn) =>
   typeof fn === "function" &&
   fn.toString.toString() !== "function toString() { [native code] }";
 
-export const isCustomValidator = (f) =>
-  f &&
-  typeof f === "function" &&
-  !isClass(f) &&
-  (!f.name || f.name[0] === f.name[0].toLowerCase());
+export const isCustomValidator = (fn) =>
+  checkConstructor(Function, fn) &&
+  !isClass(fn) &&
+  (!fn.name || fn.name[0] === fn.name[0].toLowerCase());
 
+export const isInvalidType = (fn) =>
+  checkConstructor(AsyncFunction, fn) || checkConstructor(GeneratorFunction, fn)
 export function isConstructor(f) {
   if (!f) return false;
+  // if (!checkConstructor(Function, f)) return false
+  if (isClass(f)) return true;
   if (!f.constructor) return false;
   // Not created with new
   if (f.name === "Symbol") return true;
@@ -37,7 +48,6 @@ export function isConstructor(f) {
   if (f.name === "URL") return true;
   // detect custom validator (anonymous or its name starts with lowercase)
   if (isCustomValidator(f)) return false;
-  if (isClass(f)) return true;
   // TODO: try to not instantiate
   try {
     new f();
@@ -50,15 +60,15 @@ export function isConstructor(f) {
 export const whatTypeIs = (type) => {
   if (checkConstructor(Object, type)) return "schema";
   if (isPrimitive(type)) return "primitive";
-  if (isCustomValidator(type)) return "function";
+  if (isCustomValidator(type)) return "validator";
   if (Array.isArray(type)) return "enum";
   if (checkConstructor(RegExp, type)) return "regex";
+  if (isInvalidType( type)) return "invalid";
   // try to avoid isConstructor
   return "constructor";
   // if (isConstructor(type)) return "constructor";
   // throw new Error("Invalid type " + stringify(type));
 };
-
 
 
 // fails in ArrayBuffer

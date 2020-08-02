@@ -195,6 +195,10 @@ describe("optional keys", () => {
   test("if the key doesn't exists should be valid", () => {
     expect(isValid({ a$: Number })({})).toBe(true);
   });
+  test("if the key is null or undefined should be valid", () => {
+    expect(isValid({ a$: Number })({a:undefined})).toBe(true);
+    expect(isValid({ a$: Number })({a:null})).toBe(true);
+  });
   test("should work ending with $ or ?", () => {
     expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
     expect(isValid({ "a?": String })({ a: 1 })).toBe(false);
