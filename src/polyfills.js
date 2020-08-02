@@ -1,14 +1,13 @@
-
 // globalThis polyfill
-if (typeof globalThis === 'undefined') {
+if (typeof globalThis === "undefined") {
   let getGlobal = function () {
-    if (typeof self !== 'undefined') { return self; }
-    if (typeof window !== 'undefined') { return window; }
-    if (typeof global !== 'undefined') { return global; }
-    throw new Error('unable to locate global object');
+    if (typeof self !== "undefined") return self;
+    if (typeof window !== "undefined") return window;
+    if (typeof global !== "undefined") return global;
+    throw new Error("unable to locate global object");
   };
   let globalThis = getGlobal();
-  globalThis.globalThis = globalThis
+  globalThis.globalThis = globalThis;
 }
 
 // only work in node
@@ -17,13 +16,13 @@ if (typeof globalThis === 'undefined') {
 
 // Proxy.isProxy  intercepts the creation of Proxy
 // from: http://jsfiddle.net/Xotic750/ybhs5Lph/
-if (typeof Proxy === 'function') {
+if (typeof Proxy === "function") {
   if (typeof Proxy.isProxy !== "function") {
     let proxyDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Proxy");
     let $Proxy = proxyDescriptor.value;
     let revocableDescriptor = Object.getOwnPropertyDescriptor(
       $Proxy,
-      "revocable"
+      "revocable",
     );
     let $revocable = revocableDescriptor.value;
 
@@ -43,7 +42,7 @@ if (typeof Proxy === 'function') {
     Object.defineProperty(
       proxyDescriptor.value,
       "revocable",
-      revocableDescriptor
+      revocableDescriptor,
     );
 
     let isProxyDescriptor = {
@@ -60,11 +59,9 @@ if (typeof Proxy === 'function') {
   globalThis.Proxy = {
     isProxy() {
       return false;
-    }
-  }
+    },
+  };
 }
-
-
 
 // Custom AggregateError polyfill
 // TODO test it
@@ -73,13 +70,12 @@ if (typeof AggregateError === "undefined") {
     constructor(errors = [], message) {
       super(message);
       this.errors = errors;
-      this.name = 'AggregateError';
+      this.name = "AggregateError";
     }
 
-    push(err){
-      this.errors.push(err)
+    push(err) {
+      this.errors.push(err);
     }
-
   }
 
   globalThis.AggregateError = AggregateError;
@@ -87,7 +83,7 @@ if (typeof AggregateError === "undefined") {
 
 // Array.prototype.flatMap polyfill
 if (!Array.prototype.flat) {
-  Array.prototype.flat = function(depth) {
+  Array.prototype.flat = function (depth) {
     var flattend = [];
     (function flat(array, depth) {
       for (let el of array) {
@@ -102,7 +98,7 @@ if (!Array.prototype.flat) {
   };
 }
 if (!Array.prototype.flatMap) {
-  Array.prototype.flatMap = function() {
+  Array.prototype.flatMap = function () {
     return Array.prototype.map.apply(this, arguments).flat(1);
   };
 }

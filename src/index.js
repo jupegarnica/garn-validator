@@ -25,16 +25,18 @@ export class SeriesValidationError extends AggregateError {
 }
 
 const formatErrorMessage = (type, value, path = []) =>
-  `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
-    value
-  )} do not match type ${stringify(type)}`;
+  `${path.length ? `on path /${path.join("/")} ` : ""}value ${
+    stringify(
+      value,
+    )
+  } do not match type ${stringify(type)}`;
 
 const throwError = ({ type, value, path, _Error = TypeError }) => {
   throw new _Error(formatErrorMessage(type, value, path));
 };
 const throwErrors = (
   errors,
-  { type, value, path, _Error = AggregateError }
+  { type, value, path, _Error = AggregateError },
 ) => {
   if (errors.length === 1) throw errors[0];
   throw new _Error(errors, formatErrorMessage(type, value, path));
@@ -77,7 +79,7 @@ export const validSchemaOrThrow = ({
         object[keyName],
         object,
         keyName,
-        currentPath
+        currentPath,
       );
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -96,14 +98,14 @@ export const validSchemaOrThrow = ({
       const currentPath = [...path, keyNameStripped];
       let type = schema[keyName];
       let value = object[keyNameStripped];
-      isNullish(value) ||  isValidTypeOrThrow(
-          conf,
-          type,
-          value,
-          object,
-          keyNameStripped,
-          currentPath
-        );
+      isNullish(value) || isValidTypeOrThrow(
+        conf,
+        type,
+        value,
+        object,
+        keyNameStripped,
+        currentPath,
+      );
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -117,7 +119,7 @@ export const validSchemaOrThrow = ({
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key),
     );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
@@ -132,7 +134,7 @@ export const validSchemaOrThrow = ({
           object[keyName],
           object,
           keyName,
-          currentPath
+          currentPath,
         );
       } catch (error) {
         if (!conf.collectAllErrors) {
@@ -201,8 +203,9 @@ const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
   debugger;
   for (const type of types) {
     try {
-      if (isValidTypeOrThrow(conf, type, value, root, keyName, path))
+      if (isValidTypeOrThrow(conf, type, value, root, keyName, path)) {
         return true;
+      }
     } catch (error) {
       errors.push(error);
     }
@@ -231,20 +234,23 @@ const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
       return validCustomValidatorOrThrow(type, value, root, keyName, path);
 
     case "invalid":
-      throw new SyntaxError(`checking with validator ${stringify(type)} not supported`);
+      throw new SyntaxError(
+        `checking with validator ${stringify(type)} not supported`,
+      );
   }
 };
 
-const run = (conf) => (...types) => (value) => {
-  try {
-    validSeriesOrThrow(conf, types, value);
-  } catch (error) {
-    return conf.onFinishWithError(error);
-  }
+const run = (conf) =>
+  (...types) =>
+    (value) => {
+      try {
+        validSeriesOrThrow(conf, types, value);
+      } catch (error) {
+        return conf.onFinishWithError(error);
+      }
 
-  return conf.onFinishSuccess();
-};
-
+      return conf.onFinishSuccess();
+    };
 
 const config = ({
   collectAllErrors = false,
@@ -295,9 +301,6 @@ export const isValidOrThrowAllErrors = config({
 });
 
 export const isValidOrThrow = config();
-
-
-
 
 export const arrayOf = (type) => isValidOrThrow(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValidOrThrow(Object, { [/./]: type });

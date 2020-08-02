@@ -1,7 +1,6 @@
 import "./polyfills.js";
 const isProxy = Proxy.isProxy;
 
-
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
   .constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
@@ -31,7 +30,8 @@ export const isCustomValidator = (fn) =>
   (!fn.name || fn.name[0] === fn.name[0].toLowerCase());
 
 export const isInvalidType = (fn) =>
-  checkConstructor(AsyncFunction, fn) || checkConstructor(GeneratorFunction, fn)
+  checkConstructor(AsyncFunction, fn) ||
+  checkConstructor(GeneratorFunction, fn);
 export function isConstructor(f) {
   if (!f) return false;
   // if (!checkConstructor(Function, f)) return false
@@ -63,13 +63,12 @@ export const whatTypeIs = (type) => {
   if (isCustomValidator(type)) return "validator";
   if (Array.isArray(type)) return "enum";
   if (checkConstructor(RegExp, type)) return "regex";
-  if (isInvalidType( type)) return "invalid";
+  if (isInvalidType(type)) return "invalid";
   // try to avoid isConstructor
   return "constructor";
   // if (isConstructor(type)) return "constructor";
   // throw new Error("Invalid type " + stringify(type));
 };
-
 
 // fails in ArrayBuffer
 // export const isPrimitive = (value) => !(value instanceof Object) || (value.constructor === Number || value.constructor === String);

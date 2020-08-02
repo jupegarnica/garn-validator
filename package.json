@@ -10,6 +10,7 @@
     "lib/"
   ],
   "scripts": {
+    "format":"deno fmt src",
     "run:docker": "docker-compose run node",
     "start": "npm run build:watch & npm run test:watch",
     "test": "npm run test:watch",
