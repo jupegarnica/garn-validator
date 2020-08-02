@@ -103,7 +103,7 @@ module.exports = {
   resetMocks: true,
 
   // Reset the module registry before running each individual test
-  resetModules: true,
+  resetModules: false,
 
   // A path to a custom resolver
   // resolver: null,
@@ -181,7 +181,7 @@ module.exports = {
   // verbose: null,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
-  // watchPathIgnorePatterns: [],
+  watchPathIgnorePatterns: ['src'],
 
   // Whether to use watchman for file crawling
   watchman: true,

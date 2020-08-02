@@ -1,4 +1,4 @@
-const validator = require('garn-validator/commonjs');
+const validator = require('garn-validator');
 
 describe('Should work using require commonjs',()=> {
   test('default export works', () => {

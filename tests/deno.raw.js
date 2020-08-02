@@ -1,21 +1,21 @@
 import { hasErrors } from "garn-validator";
-const schema:any = {
+const schema = {
   name: /^[a-z]{3,}$/,
-  age: (age:any) => age > 18,
+  age: (age) => age > 18,
   car: {
     brand: ["honda", "toyota"],
     date: Date,
     country: {
       name: String,
     },
-    ['/./']: () => {
+    [/./]: () => {
       throw new EvalError("unexpected key");
     },
   },
   optional$: true,
-  ['/./']: () => false,
+  [/./]: () => false,
 };
-const obj:any = {
+const obj = {
   name: "garn",
   age: 19,
   optional: 1,
@@ -28,6 +28,10 @@ const obj:any = {
   },
 };
 
-let errors = hasErrors(schema)(obj);
+let errors = hasErrors(obj)(schema);
 
 console.log(errors);
+
+if (errors.length !== 6) {
+  throw new Error('hasErrors failed')
+}
