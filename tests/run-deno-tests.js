@@ -13,11 +13,17 @@ test.each = (table) => (msg, run) => {
     });
   });
 };
-test.skip = (msg, fn) => {};
+test.skip = (msg) => {
+  console.log('skipped: ' + msg);
+};
 
 function describe(msg, fn) {
   return fn();
 }
+describe.skip = (msg) => {
+  console.log('skipped: ' + msg);
+};
+
 globalThis.expect = expect;
 globalThis.test = test;
 globalThis.describe = describe;
@@ -29,29 +35,17 @@ globalThis.jest = {
   },
 };
 
-try {
-  let response = await exec(
-    "deno test --importmap=import_map.json -A --unstable tests/",
-    { output: OutputMode.Capture, continueOnError: true }
-  );
 
-  console.log(response);
-} catch (error) {
-  console.log(error);
-}
 
-// const p = Deno.run({
-//   cmd: [
-//     "deno",
-//     "test",
-//     "--importmap=import_map.json",
-//     "--unstable",
-//     "tests/"
-//   ],
-//   // stdout: "piped",
-//   // stderr: "piped",
-// });
 
-// const all = await p.status();
-
-// console.log(all);
+await import('./use.test.js');
+await import('./unit.test.js');
+await import('./strings.test.js');
+await import('./speed.test.js');
+await import('./schema.test.js');
+await import('./numbers.test.js');
+await import('./esm.test.js');
+await import('./errors.test.js');
+await import('./enums.test.js');
+await import('./custom-validator.test.js');
+await import('./constructors.test.js');
