@@ -1,4 +1,5 @@
 import { isValidOrThrow } from "garn-validator";
+// import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
 
 const schema = {
   name: /^[a-z]{3,10}$/,
@@ -24,7 +25,7 @@ const obj = {
     brand: "honda",
     date: new Date("1982-01-01"),
     country: {
-      name: "Japan",
+      name: "japan",
     },
   },
 };

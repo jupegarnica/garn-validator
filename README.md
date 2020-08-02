@@ -39,8 +39,16 @@ const { isValidOrThrow } = require("garn-validator/commonjs");
 const isValidOrThrow = require("garn-validator/commonjs").default;
 ```
 
-## Basic Use
 
+#### Import in Deno
+
+The library can be used as is in typescript
+
+```ts
+import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
+```
+
+## Basic Use
 ```js
 import is from "garn-validator"; // default export is isValidOrThrow
 

@@ -1,4 +1,5 @@
 import { isValidOrThrow } from "garn-validator";
+// import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
 
 const schema = {
   name: /^[a-z]{3,}$/,

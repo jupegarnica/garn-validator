@@ -58,7 +58,7 @@ const defaultConfiguration = {
   onFinishWithError: onFinishWithErrorDefault,
 };
 
-export const validSchemaOrThrow = ({
+const validSchemaOrThrow = ({
   conf,
   type: schema,
   value: object,
