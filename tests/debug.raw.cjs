@@ -1,20 +1,20 @@
-import { isValidOrThrow } from "garn-validator";
+const { isValidOrThrow } = require('garn-validator/commonjs');
 
 const schema = {
-  name: /^[a-z]{3,10}$/,
-  age: (age:any) => age > 18,
+  name: /^[a-z]{3,}$/,
+  age: (age) => age > 18,
   car: {
     brand: ["honda", "toyota"],
     date: Date,
     country: {
       name: String,
     },
-    ['/./']: () => {
+    [/./]: () => {
       throw new EvalError("unexpected key");
     },
   },
   optional$: true,
-  ['/./']: () => false,
+  [/./]: () => false,
 };
 const obj = {
   name: "garn",

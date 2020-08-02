@@ -34,9 +34,9 @@ import { isValidOrThrow } from "garn-validator";
 #### Require with CommonJs
 
 ```js
-const { isValidOrThrow } = require("garn-validator");
+const { isValidOrThrow } = require("garn-validator/commonjs");
 // or use de default export
-const isValidOrThrow = require("garn-validator").default;
+const isValidOrThrow = require("garn-validator/commonjs").default;
 ```
 
 ## Basic Use
