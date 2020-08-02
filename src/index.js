@@ -7,9 +7,11 @@ import {
   isRequiredKey,
   isOptionalKey,
   optionalRegex,
-  parseToArray,
+  // isNullish,
   whatTypeIs,
 } from "./utils.js";
+
+export { AsyncFunction, GeneratorFunction } from "./utils.js";
 
 export class EnumValidationError extends AggregateError {
   name = "EnumValidationError";
@@ -92,7 +94,8 @@ export const validSchemaOrThrow = ({
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       const currentPath = [...path, keyNameStripped];
-      // TODO do not validat with enum
+      // TODO do not validate with enum
+      // isNullish(schema[keyName]) ||
       isValidTypeOrThrow(
         conf,
         [undefined, schema[keyName]],
@@ -170,7 +173,13 @@ const validPrimitiveOrThrow = (type, value, root, keyName, path) =>
   validOrThrow(value === type, { type, value, root, keyName, path });
 
 const validRegExpOrThrow = (type, value, root, keyName, path) =>
-  validOrThrow( value.constructor === String && checkRegExp(type, value), { type, value, root, keyName, path });
+  validOrThrow(value.constructor === String && checkRegExp(type, value), {
+    type,
+    value,
+    root,
+    keyName,
+    path,
+  });
 
 const validSeriesOrThrow = (conf, types, value) => {
   const errors = [];
@@ -199,7 +208,12 @@ const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
       // if (!conf.collectAllErrors) break;
     }
   }
-  throwErrors(errors, { type: types, value,path, _Error: EnumValidationError });
+  throwErrors(errors, {
+    type: types,
+    value,
+    path,
+    _Error: EnumValidationError,
+  });
   // if (errors.length > 0) {
   // }
   // return true;
@@ -216,11 +230,11 @@ const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
       return validEnumOrThrow(conf, type, value, root, keyName, path);
     case "schema":
       return validSchemaOrThrow({ conf, type, value, root, keyName, path });
-    case "function":
+    case "validator":
       return validCustomValidatorOrThrow(type, value, root, keyName, path);
 
-    // default:
-    //   throw new Error("this never happens");
+    case "invalid":
+      throw new Error("Invalid type " + stringify(type));
   }
 };
 
@@ -286,9 +300,5 @@ export const isValidOrThrow = config();
 
 export const arrayOf = (type) => isValidOrThrow(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValidOrThrow(Object, { [/./]: type });
-export const AsyncFunction = Object.getPrototypeOf(async function () {})
-  .constructor;
-export const GeneratorFunction = Object.getPrototypeOf(function* () {})
-  .constructor;
 
 export default isValidOrThrow;

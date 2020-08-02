@@ -217,11 +217,13 @@ describe("isCustomValidator:detect if a function is anonymous or its name starts
     [() => {}, true],
     [function name() {}, true],
     [function () {}, true],
-    [async () => {}, true], // noy yet supported
     [Object, false],
     [Object.is, true],
     ["asdasd", false],
     [1, false],
+    [async () => {}, false], // noy yet supported
+    [function*(){}, false], // noy yet supported
+    [class {}, false], // noy yet supported
   ])("isCustomValidator(%p) should return %p", (input, expected) => {
     expect(isCustomValidator(input)).toBe(expected);
   });
@@ -275,9 +277,26 @@ describe("stringify", () => {
     );
   });
 });
-
+// TODO make it fail
 describe("whatTypeIs", () => {
   test.each(constructors)("whatTypeIs(%s) is constructor", (input) => {
     expect(whatTypeIs(input)).toBe("constructor");
+  });
+  const VALIDATOR = () => {}
+  test.each([
+    [{}, 'schema'],
+    [[], 'enum'],
+    [1, 'primitive'],
+    [null, 'primitive'],
+    [undefined, 'primitive'],
+    ['undefined', 'primitive'],
+    [()=>{}, 'validator'],
+    // [VALIDATOR, 'validator'],
+    [class {}, 'constructor'],
+
+    [async () => {}, 'invalid'], // noy yet supported
+    [function*(){}, 'invalid'], // noy yet supported
+  ])("whatTypeIs(%s) is %p", (input, output) => {
+    expect(whatTypeIs(input)).toBe(output);
   });
 });
