@@ -1,6 +1,6 @@
 # Garn-validator
 
-Ultra fast runtime type validator for vanilla JS without dependencies.
+Ultra fast runtime type validator without dependencies.
 
 [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 
@@ -902,7 +902,6 @@ import {
   SeriesValidationError,
 } from "garn-validator";
 
-
 describe("AggregateError", () => {
   test.each([AggregateError, SchemaValidationError, Error])(
     "if schema fails with more than 2 errors should throw %p",
@@ -983,6 +982,25 @@ describe("AggregateError", () => {
   });
 });
 
+describe("check with invalid validator", () => {
+  test('should detect async functions', () => {
+    try {
+      isValidOrThrow(async () => false)(1);
+      throw 'mec';
+    } catch (error) {
+      expect(error).toBeInstanceOf(SyntaxError);
+    }
+  });
+  test('should detect generators', () => {
+    try {
+      isValidOrThrow(function*(){})(1);
+      throw 'mec';
+    } catch (error) {
+      expect(error).toBeInstanceOf(SyntaxError);
+    }
+  });
+
+});
 describe("check errors", () => {
   test("by default throws TypeError", () => {
     expect(() => {
@@ -1308,18 +1326,17 @@ describe("isValidOrThrowAllErrors ", () => {
   test("should throw AggregateError with all errors", () => {
     try {
       isValidOrThrowAllErrors(Number, String)(true);
-      throw 'ups'
+      throw "ups";
     } catch (error) {
-      expect(error).toBeInstanceOf(AggregateError)
+      expect(error).toBeInstanceOf(AggregateError);
     }
     try {
       isValidOrThrowAllErrors(Number, String)(true);
 
-      throw 'ups'
+      throw "ups";
     } catch (error) {
-      expect(error).not.toBeInstanceOf(TypeError)
+      expect(error).not.toBeInstanceOf(TypeError);
     }
-
   });
   test("should throw 2 errors", () => {
     try {
