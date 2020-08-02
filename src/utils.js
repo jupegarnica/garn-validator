@@ -6,10 +6,10 @@ export const AsyncFunction = Object.getPrototypeOf(async function () {})
   .constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
   .constructor;
-export const isNullish = (val) => val !== undefined && val !== null;
+export const isNullish = (val) => val === undefined || val === null;
 
 export const checkConstructor = (type, val) =>
-  (isNullish(val) && val.constructor === type) ||
+  (!isNullish(val) && val.constructor === type) ||
   (Proxy === type && isProxy(val));
 
 export const isClass = (fn) =>

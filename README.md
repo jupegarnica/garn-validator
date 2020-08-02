@@ -89,6 +89,7 @@ is({ [/[a-z]/]: Number })({
 is({ x$: Number })({ x: 1 }); // doesn't throws, x is present and is Number
 is({ x$: String })({ x: 1 }); // will throw, x is present but is not String
 is({ x$: String })({}); // doesn't throws, x is undefined
+is({ x$: String })({x: null}); // doesn't throws, x is null
 
 // you can use key$ or 'key?',
 // it would be nicer to have key? without quotes but is not valid JS

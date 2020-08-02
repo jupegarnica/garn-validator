@@ -33,84 +33,58 @@ describe("AggregateError", () => {
       }).toThrow(ErrorType);
     }
   );
-  test('checking schema should throw SchemaValidationError or TypeError', () => {
+  test("checking schema should throw SchemaValidationError or TypeError", () => {
     try {
-      isValidOrThrowAllErrors({a:1,b:2})({});
+      isValidOrThrowAllErrors({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
       expect(error.errors.length).toBe(2);
-
     }
     try {
-      isValidOrThrow({a:1,b:2})({});
+      isValidOrThrow({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(false);
       expect(error instanceof TypeError).toBe(true);
-
     }
-
 
     // only 1 key fails
     try {
-      isValidOrThrowAllErrors({a:1})({});
+      isValidOrThrowAllErrors({ a: 1 })({});
     } catch (error) {
       expect(error instanceof TypeError).toBe(true);
       expect(error instanceof SchemaValidationError).toBe(false);
-
     }
-
   });
-  test('checking enum should throw EnumValidationError or TypeError', () => {
+  test("checking enum should throw EnumValidationError or TypeError", () => {
     try {
-      isValidOrThrow([
-        Boolean,
-        String,
-      ])(1);
+      isValidOrThrow([Boolean, String])(1);
     } catch (error) {
       expect(error instanceof EnumValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
-      isValidOrThrow([
-        Boolean,
-      ])(1);
+      isValidOrThrow([Boolean])(1);
     } catch (error) {
       expect(error instanceof EnumValidationError).toBe(false);
       expect(error instanceof TypeError).toBe(true);
     }
   });
-  test('checking series should throw SeriesValidationError or TypeError ', () => {
+  test("checking series should throw SeriesValidationError or TypeError ", () => {
     try {
-      isValidOrThrowAllErrors(
-        Boolean,
-        String,
-      )(1);
+      isValidOrThrowAllErrors(Boolean, String)(1);
     } catch (error) {
       expect(error instanceof SeriesValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
-      isValidOrThrowAllErrors(
-        Boolean,
-      )(1);
+      isValidOrThrowAllErrors(Boolean)(1);
     } catch (error) {
       expect(error instanceof SeriesValidationError).toBe(false);
       expect(error instanceof TypeError).toBe(true);
     }
-  });
-
-});
-
-describe("hasErrors", () => {
-  test("should flat all aggregated Errors", () => {
-    expect(hasErrors(Number, { x: 1 }, () => false)(true).length).toBe(3);
-  });
-
-  test("should flat all aggregated Errors", () => {
-    expect(hasErrors(Number, { x: 1, y: 2 }, [1, 2])({}).length).toBe(5);
   });
 });
 
@@ -232,6 +206,14 @@ describe("hasErrors", () => {
       new TypeError('on path /num value "2" do not match type Number'),
     ]);
   });
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1 }, () => false)(true).length).toBe(3);
+  });
+
+  test("should flat all aggregated Errors", () => {
+    expect(hasErrors(Number, { x: 1, y: 2 }, [1, 2])({}).length).toBe(5);
+  });
+
   describe("in serie", () => {
     test.each([
       [Number, (v) => v > 0, 2, null],
@@ -276,7 +258,7 @@ describe("hasErrors", () => {
         [
           new TypeError('on path /num value "2" do not match type Number'),
           new TypeError("on path /str value null do not match type String"),
-        ]
+        ],
         // [
         //   new AggregateError(
         //     [
@@ -407,10 +389,8 @@ describe("hasErrors", () => {
         new TypeError(
           "on path /car/country/name value undefined do not match type String"
         ),
-        new TypeError(
-          "on path /optional value false do not match type undefined"
-        ),
-        new TypeError("on path /optional value false do not match type true")
+
+        new TypeError("on path /optional value false do not match type true"),
       ]);
     });
   });

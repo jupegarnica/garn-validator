@@ -7,7 +7,7 @@ import {
   isRequiredKey,
   isOptionalKey,
   optionalRegex,
-  // isNullish,
+  isNullish,
   whatTypeIs,
 } from "./utils.js";
 
@@ -94,16 +94,16 @@ export const validSchemaOrThrow = ({
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       const currentPath = [...path, keyNameStripped];
-      // TODO do not validate with enum
-      // isNullish(schema[keyName]) ||
-      isValidTypeOrThrow(
-        conf,
-        [undefined, schema[keyName]],
-        object[keyNameStripped],
-        object,
-        keyNameStripped,
-        currentPath
-      );
+      let type = schema[keyName];
+      let value = object[keyNameStripped];
+      isNullish(value) ||  isValidTypeOrThrow(
+          conf,
+          type,
+          value,
+          object,
+          keyNameStripped,
+          currentPath
+        );
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
