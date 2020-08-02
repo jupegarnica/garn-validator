@@ -14,14 +14,14 @@ test.each = (table) => (msg, run) => {
   });
 };
 test.skip = (msg) => {
-  console.log('skipped: ' + msg);
+  console.log("skipped: " + msg);
 };
 
 function describe(msg, fn) {
   return fn();
 }
 describe.skip = (msg) => {
-  console.log('skipped: ' + msg);
+  console.log("skipped: " + msg);
 };
 
 globalThis.expect = expect;
@@ -35,17 +35,14 @@ globalThis.jest = {
   },
 };
 
-
-
-
-await import('./use.test.js');
-await import('./unit.test.js');
-await import('./strings.test.js');
-await import('./speed.test.js');
-await import('./schema.test.js');
-await import('./numbers.test.js');
-await import('./esm.test.js');
-await import('./errors.test.js');
-await import('./enums.test.js');
-await import('./custom-validator.test.js');
-await import('./constructors.test.js');
+await import("./use.test.js");
+await import("./unit.test.js");
+await import("./strings.test.js");
+await import("./speed.test.js");
+await import("./schema.test.js");
+await import("./numbers.test.js");
+await import("./esm.test.js");
+await import("./errors.test.js");
+await import("./enums.test.js");
+await import("./custom-validator.test.js");
+await import("./constructors.test.js");

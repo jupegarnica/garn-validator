@@ -92,16 +92,16 @@ describe("speed tests", () => {
     });
   });
   describe("Stops in first fail", () => {
-    jest.spyOn(globalThis.console, 'log')
+    jest.spyOn(globalThis.console, 'info')
     test("should stops in first fail", () => {
       const schema = {
         b: () => false,
-        a: () => console.log("I run?"),
+        a: () => console.info("I run?"),
       };
       try {
         isValidOrThrow(schema)({ a: 1, b: 2 });
       } catch (error) {}
-      expect(globalThis.console.log).not.toHaveBeenCalled();
+      expect(globalThis.console.info).not.toHaveBeenCalled();
     });
     test.skip("should be fast", () => {
       const schema = {

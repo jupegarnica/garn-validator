@@ -12,22 +12,36 @@ describe("check with custom validator", () => {
     }).toThrow();
   });
   test("you can throw a custom message", () => {
-    expect(() => {
+    try {
       isValidOrThrow(() => {
         throw "ups";
       })(33);
-    }).toThrow("ups");
+      throw 'mec'
+    } catch (error) {
+      expect(error).toBe('ups');
+
+    }
   });
   test("by default throws TypeError", () => {
-    expect(() => {
+    try {
       isValidOrThrow(Boolean)(33);
-    }).toThrow(TypeError);
+      throw 'mec'
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError)
+
+    }
   });
   test("you can throw a custom type of error", () => {
-    expect(() => {
+    try {
       isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
-    }).toThrow(RangeError);
+      throw 'mec'
+    } catch (error) {
+      expect(error).toBeInstanceOf(RangeError)
+      expect(error).not.toBeInstanceOf(TypeError)
+
+    }
+
   });
 });

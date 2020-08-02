@@ -412,13 +412,20 @@ describe("isValidOrThrowAllErrors ", () => {
   jest.spyOn(globalThis.console, "error");
 
   test("should throw AggregateError with all errors", () => {
-    expect(() => {
+    try {
       isValidOrThrowAllErrors(Number, String)(true);
-    }).toThrow(AggregateError);
+      throw 'ups'
+    } catch (error) {
+      expect(error).toBeInstanceOf(AggregateError)
+    }
+    try {
+      isValidOrThrowAllErrors(Number, String)(true);
 
-    expect(() => {
-      isValidOrThrowAllErrors(Number, String)(true);
-    }).not.toThrow(TypeError);
+      throw 'ups'
+    } catch (error) {
+      expect(error).not.toBeInstanceOf(TypeError)
+    }
+
   });
   test("should throw 2 errors", () => {
     try {
