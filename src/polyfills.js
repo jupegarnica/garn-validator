@@ -7,7 +7,8 @@ if (typeof globalThis === 'undefined') {
     if (typeof global !== 'undefined') { return global; }
     throw new Error('unable to locate global object');
   };
-  var globalThis = getGlobal()
+  let globalThis = getGlobal();
+  globalThis.globalThis = globalThis
 }
 
 // only work in node
