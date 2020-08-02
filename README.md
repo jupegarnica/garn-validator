@@ -12,7 +12,8 @@ Ultra fast runtime type validator without dependencies.
 - Support for checking primitives or  objects with schemas
 - Easy to use and simple to learn but powerful
 - 5 behaviors (`isValid`, `isValidOrThrow`, `isValidOrLogAllErrors`, `isValidOrLog` and `hasErrors`)
-- Works with ESModules or CommonJS from node 10.x to latests
+- Works with ESModules or CommonJS from **Node** 10.x or **Deno**
+- Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
 # Get started
 
@@ -404,9 +405,9 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 - [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/ )('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
-- [ ] Async validation support
-- [ ] Support for deno
+- [x] Support for deno
 - [ ] Support for browser
+<!-- - [ ] Async validation support -->
 
 ### More examples
 
