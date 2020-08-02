@@ -213,10 +213,8 @@ const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
     path,
     _Error: EnumValidationError,
   });
-  // if (errors.length > 0) {
-  // }
-  // return true;
 };
+
 const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
   switch (whatTypeIs(type)) {
     case "regex":
@@ -233,7 +231,7 @@ const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
       return validCustomValidatorOrThrow(type, value, root, keyName, path);
 
     case "invalid":
-      throw new Error("Invalid type " + stringify(type));
+      throw new SyntaxError(`checking with validator ${stringify(type)} not supported`);
   }
 };
 
