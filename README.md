@@ -1,4 +1,4 @@
-# Garn-validator
+# garn-validator
 
 Ultra fast runtime type validator without dependencies.
 
@@ -8,8 +8,8 @@ Ultra fast runtime type validator without dependencies.
 
 # Features
 
+- Supports checking primitives or objects with schemas
 - Ultra light and **fast**  with **0 dependencies**
-- Support for checking primitives or  objects with schemas
 - Easy to use and simple to learn but powerful
 - 5 behaviors (`isValid`, `isValidOrThrow`, `isValidOrLogAllErrors`, `isValidOrLog` and `hasErrors`)
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
@@ -133,6 +133,34 @@ is({ x$: String })({x: null}); // true, x is null
 // it would be nicer to have key? without quotes but is not valid JS
 
 is({ "x?": String })({}); // true
+
+
+// custom validation against root obj
+is({
+  max: (val, root, keyName) => val > root.min,
+  min: (val, root, keyName) => val < root.max,
+})({
+  max: 1,
+  min: -1,
+}); // true
+
+is({
+  max: (val, root, keyName) => val > root.min,
+  min: (val, root, keyName) => val < root.max,
+})({
+  max: 10,
+  min: 50,
+}); // it throws
+
+
+// check keyName
+is({
+  [/./]: (val, root, keyName) => keyName.length > 3
+})({
+  max: 1, // key too short
+  longKey: 1, // valid key
+}); // it throws, max key is too short
+
 ```
 
 ### Composable
@@ -343,7 +371,7 @@ hasError will flatMap all errors found.  No AggregateError will be in the array 
 
 ### AsyncFunction & GeneratorFunction
 
-`AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you con import them from garn-validator.
+`AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you can import them from garn-validator.
 
 > Note: Async functions and generators are not normal function, so it will fail against Function constructor
 
@@ -395,19 +423,21 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 ## Roadmap
 
 - [x] Check value by constructor
-- [x] Enum type (oneOf & oneOfType)
+- [x] Enum type
 - [x] Shape type
-- [x] Custom type validation with a function (value, rootValue)
+- [x] Custom validation with a function (value, root, keyName)
 - [x] Check RegEx
 - [x] Match object key by RegEx
-- [x] Setting to change behavior (throw error , log error or custom logic)
-- [x] ArrayOf & objectOf examples
+- [x] Multiples behaviors
+- [x] ArrayOf & objectOf
 - [x] Multiples validations `isValid(String, val => val.length > 3, /^[a-z]+$/ )('foo')`
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [x] Support for deno
-- [ ] Support for browser
-<!-- - [ ] Async validation support -->
+<!-- - [ ] Support for browser -->
+- [ ] behavior applyDefaultsOnError
+- [ ] Async validation support
+- [ ] More built-in utils functions (containsText, startWith, endsWith, min, max, isLowercase, isUppercase, ...)
 
 ### More examples
 
