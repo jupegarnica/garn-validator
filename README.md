@@ -253,6 +253,12 @@ hasErrors(/[a-z]/)("g"); // null
 hasErrors(/[a-z]/, Number)("G"); // [TypeError, TypeError]
 ```
 
+
+
+<!--
+# Advanced
+##  Proxy detection -->
+
 ## Errors
 
 If a validation fails by default it will throw `new TypeError(meaningfulMessage)`;
@@ -365,8 +371,6 @@ try {
 hasError will flatMap all errors found.  No AggregateError will be in the array returned.
 
 
-
-
 ## Especial cases
 
 ### AsyncFunction & GeneratorFunction
@@ -420,7 +424,7 @@ is(objectOf(Number))({ a: 1, b: 2 }); // true
 is(objectOf(Number))({ a: 1, b: "2" }); // throws
 ```
 
-## Roadmap
+# Roadmap
 
 - [x] Check value by constructor
 - [x] Enum type
@@ -439,7 +443,7 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 - [ ] Async validation support
 - [ ] More built-in utils functions (containsText, startWith, endsWith, min, max, isLowercase, isUppercase, ...)
 
-### More examples
+# Examples
 
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
@@ -1210,15 +1214,6 @@ describe("hasErrors", () => {
           new TypeError('on path /num value "2" do not match type Number'),
           new TypeError("on path /str value null do not match type String"),
         ],
-        // [
-        //   new AggregateError(
-        //     [
-        //       new TypeError('on path /num value "2" do not match type Number'),
-        //       new TypeError("on path /str value null do not match type String"),
-        //     ],
-        //     'value {"num":"2","str":null} do not match type {"num":Number,"str":String}'
-        //   ),
-        // ],
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
