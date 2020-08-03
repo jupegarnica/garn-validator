@@ -43,13 +43,13 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 
 #### Import in Deno
 
-The library can be used as is in typescript
+The library can be used as is in typescript without installation
 
 ```ts
 import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
 ```
 
-## Basic Use
+## Basic Usage
 ```js
 import is from "garn-validator"; // default export is isValidOrThrow
 
@@ -106,7 +106,7 @@ is(Array, array => array.length === 2)([1, 2]); // true
 is(v => v > 0, v => v < 50)(100); // it throws
 ```
 
-### Check objects against an schema
+### Check object against an schema
 ```js
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
@@ -721,27 +721,7 @@ describe("special cases", () => {
     }).toThrow();
   });
 });
-describe("check String or Array against an schema", () => {
-  test("should check an string as an object", () => {
-    expect(() => {
-      isValidOrThrow({
-        0: /[lL]/,
-        1: (char) => char === "o",
-      })("Lorem");
-    }).not.toThrow();
-    // expect(() => {
-    //   isValidOrThrow({
-    //     0: /[lL]/,
-    //     1: (char) => char === "o",
-    //     2: "R",
-    //   })("Lorem");
-    // }).toThrow();
-    // expect(() => {
-    //   isValidOrThrow({
-    //     99: "a",
-    //   })("Lorem");
-    // }).toThrow();
-  });
+describe('check Array against an schema', () => {
   test("should check an Array as an object", () => {
     expect(() => {
       isValidOrThrow({
@@ -761,6 +741,29 @@ describe("check String or Array against an schema", () => {
     }).toThrow();
   });
 });
+describe("check String against an schema", () => {
+  test("should check an string as an object", () => {
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+      })("Lorem");
+    }).not.toThrow();
+    expect(() => {
+      isValidOrThrow({
+        0: /[lL]/,
+        1: (char) => char === "o",
+        2: "R",
+      })("Lorem");
+    }).toThrow();
+    expect(() => {
+      isValidOrThrow({
+        99: "a",
+      })("Lorem");
+    }).toThrow();
+  });
+
+});
 
 describe("check a function against an schema", () => {
   test("should check an function as an object", () => {
@@ -776,24 +779,7 @@ describe("check a function against an schema", () => {
       })(fn);
     }).toThrow();
   });
-  test("should check an Array as an object", () => {
-    expect(() => {
-      isValidOrThrow({
-        0: Number,
-        1: Number,
-      })([1, 2]);
-    }).not.toThrow();
-    expect(() => {
-      isValidOrThrow({
-        "/d/": Number,
-      })([1, 2]);
-    }).not.toThrow();
-    expect(() => {
-      isValidOrThrow({
-        0: String,
-      })([1, 2]);
-    }).toThrow();
-  });
+
 });
 
 describe("arrayOf", () => {
@@ -1214,6 +1200,15 @@ describe("hasErrors", () => {
           new TypeError('on path /num value "2" do not match type Number'),
           new TypeError("on path /str value null do not match type String"),
         ],
+        // [
+        //   new AggregateError(
+        //     [
+        //       new TypeError('on path /num value "2" do not match type Number'),
+        //       new TypeError("on path /str value null do not match type String"),
+        //     ],
+        //     'value {"num":"2","str":null} do not match type {"num":Number,"str":String}'
+        //   ),
+        // ],
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
