@@ -1,6 +1,6 @@
 {
   "name": "garn-validator",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Runtime type validator for JS without dependencies",
   "main": "src/index.js",
   "type": "commonjs",
