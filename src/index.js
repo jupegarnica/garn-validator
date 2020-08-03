@@ -13,14 +13,36 @@ import {
 
 export { AsyncFunction, GeneratorFunction } from "./utils.js";
 
+
+
+export class TypeValidationError extends TypeError {
+  constructor(msg, data) {
+    super(msg);
+    this.rawData = data;
+  }
+  name = "TypeValidationError";
+
+}
 export class EnumValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors,msg);
+    this.rawData = data;
+  }
   name = "EnumValidationError";
 }
 export class SchemaValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors,msg);
+    this.rawData = data;
+  }
   name = "SchemaValidationError";
 }
 
 export class SeriesValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors,msg);
+    this.rawData = data;
+  }
   name = "SeriesValidationError";
 }
 
@@ -31,15 +53,15 @@ const formatErrorMessage = (type, value, path = []) =>
     )
   } do not match type ${stringify(type)}`;
 
-const throwError = ({ type, value, path, _Error = TypeError }) => {
-  throw new _Error(formatErrorMessage(type, value, path));
+const throwError = ({ type, value, path, $Error = TypeValidationError }) => {
+  throw new $Error(formatErrorMessage(type, value, path), {type, value,path});
 };
 const throwErrors = (
   errors,
-  { type, value, path, _Error = AggregateError },
+  { type, value, path, $Error = AggregateError },
 ) => {
   if (errors.length === 1) throw errors[0];
-  throw new _Error(errors, formatErrorMessage(type, value, path));
+  throw new $Error(errors, formatErrorMessage(type, value, path),{type, value,path});
 };
 
 const validOrThrow = (input, data) => {
@@ -149,7 +171,7 @@ const validSchemaOrThrow = ({
     throwErrors(errors, {
       type: schema,
       value: object,
-      _Error: SchemaValidationError,
+      $Error: SchemaValidationError,
     });
   }
   return true;
@@ -194,7 +216,7 @@ const validSeriesOrThrow = (conf, types, value) => {
     }
   }
   if (errors.length > 0) {
-    throwErrors(errors, { type: types, value, _Error: SeriesValidationError });
+    throwErrors(errors, { type: types, value, $Error: SeriesValidationError });
   }
   return true;
 };
@@ -214,7 +236,7 @@ const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
     type: types,
     value,
     path,
-    _Error: EnumValidationError,
+    $Error: EnumValidationError,
   });
 };
 
