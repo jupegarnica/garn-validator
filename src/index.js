@@ -222,7 +222,6 @@ const validSeriesOrThrow = (conf, types, value) => {
 };
 const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
   const errors = [];
-  debugger;
   for (const type of types) {
     try {
       if (isValidTypeOrThrow(conf, type, value, root, keyName, path)) {

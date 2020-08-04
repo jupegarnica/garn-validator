@@ -12,6 +12,8 @@
   ],
   "scripts": {
     "format": "deno fmt src",
+    "lint": "deno lint --unstable src/index.js",
+    "doc": "deno doc src/index.js",
     "run:docker": "docker-compose run node",
     "start": "npm run test:watch",
     "test": "npm run test:watch",
