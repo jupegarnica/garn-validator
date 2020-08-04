@@ -11,7 +11,7 @@ import {
   whatTypeIs,
 } from "./utils.js";
 
-export { AsyncFunction, GeneratorFunction } from "./utils.js";
+export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 
 

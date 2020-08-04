@@ -1,57 +1,9 @@
 import "./polyfills.js";
+import { AsyncFunction,GeneratorFunction,constructors } from "./constants.js";
+
 const isProxy = Proxy.isProxy;
-export const AsyncFunction = Object.getPrototypeOf(async function () {})
-  .constructor;
-export const GeneratorFunction = Object.getPrototypeOf(function* () {})
-  .constructor;
 
-const constructors = [
-  Object,
-  Function,
-  Array,
-  Number,
-  Boolean,
-  String,
-  Symbol,
-  Date,
-  Promise,
-  RegExp,
-  Map,
-  BigInt,
-  Set,
-  WeakMap,
-  WeakSet,
-  Proxy,
 
-  Error,
-  EvalError,
-  RangeError,
-  ReferenceError,
-  SyntaxError,
-  TypeError,
-  URIError,
-  ArrayBuffer,
-
-  Uint8Array,
-  Int8Array,
-  Uint16Array,
-  Int16Array,
-  Uint32Array,
-  Int32Array,
-  Float32Array,
-  Float64Array,
-  Uint8ClampedArray,
-  BigUint64Array,
-  BigInt64Array,
-  SharedArrayBuffer,
-  DataView,
-  URL,
-  URLSearchParams,
-  GeneratorFunction,
-  AsyncFunction,
-  // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
-  // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
-];
 export const isNullish = (val) => val === undefined || val === null;
 
 export const checkConstructor = (type, val) =>
@@ -68,10 +20,10 @@ export const isFunctionHacked = (fn) =>
   fn.toString.toString() !== "function toString() { [native code] }";
 
 export const isCustomValidator = (fn) =>
-  checkConstructor(Function, fn)
-  && !isInvalidType(fn)
-  && !isClass(fn)
-  && !isConstructor(fn);
+  checkConstructor(Function, fn) &&
+  !isInvalidType(fn) &&
+  !isClass(fn) &&
+  !isConstructor(fn);
 
 export const isInvalidType = (fn) =>
   checkConstructor(AsyncFunction, fn) ||
