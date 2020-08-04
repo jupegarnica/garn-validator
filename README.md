@@ -298,11 +298,11 @@ is(() => "I am truthy")(10); // true
 is(() => [])(10); // true
 ```
 
-To fail a validation may return falsy or throw and error.
+To fail a validation may return falsy or throw an error.
 
 if it returns a falsy value the default error will be thrown: TypeError
 
-if it throws and error that error will be thrown.
+if it throws an error that error will be thrown.
 
 ```js
 is( () => false ) (10); // throws TypeError
@@ -378,6 +378,7 @@ is(schema)(obj); // true
 
 ```js
 is({})({a:1}); // true , a is not in the schema
+
 ```
 
 #### Optional Keys
@@ -432,6 +433,8 @@ is({
 ```
 
 > **The required keys and optional won't be check against a regexp key**
+
+
 ```js
 is({
   [/./]: Number,
@@ -460,7 +463,8 @@ is({
 });      // throw
 ```
 
-This feature is perfect to note that any key not specified in schema is not allow
+This feature is perfect to note that any key not specified in schema is not allowed
+
 ```js
 is({
   x: String,
