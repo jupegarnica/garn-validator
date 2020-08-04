@@ -266,7 +266,7 @@ is(Car)(honda); // honda.constructor === Car  --> true
 
 ```js
 function Car(name) { this.name = name}
-let honda = new Car('honda);
+let honda = new Car('honda');
 is(Car)(honda);  // throws.  Car is detected as custom validator function
 ```
 
@@ -1243,23 +1243,22 @@ describe("AggregateError", () => {
 });
 
 describe("check with invalid validator", () => {
-  test('should detect async functions', () => {
+  test("should detect async functions", () => {
     try {
       isValidOrThrow(async () => false)(1);
-      throw 'mec';
+      throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
-  test('should detect generators', () => {
+  test("should detect generators", () => {
     try {
-      isValidOrThrow(function*(){})(1);
-      throw 'mec';
+      isValidOrThrow(function* () {})(1);
+      throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
-
 });
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -1646,5 +1645,17 @@ describe("isValidOrLogAllErrors", () => {
     );
   });
 });
+
+// describe("Composable errors", () => {
+//   test("should ", () => {
+//     const isNumber = isValidOrThrowAllErrors(
+//       Number,
+//       BigInt,
+//       (num) => num === Number(num),
+//     );
+//     throw hasErrors(isNumber)("a");
+
+//   });
+// });
 
 ```
