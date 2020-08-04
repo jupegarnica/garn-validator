@@ -42,16 +42,20 @@ const isValidOrThrow = require("garn-validator/commonjs").default;
 
 ##  Deno
 
-The library can be used as is in typescript without installation
+The library can be used as is in typescript
+
+Import from deno third party modules: [deno.land/x/garn_validator](https://deno.land/x/garn_validator)
 
 ```ts
 // mod.ts
-import is from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
+import is from "https://deno.land/x/garn_validator/src/index.js";
 ```
 
 <!-- import * as garnValidator from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.d.ts";
 // import IsValidOrThrow from "garn-validator/src/index.d.ts";
 // isValidOrThrow as typeof IsValidOrThrow; -->
+
+
 
 <!-- TODO ## Browser -->
 <!-- https://jspm.org/ -->
