@@ -9,7 +9,7 @@ Ultra fast runtime type validator without dependencies.
 # Features
 
 - Supports checking primitives or objects with schemas
-- Ultra light and **fast**  with **0 dependencies**
+- Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
 - 5 behaviors (`isValid`, `isValidOrThrow`, `isValidOrLogAllErrors`, `isValidOrLog` and `hasErrors`)
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
@@ -40,23 +40,28 @@ const { isValidOrThrow } = require("garn-validator/commonjs");
 const isValidOrThrow = require("garn-validator/commonjs").default;
 ```
 
-
 #### Import in Deno
 
 The library can be used as is in typescript without installation
 
 ```ts
-import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
+// mod.ts
+import is from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
 ```
 
+<!-- import * as garnValidator from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.d.ts";
+// import IsValidOrThrow from "garn-validator/src/index.d.ts";
+// isValidOrThrow as typeof IsValidOrThrow; -->
+
 ## Basic Usage
+
 ```js
 import is from "garn-validator"; // default export is isValidOrThrow
 
-const isValidUser = is({name: String, age: Number});
+const isValidUser = is({ name: String, age: Number });
 
-isValidUser({name:'garn', age: 38}); // true
-isValidUser({name:'garn', age: '38'}); // it throws
+isValidUser({ name: "garn", age: 38 }); // true
+isValidUser({ name: "garn", age: "38" }); // it throws
 ```
 
 ### Check against built-in constructors
@@ -64,8 +69,8 @@ isValidUser({name:'garn', age: '38'}); // it throws
 ```js
 is(Number)(2); // true
 is(String)(2); // it throws
-is(Array)([1,2]); // true
-is(Object)([1,2]); // it throws
+is(Array)([1, 2]); // true
+is(Object)([1, 2]); // it throws
 ```
 
 ### Check against primitive
@@ -83,84 +88,45 @@ is(/a/)("b"); // it throws
 ```
 
 ### Check against custom function
+
 ```js
-is( value => value > 0)(33); // true
-is( value => value > 0)(-1); // wil throw
-is( Number.isNaN )(NaN); // true
-is( Number.isInteger )(1); // true
-is( Number.isInteger )(1.1); // wil throw
+is((value) => value > 0)(33); // true
+is((value) => value > 0)(-1); // wil throw
+is(Number.isNaN)(NaN); // true
+is(Number.isInteger)(1.1); // wil throw
 ```
 
 ### Check against enums (OR operator)
+
 ```js
-is( ["a", "b"] )("a"); // true
-is( ["a", "b"] )("c"); // it throws
-is( [Number, String] )("18"); // true
-is( [null, undefined, false, v => v < 0] )(18); // it throws
+is(["a", "b"])("a"); // true
+is(["a", "b"])("c"); // it throws
+is([Number, String])("18"); // true
+is([null, undefined, false, 0, ""])(18); // it throws
 ```
 
-
 ### Check multiple validations (AND operator)
+
 ```js
-is(Array, array => array.length === 2)([1, 2]); // true
-is(v => v > 0, v => v < 50)(100); // it throws
+is(Array, (array) => array.length === 2)([1, 2]); // true
+is(
+  (v) => v > 0,
+  (v) => v < 50
+)(100); // it throws
 ```
 
 ### Check object against an schema
+
 ```js
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
 is(schema)(obj); // true
 
-is({ a: 1 })(obj); // true, a is 1
-is({ c: 1 })(obj); // it throws (c is missing)
+is({ a: 1 })({ a: 1, b: 2 }); // true, a must be 1
+is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 
-// check all keys that matches regex
-is({ [/[a-z]/]: Number })({
-  x: 1,
-  y: 2,
-  z: 3,
-  CONSTANT: "foo",
-}); // true, all lowercased keys are numbers
-
-// optional keys
-is({ x$: Number })({ x: 1 }); // true, x is present and is Number
-is({ x$: String })({ x: 1 }); // it throws, x is present but is not String
-is({ x$: String })({}); // true, x is undefined
-is({ x$: String })({x: null}); // true, x is null
-
-// you can use key$ or 'key?',
-// it would be nicer to have key? without quotes but is not valid JS
-
-is({ "x?": String })({}); // true
-
-
-// custom validation against root obj
-is({
-  max: (val, root, keyName) => val > root.min,
-  min: (val, root, keyName) => val < root.max,
-})({
-  max: 1,
-  min: -1,
-}); // true
-
-is({
-  max: (val, root, keyName) => val > root.min,
-  min: (val, root, keyName) => val < root.max,
-})({
-  max: 10,
-  min: 50,
-}); // it throws
-
-
-// check keyName
-is({
-  [/./]: (val, root, keyName) => keyName.length > 3
-})({
-  max: 1, // key too short
-  longKey: 1, // valid key
-}); // it throws, max key is too short
-
+// Optional keys
+is({ x$: String })({}); // true
 ```
 
 ### Composable
@@ -197,13 +163,6 @@ const isValidUser = is({
   password: isValidPassword,
   country: ["ES", "UK"],
 });
-
-isValidUser({
-  name: "garn",
-  age: 38,
-  password: "12345aA-",
-  country: "ES",
-}); // ok
 
 isValidUser({
   name: "garn",
@@ -253,11 +212,295 @@ hasErrors(/[a-z]/)("g"); // null
 hasErrors(/[a-z]/, Number)("G"); // [TypeError, TypeError]
 ```
 
+# In depth
+
+## Types of validations
+There are 6 types of validations: Primitives, Constructors, RegExp, Enums, Schemas and Custom functions
+
+### Primitives
+
+Checking a primitive is a === comparison
+
+Anything that is not and object in JS is a primitive: `Number`, `String`, `undefined`, `null` and `Symbol`
+
+```js
+is(1)(1); // true  1 === 1
+
+is("1")(1); // throws  '1' !== 1
+
+is(1n)(1); // throws  1n !== 1
+
+is(undefined)(null); // throws  undefined !== null
+
+// keep in mind than a symbol is only equal to itself
+let s = Symbol();
+is(s)(s); // true
+is(s)(Symbol()); // throws
+```
+
+### Constructors
+
+Checking against a constructor means to know if the value evaluated has been created from that constructor
+
+```js
+is(Number)(2); // (2).constructor === Number  --> true
+is(Symbol)(Symbol()); // true
+```
+
+A valid constructor is a `class` or any built-in constructors.
+
+```js
+class Car {}
+let honda = new Car();
+is(Car)(honda); // honda.constructor === Car  --> true
+```
+
+**You cannot use a normal function used as constructor from the old JS times.**
+
+```js
+function Car(name) { this.name = name}
+let honda = new Car('honda);
+is(Car)(honda);  // throws.  Car is detected as custom validator function
+```
+
+All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constants.js#L8) are supported
+
+### RegExp
+
+The perfect validator to check strings. It does what you expect:
+
+```js
+let isLowerCased = is(/^[a-z]+$/);
+
+isLowerCased("honda"); // /^[a-z]+$/.test('honda') --> true
+// or building a regexp with the constructor RexExp;
+is(new RegExp(/^[a-z]+$/))("honda"); //  true
+```
+
+### Custom function
+
+Any function that is not a constructor is treated as custom validator
+
+It must return any truthy value to pass the validation.
+
+```js
+is((val) => val >= 0)(10); // true
+is((val) => val >= 0)(-10); // throws
+
+is(() => "I am truthy")(10); // true
+is(() => [])(10); // true
+```
+
+To fail a validation may return falsy or throw and error.
+
+if it returns a falsy value the default error will be thrown: TypeError
+
+if it throws and error that error will be thrown.
+
+```js
+is( () => false ) (10); // throws TypeError
+is( () => 0 ) (10); // throws TypeError
+
+is( () => {
+  throw new RangeError('ups);
+} ) (10); // throws RangeError
+
+is( () => {
+  throw 'ups';
+} ) (10); // throws 'ups'
+```
+
+### Enums
+
+Enums works as OR operator. Must be an array which represent all options.
+
+```js
+let cities = ["valencia", "new york", "salzburg"];
+is(cities)("valencia"); // true
+is(cities)("madrid"); // throws
+```
+
+But is much more powerful than checking against primitives. It can contain any type of validator (Primitives, Constructors, RegExp, Enums, Schemas and Custom functions).
+
+It check every item until one passes.
+
+```js
+let isNumberOrBigInt = [Number, BigInt];
+is(isNumberOrBigInt)(1n); // true
+is(isNumberOrBigInt)(1); // true
+
+let isFalsy = [0, "", null, undefined, false];
+is(isFalsy)(""); // true
+
+let isNumberAlike = [Number, (val) => val === Number(val)];
+is(isNumberAlike)(1n); // true
+is(isNumberAlike)(1); // true
+is(isNumberAlike)("1"); // true
+```
+
+### Schema
+
+An Schema is just a plain object telling in each key which validation must pass.
+
+```js
+let schema = {
+  name: String, // required and be a Number
+  age: (age) => age > 18, // required and be a greater than 18
+  tel: [Number, String], // required and be Number or String
+  role: ["admin", "user"], // required and be 'admin' or 'user'
+  credentials: {
+    // must be and object and will be validate with this "subSchema"
+    pass: String,
+    email: String,
+  },
+};
+let obj = {
+  name: "garn",
+  age: 20,
+  tel: "+34617819234",
+  role: "admin",
+  credentials: {
+    pass: "1234",
+    email: "email@example.com",
+  },
+};
+is(schema)(obj); // true
+```
+
+**Only the keys in the schema will be checked.  Any key not present in the schema won't be checked**
+
+```js
+is({})({a:1}); // true , a is not in the schema
+```
+
+#### Optional Keys
+
+And optional key must be `undefined` , `null`, or pass the validation
+
+```js
+is({ x$: Number })({ x: 1 }); // true, x is present and is Number
+is({ x$: String })({ x: 1 }); // it throws, x is present but is not String
+
+is({ x$: String })({}); // true, x is undefined
+is({ x$: String })({ x: undefined}); // true, x is undefined
+is({ x$: String })({ x: null }); // true, x is null
+
+```
+You can use `key$` or `'key?'`. It would be nicer to have `key?` without quotes but is not valid JS
+
+```js
+is({ "x?": String })({}); // true
+```
+
+#### Regexp keys
+
+You can validate multiple keys at once using a regexp key
+```js
+
+is({
+  [/./]: String
+})({
+  a: 'a',
+  b: 'b',
+}); // true
+
+// or write it as plain string
+is({
+  '/./': String
+})({
+  a: 'a',
+  b: 1, // fails
+}); // throws
 
 
-<!--
-# Advanced
-##  Proxy detection -->
+// only checks the keys that matches regex
+is({
+  [/^[a-z]+$/]: Number,
+})({
+  x: 1,
+  y: 2,
+  z: 3,
+  CONSTANT: "foo", // not checked
+}); // true, all lowercased keys are numbers
+```
+
+**The required keys and optional won't be check against a regexp key**
+```js
+is({
+  [/./]: Number,
+  x: String,   //  this required key has priority against regex key
+})({
+  x:'x' // not checked as Number, checked as String
+}); // true,  x is String
+
+is({
+  [/./]: Number,
+  x: String,
+})({
+  x:'x', // not checked as Number, checked as String
+  y:'y', // checked as Number, fails
+});      // throw
+
+
+is({
+  [/./]: Number,
+  $x: String,
+  y: String,
+})({
+  x:'x', // not checked as Number, checked as String
+  y:'y', // checked as String
+  z:1    // checked as Number, fails
+});      // throw
+```
+
+This feature is perfect to note that any key not specified in schema is not allow
+```js
+is({
+  x: String,
+  [/./]: () => false,
+})({
+  x:'x',
+  y: 'y', // fails
+});
+
+```
+
+#### Custom validations used in schemas
+
+When using a custom validator inside an schema will be run with 3 arguments:  `(value, root, keyName) => {}`
+
+- value:  the value present in that key from the object
+- root: the whole object,  not matter how deep the validation occurs
+- keyName: the name of the key to be checked.
+
+```js
+//  against root obj
+is({
+  max: (val, root, keyName) => val > root.min,
+  min: (val, root, keyName) => val < root.max,
+})({
+  max: 1,
+  min: -1,
+}); // true
+
+is({
+  max: (val, root, keyName) => val > root.min,
+  min: (val, root, keyName) => val < root.max,
+})({
+  max: 10,
+  min: 50,
+}); // it throws
+
+// check keyName
+is({
+  [/./]: (val, root, keyName) => keyName.length > 3,
+})({
+  max: 1, // key too short
+  longKey: 1, // valid key
+}); // it throws, max key is too short
+```
+
+## Proxy detection
 
 ## Errors
 
@@ -265,9 +508,7 @@ If a validation fails by default it will throw `new TypeError(meaningfulMessage)
 
 If using a custom validator throws an error , that error will be thrown.
 
-
 ### SchemaValidationError using `isValidOrThrowAllErrors`
-
 
 If more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
 
@@ -275,34 +516,30 @@ If only one key fail it will throw only that Error (not an AggregateError)
 
 SchemaValidationError inherits from AggregateError,
 
-> But if using `isValidOrThrow`  only the first Error will be thrown.
-```js
+> But if using `isValidOrThrow` only the first Error will be thrown.
 
+```js
 // more than 2 keys fails
 try {
-  isValidOrThrowAllErrors({a:1,b:2})({});
+  isValidOrThrowAllErrors({ a: 1, b: 2 })({});
 } catch (error) {
   console.log(error instanceof SchemaValidationError); // true
   console.log(error instanceof AggregateError); // true
   console.log(error.errors.length); // 2
-
 }
 try {
-  isValidOrThrow({a:1,b:2})({});
+  isValidOrThrow({ a: 1, b: 2 })({});
 } catch (error) {
   console.log(error instanceof SchemaValidationError); // false
   console.log(error instanceof TypeError); // true
-
 }
-
 
 // only 1 key fails
 try {
-  isValidOrThrowAllErrors({a:1})({});
+  isValidOrThrowAllErrors({ a: 1 })({});
 } catch (error) {
   console.log(error instanceof TypeError); // true
   console.log(error instanceof SchemaValidationError); // false
-
 }
 ```
 
@@ -316,25 +553,19 @@ EnumValidationError inherits from AggregateError.
 
 ```js
 try {
-  isValidOrThrow([
-    Boolean,
-    String,
-  ])(1);
+  isValidOrThrow([Boolean, String])(1);
 } catch (error) {
   console.log(error instanceof EnumValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
-  isValidOrThrow([
-    Boolean,
-  ])(1);
+  isValidOrThrow([Boolean])(1);
 } catch (error) {
   console.log(error instanceof EnumValidationError); // false
   console.log(error instanceof TypeError); // true
 }
 ```
-
 
 ### SeriesValidationError using `isValidOrThrowAllErrors`
 
@@ -344,22 +575,16 @@ But if the length of the enum is 1. it will throw only this error.
 
 SeriesValidationError inherits from AggregateError.
 
-
 ```js
 try {
-  isValidOrThrowAllErrors(
-    Boolean,
-    String,
-  )(1);
+  isValidOrThrowAllErrors(Boolean, String)(1);
 } catch (error) {
   console.log(error instanceof SeriesValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
-  isValidOrThrowAllErrors(
-    Boolean,
-  )(1);
+  isValidOrThrowAllErrors(Boolean)(1);
 } catch (error) {
   console.log(error instanceof SeriesValidationError); // false
   console.log(error instanceof TypeError); // true
@@ -368,8 +593,7 @@ try {
 
 ### hasErrors
 
-hasError will flatMap all errors found.  No AggregateError will be in the array returned.
-
+hasError will flatMap all errors found. No AggregateError will be in the array returned.
 
 ## Especial cases
 
@@ -448,13 +672,13 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
 <!-- inject tests -->
+
 #### schema.test.js
 
 [schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
 
 ```js
 import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
-
 
 describe("check schema", () => {
   test("check with constructor", () => {
@@ -651,8 +875,8 @@ describe("optional keys", () => {
     expect(isValid({ a$: Number })({})).toBe(true);
   });
   test("if the key is null or undefined should be valid", () => {
-    expect(isValid({ a$: Number })({a:undefined})).toBe(true);
-    expect(isValid({ a$: Number })({a:null})).toBe(true);
+    expect(isValid({ a$: Number })({ a: undefined })).toBe(true);
+    expect(isValid({ a$: Number })({ a: null })).toBe(true);
   });
   test("should work ending with $ or ?", () => {
     expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
@@ -721,7 +945,7 @@ describe("special cases", () => {
     }).toThrow();
   });
 });
-describe('check Array against an schema', () => {
+describe("check Array against an schema", () => {
   test("should check an Array as an object", () => {
     expect(() => {
       isValidOrThrow({
@@ -762,7 +986,6 @@ describe("check String against an schema", () => {
       })("Lorem");
     }).toThrow();
   });
-
 });
 
 describe("check a function against an schema", () => {
@@ -779,7 +1002,6 @@ describe("check a function against an schema", () => {
       })(fn);
     }).toThrow();
   });
-
 });
 
 describe("arrayOf", () => {
@@ -858,7 +1080,6 @@ describe("should check instances", () => {
     }).toThrow();
   });
 });
-
 ```
 
 #### custom-validator.test.js
@@ -867,7 +1088,6 @@ describe("should check instances", () => {
 
 ```js
 import isValidOrThrow from "garn-validator";
-
 
 describe("check with custom validator", () => {
   test("you can return true or false", () => {
@@ -884,19 +1104,17 @@ describe("check with custom validator", () => {
       isValidOrThrow(() => {
         throw "ups";
       })(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBe('ups');
-
+      expect(error).toBe("ups");
     }
   });
   test("by default throws TypeError", () => {
     try {
       isValidOrThrow(Boolean)(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBeInstanceOf(TypeError)
-
+      expect(error).toBeInstanceOf(TypeError);
     }
   });
   test("you can throw a custom type of error", () => {
@@ -904,16 +1122,13 @@ describe("check with custom validator", () => {
       isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBeInstanceOf(RangeError)
-      expect(error).not.toBeInstanceOf(TypeError)
-
+      expect(error).toBeInstanceOf(RangeError);
+      expect(error).not.toBeInstanceOf(TypeError);
     }
-
   });
 });
-
 ```
 
 #### errors.test.js
@@ -1012,23 +1227,22 @@ describe("AggregateError", () => {
 });
 
 describe("check with invalid validator", () => {
-  test('should detect async functions', () => {
+  test("should detect async functions", () => {
     try {
       isValidOrThrow(async () => false)(1);
-      throw 'mec';
+      throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
-  test('should detect generators', () => {
+  test("should detect generators", () => {
     try {
-      isValidOrThrow(function*(){})(1);
-      throw 'mec';
+      isValidOrThrow(function* () {})(1);
+      throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
-
 });
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -1415,5 +1629,4 @@ describe("isValidOrLogAllErrors", () => {
     );
   });
 });
-
 ```
