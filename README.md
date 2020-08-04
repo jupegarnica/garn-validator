@@ -465,7 +465,7 @@ is({
 
 ```
 
-#### Custom validations used in schemas
+#### Custom validation used in schemas
 
 When using a custom validator inside an schema will be run with 3 arguments:  `(value, root, keyName) => {}`
 
@@ -491,7 +491,7 @@ is({
   min: 50,
 }); // it throws
 
-// check keyName
+// all key must be at least 3 characters
 is({
   [/./]: (val, root, keyName) => keyName.length > 3,
 })({
@@ -499,8 +499,7 @@ is({
   longKey: 1, // valid key
 }); // it throws, max key is too short
 ```
-
-## Proxy detection
+<!-- TODO ## Proxy detection -->
 
 ## Errors
 
@@ -672,13 +671,13 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
 <!-- inject tests -->
-
 #### schema.test.js
 
 [schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
 
 ```js
 import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
+
 
 describe("check schema", () => {
   test("check with constructor", () => {
@@ -875,8 +874,8 @@ describe("optional keys", () => {
     expect(isValid({ a$: Number })({})).toBe(true);
   });
   test("if the key is null or undefined should be valid", () => {
-    expect(isValid({ a$: Number })({ a: undefined })).toBe(true);
-    expect(isValid({ a$: Number })({ a: null })).toBe(true);
+    expect(isValid({ a$: Number })({a:undefined})).toBe(true);
+    expect(isValid({ a$: Number })({a:null})).toBe(true);
   });
   test("should work ending with $ or ?", () => {
     expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
@@ -945,7 +944,7 @@ describe("special cases", () => {
     }).toThrow();
   });
 });
-describe("check Array against an schema", () => {
+describe('check Array against an schema', () => {
   test("should check an Array as an object", () => {
     expect(() => {
       isValidOrThrow({
@@ -986,6 +985,7 @@ describe("check String against an schema", () => {
       })("Lorem");
     }).toThrow();
   });
+
 });
 
 describe("check a function against an schema", () => {
@@ -1002,6 +1002,7 @@ describe("check a function against an schema", () => {
       })(fn);
     }).toThrow();
   });
+
 });
 
 describe("arrayOf", () => {
@@ -1080,6 +1081,7 @@ describe("should check instances", () => {
     }).toThrow();
   });
 });
+
 ```
 
 #### custom-validator.test.js
@@ -1088,6 +1090,7 @@ describe("should check instances", () => {
 
 ```js
 import isValidOrThrow from "garn-validator";
+
 
 describe("check with custom validator", () => {
   test("you can return true or false", () => {
@@ -1104,17 +1107,19 @@ describe("check with custom validator", () => {
       isValidOrThrow(() => {
         throw "ups";
       })(33);
-      throw "mec";
+      throw 'mec'
     } catch (error) {
-      expect(error).toBe("ups");
+      expect(error).toBe('ups');
+
     }
   });
   test("by default throws TypeError", () => {
     try {
       isValidOrThrow(Boolean)(33);
-      throw "mec";
+      throw 'mec'
     } catch (error) {
-      expect(error).toBeInstanceOf(TypeError);
+      expect(error).toBeInstanceOf(TypeError)
+
     }
   });
   test("you can throw a custom type of error", () => {
@@ -1122,13 +1127,16 @@ describe("check with custom validator", () => {
       isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
-      throw "mec";
+      throw 'mec'
     } catch (error) {
-      expect(error).toBeInstanceOf(RangeError);
-      expect(error).not.toBeInstanceOf(TypeError);
+      expect(error).toBeInstanceOf(RangeError)
+      expect(error).not.toBeInstanceOf(TypeError)
+
     }
+
   });
 });
+
 ```
 
 #### errors.test.js
@@ -1227,22 +1235,23 @@ describe("AggregateError", () => {
 });
 
 describe("check with invalid validator", () => {
-  test("should detect async functions", () => {
+  test('should detect async functions', () => {
     try {
       isValidOrThrow(async () => false)(1);
-      throw "mec";
+      throw 'mec';
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
-  test("should detect generators", () => {
+  test('should detect generators', () => {
     try {
-      isValidOrThrow(function* () {})(1);
-      throw "mec";
+      isValidOrThrow(function*(){})(1);
+      throw 'mec';
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
     }
   });
+
 });
 describe("check errors", () => {
   test("by default throws TypeError", () => {
@@ -1629,4 +1638,5 @@ describe("isValidOrLogAllErrors", () => {
     );
   });
 });
+
 ```
