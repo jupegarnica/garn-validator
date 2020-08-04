@@ -30,7 +30,7 @@ describe("check numbers", () => {
   });
   test('BigInts against primitive', () => {
     expect(() => {
-      isValidOrThrow(1n)(2n);
+      isValidOrThrow(1)(1n);
     }).toThrow();
     expect(() => {
       isValidOrThrow(1n)(1n);
@@ -48,6 +48,9 @@ describe("check numbers", () => {
     expect(() => {
       isValidOrThrow((val) => val === 33)(33n);
     }).toThrow();
+    expect(() => {
+      isValidOrThrow((val) => val == 33)(33n);
+    }).not.toThrow();
 
   });
   test("check with custom validator", () => {

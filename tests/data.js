@@ -10,6 +10,12 @@ export const constructors = [
   Date,
   Promise,
   RegExp,
+  Map,
+  BigInt,
+  Set,
+  WeakMap,
+  WeakSet,
+  Proxy,
 
   Error,
   EvalError,
@@ -31,19 +37,14 @@ export const constructors = [
   Uint8ClampedArray,
   BigUint64Array,
   BigInt64Array,
-  DataView,
-  Map,
-  BigInt,
-  Set,
-  WeakMap,
-  WeakSet,
-  Proxy,
   SharedArrayBuffer,
+  DataView,
   URL,
   URLSearchParams,
   // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ];
+
 export const notConstructors = [
   // Intl, // not suported in deno
   Reflect,

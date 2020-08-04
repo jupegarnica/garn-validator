@@ -3,7 +3,7 @@ import {
   isPrimitive,
   isConstructor,
   isCustomValidator,
-  isFunction,
+  isFunctionHacked,
   stringify,
   isClass,
   whatTypeIs,
@@ -137,8 +137,6 @@ describe("isConstructor", () => {
   test.each([
     [Object, true],
     [Array, true],
-    [Fn, true],
-    [function Name() {}, true],
     [class myClass {}, true],
     [class MyClass {}, true],
     [Promise, true],
@@ -152,6 +150,8 @@ describe("isConstructor", () => {
     [FnAsync, false],
     [fnArrow, false],
     [FnArrow, false],
+    [Fn, false],
+    [function Name() {}, false],
     [function name() {}, false],
     [Math, false],
   ])("isConstructor(%s) === %p", (value, expected) => {
@@ -168,23 +168,23 @@ describe("isConstructor", () => {
   );
 });
 
-describe("isFunction not hacked", () => {
+describe("isFunctionHacked ", () => {
   function hack() {}
   hack.toString = () => "class {}";
 
   test.each([
-    [function () {}, true],
-    [function* () {}, true],
-    [async function () {}, true],
-    [function Name() {}, true],
-    [(classArg) => classArg, true],
-    [Array.isArray, true],
+    [function () {}, false],
+    [function* () {}, false],
+    [async function () {}, false],
+    [function Name() {}, false],
+    [(classArg) => classArg, false],
+    [Array.isArray, false],
 
     [class {}, false],
     [class MyClass {}, false],
-    [hack, false],
+    [hack, true],
   ])("input %p should return %p", (input, expected) => {
-    expect(isFunction(input)).toBe(expected);
+    expect(isFunctionHacked(input)).toBe(expected);
   });
 });
 describe("isClass", () => {
@@ -210,12 +210,13 @@ describe("isClass", () => {
   });
 });
 
-describe("isCustomValidator:detect if a function is anonymous or its name starts with lowercase", () => {
+describe("isCustomValidator", () => {
   test.each([
     [() => {}, true],
     [function name() {}, true],
     [function () {}, true],
     [Object, false],
+    [Number, false],
     [Object.is, true],
     ["asdasd", false],
     [1, false],
@@ -277,7 +278,6 @@ describe("stringify", () => {
     );
   });
 });
-// TODO make it fail
 describe("whatTypeIs", () => {
   test.each(constructors)("whatTypeIs(%s) is constructor", (input) => {
     expect(whatTypeIs(input)).toBe("constructor");
@@ -292,7 +292,7 @@ describe("whatTypeIs", () => {
     ["undefined", "primitive"],
     [() => {}, "validator"],
     // [VALIDATOR, 'validator'],
-    [class {}, "constructor"],
+    [class Car{}, "constructor"],
 
     [async () => {}, "invalid"], // noy yet supported
     [function* () {}, "invalid"], // noy yet supported

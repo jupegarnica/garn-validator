@@ -1,10 +1,57 @@
 import "./polyfills.js";
 const isProxy = Proxy.isProxy;
-
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
   .constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
   .constructor;
+
+const constructors = [
+  Object,
+  Function,
+  Array,
+  Number,
+  Boolean,
+  String,
+  Symbol,
+  Date,
+  Promise,
+  RegExp,
+  Map,
+  BigInt,
+  Set,
+  WeakMap,
+  WeakSet,
+  Proxy,
+
+  Error,
+  EvalError,
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError,
+  ArrayBuffer,
+
+  Uint8Array,
+  Int8Array,
+  Uint16Array,
+  Int16Array,
+  Uint32Array,
+  Int32Array,
+  Float32Array,
+  Float64Array,
+  Uint8ClampedArray,
+  BigUint64Array,
+  BigInt64Array,
+  SharedArrayBuffer,
+  DataView,
+  URL,
+  URLSearchParams,
+  GeneratorFunction,
+  AsyncFunction,
+  // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
+  // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
+];
 export const isNullish = (val) => val === undefined || val === null;
 
 export const checkConstructor = (type, val) =>
@@ -16,58 +63,37 @@ export const isClass = (fn) =>
   /^\bclass(?!\$)\b/.test(fn.toString()) &&
   !isFunctionHacked(fn);
 
-export const isFunction = (fn) =>
-  // checkConstructor(Function, fn)
-  typeof fn === "function" && !isClass(fn) && !isFunctionHacked(fn);
-
 export const isFunctionHacked = (fn) =>
   typeof fn === "function" &&
   fn.toString.toString() !== "function toString() { [native code] }";
 
 export const isCustomValidator = (fn) =>
-  checkConstructor(Function, fn) &&
-  !isClass(fn) &&
-  (!fn.name || fn.name[0] === fn.name[0].toLowerCase());
+  checkConstructor(Function, fn)
+  && !isInvalidType(fn)
+  && !isClass(fn)
+  && !isConstructor(fn);
 
 export const isInvalidType = (fn) =>
   checkConstructor(AsyncFunction, fn) ||
   checkConstructor(GeneratorFunction, fn);
+
 export function isConstructor(f) {
   if (!f) return false;
-  // if (!checkConstructor(Function, f)) return false
-  if (isClass(f)) return true;
+  if (typeof f !== "function") return false;
+  if (!f.name) return false;
   if (!f.constructor) return false;
-  // Not created with new
-  if (f.name === "Symbol") return true;
-  if (f.name === "BigInt") return true;
-
-  // needs especial params to be instantiated
-  if (f.name === "Promise") return true;
-  if (f.name === "DataView") return true;
-  if (f.name === "Proxy") return true;
-  if (f.name === "URL") return true;
-  // detect custom validator (anonymous or its name starts with lowercase)
-  if (isCustomValidator(f)) return false;
-  // TODO: try to not instantiate
-  try {
-    new f();
-    return true;
-  } catch (err) {
-    return false;
-  }
+  if (isClass(f)) return true;
+  return constructors.some((c) => c === f);
 }
 
 export const whatTypeIs = (type) => {
   if (checkConstructor(Object, type)) return "schema";
   if (isPrimitive(type)) return "primitive";
-  if (isCustomValidator(type)) return "validator";
   if (Array.isArray(type)) return "enum";
   if (checkConstructor(RegExp, type)) return "regex";
-  if (isInvalidType(type)) return "invalid";
-  // try to avoid isConstructor
-  return "constructor";
-  // if (isConstructor(type)) return "constructor";
-  // throw new Error("Invalid type " + stringify(type));
+  if (isConstructor(type)) return "constructor";
+  if (isCustomValidator(type)) return "validator";
+  return "invalid";
 };
 
 // fails in ArrayBuffer
