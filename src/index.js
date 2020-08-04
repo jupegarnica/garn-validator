@@ -15,14 +15,14 @@ export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 
 
-export class TypeValidationError extends TypeError {
-  constructor(msg, data) {
-    super(msg);
-    this.rawData = data;
-  }
-  name = "TypeValidationError";
+// export class TypeValidationError extends TypeError {
+//   constructor(msg, data) {
+//     super(msg);
+//     this.rawData = data;
+//   }
+//   name = "TypeValidationError";
 
-}
+// }
 export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors,msg);
@@ -53,7 +53,7 @@ const formatErrorMessage = (type, value, path = []) =>
     )
   } do not match type ${stringify(type)}`;
 
-const throwError = ({ type, value, path, $Error = TypeValidationError }) => {
+const throwError = ({ type, value, path, $Error = TypeError }) => {
   throw new $Error(formatErrorMessage(type, value, path), {type, value,path});
 };
 const throwErrors = (
