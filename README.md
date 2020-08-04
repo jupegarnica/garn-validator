@@ -255,7 +255,7 @@ let honda = new Car();
 is(Car)(honda); // honda.constructor === Car  --> true
 ```
 
-**You cannot use a normal function used as constructor from the old JS times.**
+> **You cannot use a normal function used as constructor from the old JS times.**
 
 ```js
 function Car(name) { this.name = name}
@@ -367,7 +367,7 @@ let obj = {
 is(schema)(obj); // true
 ```
 
-**Only the keys in the schema will be checked.  Any key not present in the schema won't be checked**
+> **Only the keys in the schema will be checked.  Any key not present in the schema won't be checked**
 
 ```js
 is({})({a:1}); // true , a is not in the schema
@@ -424,7 +424,7 @@ is({
 }); // true, all lowercased keys are numbers
 ```
 
-**The required keys and optional won't be check against a regexp key**
+> **The required keys and optional won't be check against a regexp key**
 ```js
 is({
   [/./]: Number,
@@ -499,6 +499,7 @@ is({
   longKey: 1, // valid key
 }); // it throws, max key is too short
 ```
+<!-- TODO ## Validations in series -->
 <!-- TODO ## Proxy detection -->
 
 ## Errors
