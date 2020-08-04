@@ -1,5 +1,13 @@
 import { isValidOrThrow } from "garn-validator";
-// import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
+
+
+// import IsValidOrThrow from "garn-validator/src/index.d.ts";
+
+// isValidOrThrow as typeof IsValidOrThrow;
+
+// let n : string= isValidOrThrow(Number)(2);
+
+// console.log(n);
 
 const schema = {
   name: /^[a-z]{3,10}$/,
