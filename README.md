@@ -1,4 +1,4 @@
-# garn-validator
+<h1>garn-validator</h1>
 
 Ultra fast runtime type validator without dependencies.
 
@@ -6,7 +6,7 @@ Ultra fast runtime type validator without dependencies.
 
 ![Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Tests%20CI/badge.svg)
 
-# Features
+<h1>Features</h1>
 
 - Supports checking primitives or objects with schemas
 - Ultra light and **fast** with **0 dependencies**
@@ -15,15 +15,59 @@ Ultra fast runtime type validator without dependencies.
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
+<h1>Contents</h1>
+
+- [Get started](#get-started)
+  - [Node](#node)
+    - [Import with ES Modules](#import-with-es-modules)
+    - [Require with CommonJs](#require-with-commonjs)
+  - [Deno](#deno)
+  - [Basic Usage](#basic-usage)
+    - [Check against built-in constructors](#check-against-built-in-constructors)
+    - [Check against primitive](#check-against-primitive)
+    - [Check string against regex](#check-string-against-regex)
+    - [Check against custom function](#check-against-custom-function)
+    - [Check against enums (OR operator)](#check-against-enums-or-operator)
+    - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
+    - [Check object against an schema](#check-object-against-an-schema)
+    - [Composable](#composable)
+    - [Behaviors](#behaviors)
+- [In depth](#in-depth)
+  - [Types of validations](#types-of-validations)
+    - [Primitives](#primitives)
+    - [Constructors](#constructors)
+    - [RegExp](#regexp)
+    - [Custom function](#custom-function)
+    - [Enums](#enums)
+    - [Schema](#schema)
+      - [Optional Keys](#optional-keys)
+      - [Regexp keys](#regexp-keys)
+      - [Custom validation used in schemas](#custom-validation-used-in-schemas)
+  - [Errors](#errors)
+    - [SchemaValidationError using `isValidOrThrowAllErrors`](#schemavalidationerror-using-isvalidorthrowallerrors)
+    - [EnumValidationError](#enumvalidationerror)
+    - [SeriesValidationError using `isValidOrThrowAllErrors`](#seriesvalidationerror-using-isvalidorthrowallerrors)
+    - [hasErrors](#haserrors)
+  - [Especial cases](#especial-cases)
+    - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
+    - [arrayOf](#arrayof)
+    - [objectOf](#objectof)
+- [Roadmap](#roadmap)
+- [Examples](#examples)
+      - [schema.test.js](#schematestjs)
+      - [custom-validator.test.js](#custom-validatortestjs)
+      - [errors.test.js](#errorstestjs)
+
 # Get started
 
-## Install
+## Node
+
 
 ```bash
 npm install garn-validator
 ```
 
-#### Import with ES Modules
+### Import with ES Modules
 
 ```js
 // default export is isValidOrThrow
@@ -32,7 +76,7 @@ import isValidOrThrow from "garn-validator";
 import { isValidOrThrow } from "garn-validator";
 ```
 
-#### Require with CommonJs
+### Require with CommonJs
 
 ```js
 const { isValidOrThrow } = require("garn-validator/commonjs");
