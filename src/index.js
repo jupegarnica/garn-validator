@@ -13,55 +13,60 @@ import {
 
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
-
 // TODO
 // export class TypeValidationError extends TypeError {
 //   constructor(msg, data) {
 //     super(msg);
+// this.name = "TypeValidationError";
 //     this.rawData = data;
 //   }
-//   name = "TypeValidationError";
 
 // }
 export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
-    super(errors,msg);
+    super(errors, msg);
+    this.name = "EnumValidationError";
     this.rawData = data;
   }
-  name = "EnumValidationError";
 }
 export class SchemaValidationError extends AggregateError {
   constructor(errors, msg, data) {
-    super(errors,msg);
+    super(errors, msg);
+    this.name = "SchemaValidationError";
     this.rawData = data;
   }
-  name = "SchemaValidationError";
 }
 
 export class SeriesValidationError extends AggregateError {
   constructor(errors, msg, data) {
-    super(errors,msg);
+    super(errors, msg);
+    this.name = "SeriesValidationError";
     this.rawData = data;
   }
-  name = "SeriesValidationError";
 }
 
 const formatErrorMessage = (type, value, path = []) =>
-  `${path.length ? `on path /${path.join("/")} ` : ""}value ${
-    stringify(
-      value,
-    )
-  } do not match type ${stringify(type)}`;
+  `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
+    value
+  )} do not match type ${stringify(type)}`;
 
 const throwError = ({ type, value, path, $Error = TypeError }) => {
-  throw new $Error(formatErrorMessage(type, value, path), {type, value,path});
+  throw new $Error(formatErrorMessage(type, value, path), {
+    type,
+    value,
+    path,
+  });
 };
 const throwErrors = (
   errors,
-  { type, value, path, $Error = AggregateError },
+  { type, value, path, $Error = AggregateError }
 ) => {
   if (errors.length === 1) throw errors[0];
-  throw new $Error(errors, formatErrorMessage(type, value, path),{type, value,path});
+  throw new $Error(errors, formatErrorMessage(type, value, path), {
+    type,
+    value,
+    path,
+  });
 };
 
 const validOrThrow = (input, data) => {
@@ -101,7 +106,7 @@ const validSchemaOrThrow = ({
         object[keyName],
         object,
         keyName,
-        currentPath,
+        currentPath
       );
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -120,14 +125,15 @@ const validSchemaOrThrow = ({
       const currentPath = [...path, keyNameStripped];
       let type = schema[keyName];
       let value = object[keyNameStripped];
-      isNullish(value) || isValidTypeOrThrow(
-        conf,
-        type,
-        value,
-        object,
-        keyNameStripped,
-        currentPath,
-      );
+      isNullish(value) ||
+        isValidTypeOrThrow(
+          conf,
+          type,
+          value,
+          object,
+          keyNameStripped,
+          currentPath
+        );
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -141,7 +147,7 @@ const validSchemaOrThrow = ({
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key),
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
     );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
@@ -156,7 +162,7 @@ const validSchemaOrThrow = ({
           object[keyName],
           object,
           keyName,
-          currentPath,
+          currentPath
         );
       } catch (error) {
         if (!conf.collectAllErrors) {
@@ -256,22 +262,20 @@ const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
 
     case "invalid":
       throw new SyntaxError(
-        `checking with validator ${stringify(type)} not supported`,
+        `checking with validator ${stringify(type)} not supported`
       );
   }
 };
 
-const run = (conf) =>
-  (...types) =>
-    (value) => {
-      try {
-        validSeriesOrThrow(conf, types, value);
-      } catch (error) {
-        return conf.onFinishWithError(error);
-      }
+const run = (conf) => (...types) => (value) => {
+  try {
+    validSeriesOrThrow(conf, types, value);
+  } catch (error) {
+    return conf.onFinishWithError(error);
+  }
 
-      return conf.onFinishSuccess();
-    };
+  return conf.onFinishSuccess();
+};
 
 const config = ({
   collectAllErrors = false,
