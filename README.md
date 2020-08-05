@@ -584,12 +584,6 @@ try {
   console.log(error instanceof AggregateError); // true
   console.log(error.errors.length); // 2
 }
-try {
-  isValidOrThrow({ a: 1, b: 2 })({});
-} catch (error) {
-  console.log(error instanceof SchemaValidationError); // false
-  console.log(error instanceof TypeError); // true
-}
 
 // only 1 key fails
 try {
