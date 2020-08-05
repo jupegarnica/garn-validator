@@ -26,14 +26,14 @@ export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
     this.name = "EnumValidationError";
-    this.rawData = data;
+    this.raw = data;
   }
 }
 export class SchemaValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
     this.name = "SchemaValidationError";
-    this.rawData = data;
+    this.raw = data;
   }
 }
 
@@ -41,7 +41,7 @@ export class SeriesValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
     this.name = "SeriesValidationError";
-    this.rawData = data;
+    this.raw = data;
   }
 }
 
@@ -50,12 +50,20 @@ const formatErrorMessage = (type, value, path = []) =>
     value
   )} do not match type ${stringify(type)}`;
 
-const throwError = ({ type, value, path, $Error = TypeError }) => {
-  throw new $Error(formatErrorMessage(type, value, path), {
+const throwError = ({ type, value, path, root, $Error = TypeError }) => {
+  let error = new $Error(formatErrorMessage(type, value, path), {
     type,
     value,
     path,
+    root
   });
+  error.raw = {
+    type,
+    value,
+    path,
+    root
+  }
+  throw error
 };
 const throwErrors = (
   errors,
@@ -89,10 +97,11 @@ const validSchemaOrThrow = ({
   conf,
   type: schema,
   value: object,
+  root = object,
   path = [],
 }) => {
   if (!(object instanceof Object || typeof object === "string")) {
-    return throwError({ type: schema, value: object });
+    return throwError({ type: schema, value: object, root, path });
   }
 
   let requiredErrors = [];
@@ -104,9 +113,9 @@ const validSchemaOrThrow = ({
         conf,
         schema[keyName],
         object[keyName],
-        object,
+        root,
         keyName,
-        currentPath
+        currentPath,
       );
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -130,7 +139,7 @@ const validSchemaOrThrow = ({
           conf,
           type,
           value,
-          object,
+          root,
           keyNameStripped,
           currentPath
         );
@@ -160,7 +169,7 @@ const validSchemaOrThrow = ({
           conf,
           schema[regexpString],
           object[keyName],
-          object,
+          root,
           keyName,
           currentPath
         );
