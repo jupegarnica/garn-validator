@@ -11,7 +11,7 @@ Ultra fast runtime type validator without dependencies.
 - Supports checking primitives or objects with schemas
 - Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
-- 5 behaviors (`isValid`, `isValidOrThrow`, `isValidOrLogAllErrors`, `isValidOrLog` and `hasErrors`)
+- 6 behaviors: `hasErrors`, `isValid`, `isValidOrThrow`,`isValidOrLog`, `isValidOrLogAllErrors` and `isValidOrThrowAllErrors`.
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
@@ -23,7 +23,7 @@ Ultra fast runtime type validator without dependencies.
     - [Require with CommonJs](#require-with-commonjs)
   - [Deno](#deno)
   - [Basic Usage](#basic-usage)
-    - [Check against constructors](#check-against-constructors)
+    - [Check against constructor](#check-against-constructor)
     - [Check against primitive](#check-against-primitive)
     - [Check string against regex](#check-string-against-regex)
     - [Check against custom function](#check-against-custom-function)
@@ -115,7 +115,7 @@ isValidUser({ name: "garn", age: 38 }); // true
 isValidUser({ name: "garn", age: "38" }); // it throws
 ```
 
-### Check against constructors
+### Check against constructor
 
 ```js
 is(Number)(2); // true
@@ -225,14 +225,16 @@ isValidUser({
 
 ### Behaviors
 
-There are 5 behaviors you can import:
+There are 6 behaviors that can be divided in 2 categories:
 
-- `isValidOrThrow` (returns true of throw the first error found)
-- `hasErrors` (return null or array of errors, never throws)
-- `isValid` (returns true or false, never throws)
-- `isValidOrLog` (returns true or false and log first error, never throws)
-- `isValidOrLogAllErrors` (returns true or false and log all errors, never throws)
-- `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
+- Stop in first Error:
+  - `isValidOrThrow` (returns true of throw the first error found)
+  - `isValid` (returns true or false, never throws)
+  - `isValidOrLog` (returns true or false and log first error, never throws)
+- Collect all Errors:
+  - `hasErrors` (return null or array of errors, never throws)
+  - `isValidOrLogAllErrors` (returns true or false and log all errors, never throws)
+  - `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
 
 The default export is `isValidOrThrow`
 
