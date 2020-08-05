@@ -677,7 +677,7 @@ is(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
 
 To not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
 
-`export const arrayOf = type => isValidOrThrow(Array, {[/^\d$/]: type})`
+`export const arrayOf = type => isValid(Array, {[/^\d$/]: type})`
 
 ```js
 import is, { arrayOf } from "garn-validator";
@@ -690,7 +690,7 @@ is(arrayOf(Number))([1, 2, "3"]); // throws
 
 You can import `objectOf` from garn-validator as a shortcut to:
 
-`export const objectOf = type => isValidOrThrow(Object, {[/./]: type})`
+`export const objectOf = type => isValid(Object, {[/./]: type})`
 
 ```js
 import is, { objectOf } from "garn-validator";
