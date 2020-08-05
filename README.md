@@ -23,7 +23,7 @@ Ultra fast runtime type validator without dependencies.
     - [Require with CommonJs](#require-with-commonjs)
   - [Deno](#deno)
   - [Basic Usage](#basic-usage)
-    - [Check against built-in constructors](#check-against-built-in-constructors)
+    - [Check against constructors](#check-against-constructors)
     - [Check against primitive](#check-against-primitive)
     - [Check string against regex](#check-string-against-regex)
     - [Check against custom function](#check-against-custom-function)
@@ -44,9 +44,9 @@ Ultra fast runtime type validator without dependencies.
       - [Regexp keys](#regexp-keys)
       - [Custom validation used in schemas](#custom-validation-used-in-schemas)
   - [Errors](#errors)
-    - [SchemaValidationError using `isValidOrThrowAllErrors`](#schemavalidationerror-using-isvalidorthrowallerrors)
+    - [SchemaValidationError using isValidOrThrowAllErrors](#schemavalidationerror-using-isvalidorthrowallerrors)
     - [EnumValidationError](#enumvalidationerror)
-    - [SeriesValidationError using `isValidOrThrowAllErrors`](#seriesvalidationerror-using-isvalidorthrowallerrors)
+    - [SeriesValidationError using isValidOrThrowAllErrors](#seriesvalidationerror-using-isvalidorthrowallerrors)
     - [hasErrors](#haserrors)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
@@ -115,7 +115,7 @@ isValidUser({ name: "garn", age: 38 }); // true
 isValidUser({ name: "garn", age: "38" }); // it throws
 ```
 
-### Check against built-in constructors
+### Check against constructors
 
 ```js
 is(Number)(2); // true
@@ -563,7 +563,7 @@ If a validation fails by default it will throw `new TypeError(meaningfulMessage)
 
 If using a custom validator throws an error , that error will be thrown.
 
-### SchemaValidationError using `isValidOrThrowAllErrors`
+### SchemaValidationError using isValidOrThrowAllErrors
 
 If more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
 
@@ -622,7 +622,7 @@ try {
 }
 ```
 
-### SeriesValidationError using `isValidOrThrowAllErrors`
+### SeriesValidationError using isValidOrThrowAllErrors
 
 If fails all items of a serie of validations, it will throw a SeriesValidationError with all Errors aggregated in error.errors
 
