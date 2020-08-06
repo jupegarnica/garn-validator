@@ -13,15 +13,13 @@ import {
 
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
-// TODO
-// export class TypeValidationError extends TypeError {
-//   constructor(msg, data) {
-//     super(msg);
-// this.name = "TypeValidationError";
-//     this.rawData = data;
-//   }
-
-// }
+export class TypeValidationError extends TypeError {
+  constructor(msg, data) {
+    super(msg);
+    this.name = "TypeValidationError";
+    this.raw = data;
+  }
+}
 export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
@@ -50,32 +48,24 @@ const formatErrorMessage = (type, value, path = []) =>
     value
   )} do not match type ${stringify(type)}`;
 
-const throwError = ({ type, value, path, root, $Error = TypeError }) => {
-  let error = new $Error(formatErrorMessage(type, value, path), {
+const throwError = (data) => {
+  const {
     type,
     value,
     path,
-    root,
-  });
-  // error.raw = {
-  //   type,
-  //   value,
-  //   path,
-  //   root
-  // }
-  // console.log('root',root);
+    $Error = TypeValidationError,
+  } = data;
+  const error = new $Error(formatErrorMessage(type, value, path), data);
+
   throw error;
 };
 const throwErrors = (
   errors,
-  { type, value, path, $Error = AggregateError }
+  data
 ) => {
   if (errors.length === 1) throw errors[0];
-  throw new $Error(errors, formatErrorMessage(type, value, path), {
-    type,
-    value,
-    path,
-  });
+  const { type, value, path, $Error = AggregateError } = data;
+  throw new $Error(errors, formatErrorMessage(type, value, path), data);
 };
 
 const validOrThrow = (input, data) => {
@@ -94,15 +84,16 @@ const defaultConfiguration = {
   onFinishWithError: onFinishWithErrorDefault,
 };
 
-const validSchemaOrThrow = ({
-  conf,
-  type: schema,
-  value: object,
-  root = object,
-  path = [],
-}) => {
+const validSchemaOrThrow = (data) => {
+  const {
+    conf,
+    type: schema,
+    value: object,
+    root = object,
+    path = [],
+  } = data;
   if (!(object instanceof Object || typeof object === "string")) {
-    return throwError({ type: schema, value: object, root, path });
+    return throwError(data);
   }
 
   let requiredErrors = [];
@@ -110,14 +101,14 @@ const validSchemaOrThrow = ({
   for (const keyName of requiredKeys) {
     try {
       const currentPath = [...path, keyName];
-      isValidTypeOrThrow(
+      isValidTypeOrThrow({
         conf,
-        schema[keyName],
-        object[keyName],
+        type: schema[keyName],
+        value: object[keyName],
         root,
         keyName,
-        currentPath
-      );
+        path: currentPath,
+      });
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -136,14 +127,14 @@ const validSchemaOrThrow = ({
       let type = schema[keyName];
       let value = object[keyNameStripped];
       isNullish(value) ||
-        isValidTypeOrThrow(
+        isValidTypeOrThrow({
           conf,
           type,
           value,
           root,
-          keyNameStripped,
-          currentPath
-        );
+          keyName: keyNameStripped,
+          path: currentPath,
+        });
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -166,14 +157,14 @@ const validSchemaOrThrow = ({
     for (const keyName of keys) {
       try {
         const currentPath = [...path, keyName];
-        isValidTypeOrThrow(
+        isValidTypeOrThrow({
           conf,
-          schema[regexpString],
-          object[keyName],
+          type: schema[regexpString],
+          value: object[keyName],
           root,
           keyName,
-          currentPath
-        );
+          path: currentPath,
+        });
       } catch (error) {
         if (!conf.collectAllErrors) {
           throw error;
@@ -185,61 +176,49 @@ const validSchemaOrThrow = ({
   const errors = [...regexErrors, ...requiredErrors, ...optionalError];
   if (errors.length > 0) {
     throwErrors(errors, {
-      type: schema,
-      value: object,
+      ...data,
       $Error: SchemaValidationError,
     });
   }
   return true;
 };
 
-const isMainValidator = Symbol('validator mark');
-const validCustomValidatorOrThrow = (fn, value, root = {}, keyName, path) => {
-  if (fn[isMainValidator]) {
-    root[isMainValidator] = {
-      collectAllErrors: false,
-      onFinishSuccess: () => true,
-      onFinishWithError: (error) => {
+const isMainValidator = Symbol("validator mark");
+const rewriteConf = Symbol("rewrite configuration");
 
-        return false
-      },
-    };
+const validCustomValidatorOrThrow = (data) => {
+  const {type:fn, value, root, keyName} = data
+
+  if (fn[isMainValidator]) {
+    try {
+        let newConf = {
+          ...data.conf,
+          onFinishSuccess: onFinishSuccessDefault,
+          onFinishWithError: onFinishWithErrorDefault,
+        }
+       return fn(value, {[rewriteConf]:newConf });
+    } catch (error) {
+      if (error.raw) throwError({...data, type:error.raw.type})
+      throw error
+    }
+
   }
 
-  return validOrThrow(fn(value, root, keyName), {
-    type: fn,
-    value,
-    root,
-    keyName,
-    path,
-  });
-
+  return validOrThrow(fn(value, root, keyName), data);
 };
-const validConstructorOrThrow = (type, value, root, keyName, path) =>
-  validOrThrow(checkConstructor(type, value), {
-    type,
-    value,
-    root,
-    keyName,
-    path,
-  });
-const validPrimitiveOrThrow = (type, value, root, keyName, path) =>
-  validOrThrow(value === type, { type, value, root, keyName, path });
+const validConstructorOrThrow = (data) =>
+  validOrThrow(checkConstructor(data.type, data.value), data);
+const validPrimitiveOrThrow = (data) =>
+  validOrThrow(data.value === data.type, data);
 
-const validRegExpOrThrow = (type, value, root, keyName, path) =>
-  validOrThrow(value.constructor === String && checkRegExp(type, value), {
-    type,
-    value,
-    root,
-    keyName,
-    path,
-  });
+const validRegExpOrThrow = (data) =>
+  validOrThrow(data.value.constructor === String && checkRegExp(data.type, data.value), data);
 
 const validSeriesOrThrow = (conf, types, value) => {
   const errors = [];
   for (const type of types) {
     try {
-      isValidTypeOrThrow(conf, type, value);
+      isValidTypeOrThrow({conf, type, value});
     } catch (error) {
       errors.push(error);
       if (!conf.collectAllErrors) break;
@@ -250,11 +229,12 @@ const validSeriesOrThrow = (conf, types, value) => {
   }
   return true;
 };
-const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
+const validEnumOrThrow = (data) => {
+  const {conf, type:types, value, root, keyName, path} = data;
   const errors = [];
   for (const type of types) {
     try {
-      if (isValidTypeOrThrow(conf, type, value, root, keyName, path)) {
+      if (isValidTypeOrThrow({conf, type, value, root, keyName, path})) {
         return true;
       }
     } catch (error) {
@@ -262,52 +242,46 @@ const validEnumOrThrow = (conf, types, value, root, keyName, path) => {
     }
   }
   throwErrors(errors, {
-    type: types,
-    value,
-    path,
+    ...data,
     $Error: EnumValidationError,
   });
 };
 
-const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
-  switch (whatTypeIs(type)) {
+const isValidTypeOrThrow = (data) => {
+  switch (whatTypeIs(data.type)) {
     case "regex":
-      return validRegExpOrThrow(type, value, root, keyName, path);
+      return validRegExpOrThrow(data);
     case "primitive":
-      return validPrimitiveOrThrow(type, value, root, keyName, path);
+      return validPrimitiveOrThrow(data);
     case "constructor":
-      return validConstructorOrThrow(type, value, root, keyName, path);
+      return validConstructorOrThrow(data);
     case "enum":
-      return validEnumOrThrow(conf, type, value, root, keyName, path);
+      return validEnumOrThrow(data);
     case "schema":
-      return validSchemaOrThrow({ conf, type, value, root, keyName, path });
+      return validSchemaOrThrow(data);
     case "validator":
-      return validCustomValidatorOrThrow(type, value, root, keyName, path);
+      return validCustomValidatorOrThrow(data);
 
     case "invalid":
       throw new SyntaxError(
-        `checking with validator ${stringify(type)} not supported`
+        `checking with validator ${stringify(data.type)} not supported`
       );
   }
 };
 
-
-
-const run = (mainConf) => (...types) => {
-  function runner(value, { [isMainValidator]: conf = {} } = {}) {
-    conf = {
-      ...mainConf,
-      ...conf,
-    };
+const run = (conf) => (...types) => {
+  function runner(value, secret = {}) {
+    let currentConf = conf;
+    if(secret[rewriteConf]) currentConf = secret[rewriteConf];
     try {
-      validSeriesOrThrow(conf, types, value);
+      validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
-      return conf.onFinishWithError(error);
+      return currentConf.onFinishWithError(error);
     }
 
-    return conf.onFinishSuccess();
+    return currentConf.onFinishSuccess();
   }
-  runner[isMainValidator] = mainConf;
+  runner[isMainValidator] = true;
 
   return runner;
 };
