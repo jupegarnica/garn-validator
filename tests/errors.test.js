@@ -6,6 +6,7 @@ import {
   SchemaValidationError,
   EnumValidationError,
   SeriesValidationError,
+  TypeValidationError
 } from "garn-validator";
 
 describe("AggregateError", () => {
@@ -33,7 +34,7 @@ describe("AggregateError", () => {
       }).toThrow(ErrorType);
     }
   );
-  test("checking schema should throw SchemaValidationError or TypeError", () => {
+  test("checking schema should throw SchemaValidationError or TypeValidationError", () => {
     try {
       isValidOrThrowAllErrors({ a: 1, b: 2 })({});
     } catch (error) {
@@ -45,18 +46,18 @@ describe("AggregateError", () => {
       isValidOrThrow({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(false);
-      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof TypeValidationError).toBe(true);
     }
 
     // only 1 key fails
     try {
       isValidOrThrowAllErrors({ a: 1 })({});
     } catch (error) {
-      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof TypeValidationError).toBe(true);
       expect(error instanceof SchemaValidationError).toBe(false);
     }
   });
-  test("checking enum should throw EnumValidationError or TypeError", () => {
+  test("checking enum should throw EnumValidationError or TypeValidationError", () => {
     try {
       isValidOrThrow([Boolean, String])(1);
     } catch (error) {
@@ -68,10 +69,10 @@ describe("AggregateError", () => {
       isValidOrThrow([Boolean])(1);
     } catch (error) {
       expect(error instanceof EnumValidationError).toBe(false);
-      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof TypeValidationError).toBe(true);
     }
   });
-  test("checking series should throw SeriesValidationError or TypeError ", () => {
+  test("checking series should throw SeriesValidationError or TypeValidationError ", () => {
     try {
       isValidOrThrowAllErrors(Boolean, String)(1);
     } catch (error) {
@@ -83,7 +84,7 @@ describe("AggregateError", () => {
       isValidOrThrowAllErrors(Boolean)(1);
     } catch (error) {
       expect(error instanceof SeriesValidationError).toBe(false);
-      expect(error instanceof TypeError).toBe(true);
+      expect(error instanceof TypeValidationError).toBe(true);
     }
   });
 });
@@ -107,10 +108,10 @@ describe("check with invalid validator", () => {
   });
 });
 describe("check errors", () => {
-  test("by default throws TypeError", () => {
+  test("by default throws TypeValidationError", () => {
     expect(() => {
       isValidOrThrow(Boolean)(33);
-    }).toThrow(TypeError);
+    }).toThrow(TypeValidationError);
   });
   test("Should throw meaningfully message", () => {
     expect(() => {
@@ -221,7 +222,7 @@ describe("hasErrors", () => {
     expect(
       hasErrors({ num: Number, str: String })({ num: "2", str: "str" })
     ).toEqual([
-      new TypeError('on path /num value "2" do not match type Number'),
+      new TypeValidationError('on path /num value "2" do not match type Number'),
     ]);
   });
   test("should flat all aggregated Errors", () => {
@@ -238,15 +239,15 @@ describe("hasErrors", () => {
         Number,
         (v) => v > 100,
         2,
-        [new TypeError("value 2 do not match type v=>v>100")],
+        [new TypeValidationError("value 2 do not match type v=>v>100")],
       ],
       [
         String,
         (v) => v > 100,
         2,
         [
-          new TypeError("value 2 do not match type String"),
-          new TypeError("value 2 do not match type v=>v>100"),
+          new TypeValidationError("value 2 do not match type String"),
+          new TypeValidationError("value 2 do not match type v=>v>100"),
         ],
       ],
     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
@@ -267,20 +268,20 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [new TypeError('on path /num value "2" do not match type Number')],
+        [new TypeValidationError('on path /num value "2" do not match type Number')],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeError('on path /num value "2" do not match type Number'),
-          new TypeError("on path /str value null do not match type String"),
+          new TypeValidationError('on path /num value "2" do not match type Number'),
+          new TypeValidationError("on path /str value null do not match type String"),
         ],
         // [
         //   new AggregateError(
         //     [
-        //       new TypeError('on path /num value "2" do not match type Number'),
-        //       new TypeError("on path /str value null do not match type String"),
+        //       new TypeValidationError('on path /num value "2" do not match type Number'),
+        //       new TypeValidationError("on path /str value null do not match type String"),
         //     ],
         //     'value {"num":"2","str":null} do not match type {"num":Number,"str":String}'
         //   ),
@@ -304,7 +305,7 @@ describe("hasErrors", () => {
       [
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: "str" } },
-        [new TypeError('on path /obj/num value "2" do not match type Number')],
+        [new TypeValidationError('on path /obj/num value "2" do not match type Number')],
       ],
       [
         {
@@ -319,8 +320,8 @@ describe("hasErrors", () => {
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: null } },
         [
-          new TypeError('on path /obj/num value "2" do not match type Number'),
-          new TypeError("on path /obj/str value null do not match type String"),
+          new TypeValidationError('on path /obj/num value "2" do not match type Number'),
+          new TypeValidationError("on path /obj/str value null do not match type String"),
         ],
       ],
     ])(
@@ -378,28 +379,28 @@ describe("hasErrors", () => {
         noValidKey: 1,
       };
       expect(hasErrors(schema)(obj)).toEqual([
-        new TypeError(
+        new TypeValidationError(
           "on path /noValidKey value 1 do not match type ()=>false"
         ),
-        new TypeError(
+        new TypeValidationError(
           'on path /name value "Garn" do not match type /^[a-z]{3,}$/'
         ),
-        new TypeError("on path /age value 18 do not match type age=>age>18"),
+        new TypeValidationError("on path /age value 18 do not match type age=>age>18"),
         new EvalError("unexpected key"),
-        new TypeError(
+        new TypeValidationError(
           'on path /car/brand value "Honda" do not match type "honda"'
         ),
-        new TypeError(
+        new TypeValidationError(
           'on path /car/brand value "Honda" do not match type "toyota"'
         ),
-        new TypeError(
+        new TypeValidationError(
           'on path /car/date value "1982-01-01" do not match type Date'
         ),
-        new TypeError(
+        new TypeValidationError(
           "on path /car/country/name value undefined do not match type String"
         ),
 
-        new TypeError("on path /optional value false do not match type true"),
+        new TypeValidationError("on path /optional value false do not match type true"),
       ]);
     });
   });
@@ -417,9 +418,9 @@ describe("hasErrors", () => {
         y: 1,
       };
       expect(hasErrors(schema1, schema2)(obj)).toEqual([
-        new TypeError("on path /x value true do not match type Number"),
-        new TypeError("on path /y value 1 do not match type Boolean"),
-        new TypeError("on path /z value undefined do not match type Function"),
+        new TypeValidationError("on path /x value true do not match type Number"),
+        new TypeValidationError("on path /y value 1 do not match type Boolean"),
+        new TypeValidationError("on path /z value undefined do not match type Function"),
       ]);
     });
   });
@@ -440,7 +441,7 @@ describe("isValidOrThrowAllErrors ", () => {
 
       throw "ups";
     } catch (error) {
-      expect(error).not.toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(TypeValidationError);
     }
   });
   test("should throw 2 errors", () => {
@@ -469,10 +470,10 @@ describe("isValidOrLogAllErrors", () => {
     isValidOrLogAllErrors(Number, Boolean, String)(true);
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeError("value true do not match type Number")
+      new TypeValidationError("value true do not match type Number")
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeError("value true do not match type String")
+      new TypeValidationError("value true do not match type String")
     );
   });
   test("should log meaningful errors in schemas", () => {
@@ -484,10 +485,10 @@ describe("isValidOrLogAllErrors", () => {
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeError("on path /y value 2 do not match type Boolean")
+      new TypeValidationError("on path /y value 2 do not match type Boolean")
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeError("on path /z value 3 do not match type String")
+      new TypeValidationError("on path /z value 3 do not match type String")
     );
   });
 });

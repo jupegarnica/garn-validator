@@ -13,25 +13,38 @@ import {
 
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
+const formatErrorMessage = (data) => {
+  const { type, value, path = [] } = data;
+  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
+    value
+  )} do not match type ${stringify(type)}`;
+};
+const descriptor = (data) => ({
+  value: data,
+  writable: false,
+  enumerable: false,
+  configurable: false,
+});
 export class TypeValidationError extends TypeError {
   constructor(msg, data) {
     super(msg);
     this.name = "TypeValidationError";
-    this.raw = data;
+    Object.defineProperty(this, "raw", descriptor(data));
   }
 }
 export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
     this.name = "EnumValidationError";
-    this.raw = data;
+    Object.defineProperty(this, "raw", descriptor(data));
   }
 }
 export class SchemaValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
+
     this.name = "SchemaValidationError";
-    this.raw = data;
+    Object.defineProperty(this, "raw", descriptor(data));
   }
 }
 
@@ -39,33 +52,20 @@ export class SeriesValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
     this.name = "SeriesValidationError";
-    this.raw = data;
+    Object.defineProperty(this, "raw", descriptor(data));
   }
 }
 
-const formatErrorMessage = (type, value, path = []) =>
-  `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
-    value
-  )} do not match type ${stringify(type)}`;
-
 const throwError = (data) => {
-  const {
-    type,
-    value,
-    path,
-    $Error = TypeValidationError,
-  } = data;
-  const error = new $Error(formatErrorMessage(type, value, path), data);
+  const { $Error = TypeValidationError } = data;
+  const error = new $Error(formatErrorMessage(data),data);
 
   throw error;
 };
-const throwErrors = (
-  errors,
-  data
-) => {
+const throwErrors = (errors, data) => {
   if (errors.length === 1) throw errors[0];
-  const { type, value, path, $Error = AggregateError } = data;
-  throw new $Error(errors, formatErrorMessage(type, value, path), data);
+  const { $Error = AggregateError } = data;
+  throw new $Error(errors,formatErrorMessage(data), data);
 };
 
 const validOrThrow = (input, data) => {
@@ -85,13 +85,7 @@ const defaultConfiguration = {
 };
 
 const validSchemaOrThrow = (data) => {
-  const {
-    conf,
-    type: schema,
-    value: object,
-    root = object,
-    path = [],
-  } = data;
+  const { conf, type: schema, value: object, root = object, path = [] } = data;
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
@@ -187,21 +181,20 @@ const isMainValidator = Symbol("validator mark");
 const rewriteConf = Symbol("rewrite configuration");
 
 const validCustomValidatorOrThrow = (data) => {
-  const {type:fn, value, root, keyName} = data
+  const { type: fn, value, root, keyName } = data;
 
   if (fn[isMainValidator]) {
     try {
-        let newConf = {
-          ...data.conf,
-          onFinishSuccess: onFinishSuccessDefault,
-          onFinishWithError: onFinishWithErrorDefault,
-        }
-       return fn(value, {[rewriteConf]:newConf });
+      let newConf = {
+        ...data.conf,
+        onFinishSuccess: onFinishSuccessDefault,
+        onFinishWithError: onFinishWithErrorDefault,
+      };
+      return fn(value, { [rewriteConf]: newConf });
     } catch (error) {
-      if (error.raw) throwError({...data, type:error.raw.type})
-      throw error
+      if (error.raw) throwError({ ...data, type: error.raw.type });
+      throw error;
     }
-
   }
 
   return validOrThrow(fn(value, root, keyName), data);
@@ -212,13 +205,16 @@ const validPrimitiveOrThrow = (data) =>
   validOrThrow(data.value === data.type, data);
 
 const validRegExpOrThrow = (data) =>
-  validOrThrow(data.value.constructor === String && checkRegExp(data.type, data.value), data);
+  validOrThrow(
+    data.value.constructor === String && checkRegExp(data.type, data.value),
+    data
+  );
 
 const validSeriesOrThrow = (conf, types, value) => {
   const errors = [];
   for (const type of types) {
     try {
-      isValidTypeOrThrow({conf, type, value});
+      isValidTypeOrThrow({ conf, type, value });
     } catch (error) {
       errors.push(error);
       if (!conf.collectAllErrors) break;
@@ -230,11 +226,11 @@ const validSeriesOrThrow = (conf, types, value) => {
   return true;
 };
 const validEnumOrThrow = (data) => {
-  const {conf, type:types, value, root, keyName, path} = data;
+  const { conf, type: types, value, root, keyName, path } = data;
   const errors = [];
   for (const type of types) {
     try {
-      if (isValidTypeOrThrow({conf, type, value, root, keyName, path})) {
+      if (isValidTypeOrThrow({ conf, type, value, root, keyName, path })) {
         return true;
       }
     } catch (error) {
@@ -272,7 +268,7 @@ const isValidTypeOrThrow = (data) => {
 const run = (conf) => (...types) => {
   function runner(value, secret = {}) {
     let currentConf = conf;
-    if(secret[rewriteConf]) currentConf = secret[rewriteConf];
+    if (secret[rewriteConf]) currentConf = secret[rewriteConf];
     try {
       validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
