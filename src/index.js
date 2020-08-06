@@ -55,15 +55,16 @@ const throwError = ({ type, value, path, root, $Error = TypeError }) => {
     type,
     value,
     path,
-    root
+    root,
   });
-  error.raw = {
-    type,
-    value,
-    path,
-    root
-  }
-  throw error
+  // error.raw = {
+  //   type,
+  //   value,
+  //   path,
+  //   root
+  // }
+  // console.log('root',root);
+  throw error;
 };
 const throwErrors = (
   errors,
@@ -115,7 +116,7 @@ const validSchemaOrThrow = ({
         object[keyName],
         root,
         keyName,
-        currentPath,
+        currentPath
       );
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -192,14 +193,28 @@ const validSchemaOrThrow = ({
   return true;
 };
 
-const validCustomValidatorOrThrow = (fn, value, root, keyName, path) =>
-  validOrThrow(fn(value, root, keyName), {
+const isMainValidator = Symbol('validator mark');
+const validCustomValidatorOrThrow = (fn, value, root = {}, keyName, path) => {
+  if (fn[isMainValidator]) {
+    root[isMainValidator] = {
+      collectAllErrors: false,
+      onFinishSuccess: () => true,
+      onFinishWithError: (error) => {
+
+        return false
+      },
+    };
+  }
+
+  return validOrThrow(fn(value, root, keyName), {
     type: fn,
     value,
     root,
     keyName,
     path,
   });
+
+};
 const validConstructorOrThrow = (type, value, root, keyName, path) =>
   validOrThrow(checkConstructor(type, value), {
     type,
@@ -276,14 +291,25 @@ const isValidTypeOrThrow = (conf, type, value, root, keyName, path) => {
   }
 };
 
-const run = (conf) => (...types) => (value) => {
-  try {
-    validSeriesOrThrow(conf, types, value);
-  } catch (error) {
-    return conf.onFinishWithError(error);
-  }
 
-  return conf.onFinishSuccess();
+
+const run = (mainConf) => (...types) => {
+  function runner(value, { [isMainValidator]: conf = {} } = {}) {
+    conf = {
+      ...mainConf,
+      ...conf,
+    };
+    try {
+      validSeriesOrThrow(conf, types, value);
+    } catch (error) {
+      return conf.onFinishWithError(error);
+    }
+
+    return conf.onFinishSuccess();
+  }
+  runner[isMainValidator] = mainConf;
+
+  return runner;
 };
 
 const config = ({
