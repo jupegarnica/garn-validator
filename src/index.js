@@ -58,26 +58,42 @@ export class SeriesValidationError extends AggregateError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
+const createError = (data) => {
+  data.$Error = data.$Error || TypeValidationError;
+  return new data.$Error(formatErrorMessage(data), data);
+};
 
+const createAggregateError = (errors, data) => {
+  data.$Error = data.$Error || AggregateError;
+  return new data.$Error(errors, formatErrorMessage(data), data);
+};
 const throwError = (data) => {
-  const { $Error = TypeValidationError } = data;
-  throw new $Error(formatErrorMessage(data), data);
+  throw createError(data);
 };
 const throwErrors = (errors, data) => {
   if (errors.length === 1) throw errors[0];
-  const { $Error = AggregateError } = data;
-  throw new $Error(errors, formatErrorMessage(data), data);
+  throw createAggregateError(errors, data);
+};
+
+
+const mapError = (error, data) => {
+  if (!error.raw) return error;
+  const overriddenPath = { ...error.raw, path: data.path};
+
+  if (error instanceof AggregateError) {
+    const errors = error.errors.map((e) =>
+      mapError(e, data)
+    );
+    return createAggregateError(errors, data);
+  } else {
+    return createError(overriddenPath);
+  }
 };
 
 // TODO rewrite recursivamente aggregateError
-const rewriteError = (error, data) => {
-  const newData = { ...data, type: error.raw.type };
-  // console.log(newData);
-  if (error instanceof AggregateError) {
-    throwErrors(error.errors, newData);
-  } else {
-    throwError(newData);
-  }
+const reThrowError = (error, data) => {
+  const newData = { ...data, ...error.raw, $Error: error.constructor };
+  throw mapError(error, newData);
 };
 
 const validOrThrow = (input, data) => {
@@ -196,7 +212,7 @@ const validMainValidatorOrThrow = (data) => {
     return fn(value, { [configurationSymbol]: newConf });
   } catch (error) {
     if (error.raw) {
-      rewriteError(error, { ...data, $Error: error.constructor });
+      reThrowError(error, data);
     }
     throw error;
   }
