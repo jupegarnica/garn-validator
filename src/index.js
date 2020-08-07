@@ -11,7 +11,7 @@ import {
   whatTypeIs,
   validatorSymbol,
   configurationSymbol,
-} from "./utils.js";
+} from "./helpers.js";
 
 export {
   AsyncFunction,
@@ -84,11 +84,7 @@ const onFinishWithErrorDefault = (error) => {
   throw error;
 };
 
-const defaultConfiguration = {
-  collectAllErrors: false,
-  onFinishSuccess: onFinishSuccessDefault,
-  onFinishWithError: onFinishWithErrorDefault,
-};
+
 
 const validSchemaOrThrow = (data) => {
   const { conf, type: schema, value: object, root = object, path = [] } = data;
@@ -291,7 +287,7 @@ const config = ({
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
   onFinishWithError = onFinishWithErrorDefault,
-} = defaultConfiguration) =>
+}) =>
   run({ collectAllErrors, onFinishSuccess, onFinishWithError });
 
 const logErrorsAndReturnFalse = (error) => {
@@ -335,7 +331,7 @@ export const isValidOrThrowAllErrors = config({
   collectAllErrors: true,
 });
 
-export const isValidOrThrow = config();
+export const isValidOrThrow = config({});
 
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
