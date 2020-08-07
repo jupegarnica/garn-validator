@@ -9,9 +9,14 @@ import {
   optionalRegex,
   isNullish,
   whatTypeIs,
+  validatorSymbol,
+  configurationSymbol,
 } from "./utils.js";
 
-export { AsyncFunction, GeneratorFunction } from "./constants.js";
+export {
+  AsyncFunction,
+  GeneratorFunction,
+} from "./constants.js";
 
 const formatErrorMessage = (data) => {
   const { type, value, path = [] } = data;
@@ -19,12 +24,14 @@ const formatErrorMessage = (data) => {
     value
   )} do not match type ${stringify(type)}`;
 };
+
 const descriptor = (data) => ({
   value: data,
   writable: false,
   enumerable: false,
   configurable: false,
 });
+
 export class TypeValidationError extends TypeError {
   constructor(msg, data) {
     super(msg);
@@ -58,14 +65,13 @@ export class SeriesValidationError extends AggregateError {
 
 const throwError = (data) => {
   const { $Error = TypeValidationError } = data;
-  const error = new $Error(formatErrorMessage(data),data);
+  throw new $Error(formatErrorMessage(data), data);
 
-  throw error;
 };
 const throwErrors = (errors, data) => {
   if (errors.length === 1) throw errors[0];
   const { $Error = AggregateError } = data;
-  throw new $Error(errors,formatErrorMessage(data), data);
+  throw new $Error(errors, formatErrorMessage(data), data);
 };
 
 const validOrThrow = (input, data) => {
@@ -177,20 +183,17 @@ const validSchemaOrThrow = (data) => {
   return true;
 };
 
-const isMainValidator = Symbol("validator mark");
-const rewriteConf = Symbol("rewrite configuration");
-
 const validCustomValidatorOrThrow = (data) => {
   const { type: fn, value, root, keyName } = data;
 
-  if (fn[isMainValidator]) {
+  if (fn[validatorSymbol]) {
     try {
       let newConf = {
         ...data.conf,
         onFinishSuccess: onFinishSuccessDefault,
         onFinishWithError: onFinishWithErrorDefault,
       };
-      return fn(value, { [rewriteConf]: newConf });
+      return fn(value, { [configurationSymbol]: newConf });
     } catch (error) {
       if (error.raw) throwError({ ...data, type: error.raw.type });
       throw error;
@@ -199,6 +202,8 @@ const validCustomValidatorOrThrow = (data) => {
 
   return validOrThrow(fn(value, root, keyName), data);
 };
+
+
 const validConstructorOrThrow = (data) =>
   validOrThrow(checkConstructor(data.type, data.value), data);
 const validPrimitiveOrThrow = (data) =>
@@ -268,7 +273,7 @@ const isValidTypeOrThrow = (data) => {
 const run = (conf) => (...types) => {
   function runner(value, secret = {}) {
     let currentConf = conf;
-    if (secret[rewriteConf]) currentConf = secret[rewriteConf];
+    if (secret[configurationSymbol]) currentConf = secret[configurationSymbol];
     try {
       validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
@@ -277,7 +282,7 @@ const run = (conf) => (...types) => {
 
     return currentConf.onFinishSuccess();
   }
-  runner[isMainValidator] = true;
+  runner[validatorSymbol] = true;
 
   return runner;
 };

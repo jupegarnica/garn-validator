@@ -4,6 +4,9 @@ import { AsyncFunction,GeneratorFunction,constructors } from "./constants.js";
 const isProxy = Proxy.isProxy;
 
 
+export const validatorSymbol = Symbol("validator mark");
+export const configurationSymbol = Symbol("rewrite configuration");
+
 export const isNullish = (val) => val === undefined || val === null;
 
 export const checkConstructor = (type, val) =>
