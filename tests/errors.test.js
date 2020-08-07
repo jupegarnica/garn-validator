@@ -116,7 +116,7 @@ describe("check errors", () => {
   test("Should throw meaningfully message", () => {
     expect(() => {
       isValidOrThrow(1)(33);
-    }).toThrow("value 33 do not match type 1");
+    }).toThrow("value 33 do not match primitive 1");
   });
   test("should throw a custom type of error", () => {
     expect(() => {
@@ -160,12 +160,12 @@ describe("check errors", () => {
   test("should format the schema", () => {
     expect(() => {
       isValidOrThrow({ a: Number })(33);
-    }).toThrow('value 33 do not match type {"a":Number}');
+    }).toThrow('value 33 do not match schema {"a":Number}');
   });
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow("on path /a value undefined do not match type Number");
+    }).toThrow("on path /a value undefined do not match constructor Number");
   });
 });
 
@@ -173,7 +173,7 @@ describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       isValidOrThrow(Number, String)(2);
-    }).toThrow("value 2 do not match type String");
+    }).toThrow("value 2 do not match constructor String");
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
@@ -207,6 +207,7 @@ describe("checking enums", () => {
       throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(EnumValidationError);
+      expect(error.message).toMatch('enum');
       expect(error).toBeInstanceOf(AggregateError);
     }
   });
@@ -222,7 +223,7 @@ describe("hasErrors", () => {
     expect(
       hasErrors({ num: Number, str: String })({ num: "2", str: "str" })
     ).toEqual([
-      new TypeValidationError('on path /num value "2" do not match type Number'),
+      new TypeValidationError('on path /num value "2" do not match constructor Number'),
     ]);
   });
   test("should flat all aggregated Errors", () => {
@@ -239,15 +240,15 @@ describe("hasErrors", () => {
         Number,
         (v) => v > 100,
         2,
-        [new TypeValidationError("value 2 do not match type v=>v>100")],
+        [new TypeValidationError("value 2 do not match validator v=>v>100")],
       ],
       [
         String,
         (v) => v > 100,
         2,
         [
-          new TypeValidationError("value 2 do not match type String"),
-          new TypeValidationError("value 2 do not match type v=>v>100"),
+          new TypeValidationError("value 2 do not match constructor String"),
+          new TypeValidationError("value 2 do not match validator v=>v>100"),
         ],
       ],
     ])("hasErrors(%p,%p)(%p) === %p", (a, b, input, expected) => {
@@ -268,24 +269,16 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [new TypeValidationError('on path /num value "2" do not match type Number')],
+        [new TypeValidationError('on path /num value "2" do not match constructor Number')],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeValidationError('on path /num value "2" do not match type Number'),
-          new TypeValidationError("on path /str value null do not match type String"),
+          new TypeValidationError('on path /num value "2" do not match constructor Number'),
+          new TypeValidationError("on path /str value null do not match constructor String"),
         ],
-        // [
-        //   new AggregateError(
-        //     [
-        //       new TypeValidationError('on path /num value "2" do not match type Number'),
-        //       new TypeValidationError("on path /str value null do not match type String"),
-        //     ],
-        //     'value {"num":"2","str":null} do not match type {"num":Number,"str":String}'
-        //   ),
-        // ],
+
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
@@ -305,7 +298,7 @@ describe("hasErrors", () => {
       [
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: "str" } },
-        [new TypeValidationError('on path /obj/num value "2" do not match type Number')],
+        [new TypeValidationError('on path /obj/num value "2" do not match constructor Number')],
       ],
       [
         {
@@ -320,8 +313,8 @@ describe("hasErrors", () => {
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: null } },
         [
-          new TypeValidationError('on path /obj/num value "2" do not match type Number'),
-          new TypeValidationError("on path /obj/str value null do not match type String"),
+          new TypeValidationError('on path /obj/num value "2" do not match constructor Number'),
+          new TypeValidationError("on path /obj/str value null do not match constructor String"),
         ],
       ],
     ])(
@@ -380,27 +373,27 @@ describe("hasErrors", () => {
       };
       expect(hasErrors(schema)(obj)).toEqual([
         new TypeValidationError(
-          "on path /noValidKey value 1 do not match type ()=>false"
+          "on path /noValidKey value 1 do not match validator ()=>false"
         ),
         new TypeValidationError(
-          'on path /name value "Garn" do not match type /^[a-z]{3,}$/'
+          'on path /name value "Garn" do not match regex /^[a-z]{3,}$/'
         ),
-        new TypeValidationError("on path /age value 18 do not match type age=>age>18"),
+        new TypeValidationError("on path /age value 18 do not match validator age=>age>18"),
         new EvalError("unexpected key"),
         new TypeValidationError(
-          'on path /car/brand value "Honda" do not match type "honda"'
+          'on path /car/brand value "Honda" do not match primitive "honda"'
         ),
         new TypeValidationError(
-          'on path /car/brand value "Honda" do not match type "toyota"'
+          'on path /car/brand value "Honda" do not match primitive "toyota"'
         ),
         new TypeValidationError(
-          'on path /car/date value "1982-01-01" do not match type Date'
+          'on path /car/date value "1982-01-01" do not match constructor Date'
         ),
         new TypeValidationError(
-          "on path /car/country/name value undefined do not match type String"
+          "on path /car/country/name value undefined do not match constructor String"
         ),
 
-        new TypeValidationError("on path /optional value false do not match type true"),
+        new TypeValidationError("on path /optional value false do not match primitive true"),
       ]);
     });
   });
@@ -418,9 +411,9 @@ describe("hasErrors", () => {
         y: 1,
       };
       expect(hasErrors(schema1, schema2)(obj)).toEqual([
-        new TypeValidationError("on path /x value true do not match type Number"),
-        new TypeValidationError("on path /y value 1 do not match type Boolean"),
-        new TypeValidationError("on path /z value undefined do not match type Function"),
+        new TypeValidationError("on path /x value true do not match constructor Number"),
+        new TypeValidationError("on path /y value 1 do not match constructor Boolean"),
+        new TypeValidationError("on path /z value undefined do not match constructor Function"),
       ]);
     });
   });
@@ -470,10 +463,10 @@ describe("isValidOrLogAllErrors", () => {
     isValidOrLogAllErrors(Number, Boolean, String)(true);
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("value true do not match type Number")
+      new TypeValidationError("value true do not match constructor Number")
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("value true do not match type String")
+      new TypeValidationError("value true do not match constructor String")
     );
   });
   test("should log meaningful errors in schemas", () => {
@@ -485,10 +478,10 @@ describe("isValidOrLogAllErrors", () => {
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("on path /y value 2 do not match type Boolean")
+      new TypeValidationError("on path /y value 2 do not match constructor Boolean")
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("on path /z value 3 do not match type String")
+      new TypeValidationError("on path /z value 3 do not match constructor String")
     );
   });
 });

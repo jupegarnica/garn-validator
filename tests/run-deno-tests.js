@@ -46,3 +46,4 @@ await import("./errors.test.js");
 await import("./enums.test.js");
 await import("./custom-validator.test.js");
 await import("./constructors.test.js");
+await import("./composable.test.js");

@@ -16,10 +16,10 @@ import {
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 const formatErrorMessage = (data) => {
-  const { type, value, path = [] , $Error} = data;
+  const { type, value, path = [] } = data;
   return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
     value
-  )} do not match ${'type' || whatTypeIs(type)} ${stringify(type)}`;
+  )} do not match ${whatTypeIs(type)} ${stringify(type)}`;
 };
 
 const descriptor = (data) => ({
