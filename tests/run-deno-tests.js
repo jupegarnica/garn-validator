@@ -1,27 +1,27 @@
 import { expect } from "https://deno.land/x/expect@v0.2.1/mod.ts";
 import * as mock from "https://deno.land/x/expect@v0.2.1/mock.ts";
 
-const test = (msg, fn) => {
-  return Deno.test(msg, fn);
+const test = (name, fn) => {
+  return Deno.test({ name, fn });
 };
-test.each = (table) => (msg, run) => {
+test.each = (table) => (name, run) => {
   table.forEach((paramOrParam) => {
     let params = Array.isArray(paramOrParam) ? paramOrParam : [paramOrParam];
     test({
-      name: msg,
+      name: name,
       fn: () => run(...params),
     });
   });
 };
-test.skip = (msg) => {
-  console.log("skipped: " + msg);
+test.skip = (name, fn) => {
+  return Deno.test({ name, fn, ignore: true });
 };
 
-function describe(msg, fn) {
+function describe(name, fn) {
   return fn();
 }
-describe.skip = (msg) => {
-  console.log("skipped: " + msg);
+describe.skip = (name, fn) => {
+  return Deno.test({ name, fn, ignore: true });
 };
 
 globalThis.expect = expect;
