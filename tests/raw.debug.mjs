@@ -1,4 +1,4 @@
-import { hasErrors,isValidOrThrow ,isValid, isValidOrThrowAllErrors} from "garn-validator";
+import { hasErrors,isValidOrThrow ,isValid, isValidOrThrowAll} from "garn-validator";
 import { stringify } from "../src/utils.js";
 let n = (num) => num === Number(num)
 
@@ -14,6 +14,6 @@ errors.forEach(e => console.log(e.raw));
 console.log(errors);
 
 } catch (error) {
-  // error.errors.forEach(e => console.log(e.raw.conf.onFinishSuccess.toString()));
+  // error.errors.forEach(e => console.log(e.raw.conf.onValid.toString()));
   // console.log(error);
 }

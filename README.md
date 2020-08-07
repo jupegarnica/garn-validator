@@ -11,7 +11,7 @@ Ultra fast runtime type validator without dependencies.
 - Supports checking primitives or objects with schemas
 - Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
-- 6 behaviors: `hasErrors`, `isValid`, `isValidOrThrow`,`isValidOrLog`, `isValidOrLogAllErrors` and `isValidOrThrowAllErrors`.
+- 6 behaviors: `hasErrors`, `isValid`, `isValidOrThrow`,`isValidOrLog`, `isValidOrLogAll` and `isValidOrThrowAll`.
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
@@ -44,9 +44,9 @@ Ultra fast runtime type validator without dependencies.
       - [Regexp keys](#regexp-keys)
       - [Custom validation used in schemas](#custom-validation-used-in-schemas)
   - [Errors](#errors)
-    - [SchemaValidationError using isValidOrThrowAllErrors](#schemavalidationerror-using-isvalidorthrowallerrors)
+    - [SchemaValidationError using isValidOrThrowAll](#schemavalidationerror-using-isValidOrThrowAll)
     - [EnumValidationError](#enumvalidationerror)
-    - [SeriesValidationError using isValidOrThrowAllErrors](#seriesvalidationerror-using-isvalidorthrowallerrors)
+    - [SeriesValidationError using isValidOrThrowAll](#seriesvalidationerror-using-isValidOrThrowAll)
     - [hasErrors](#haserrors)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
@@ -233,8 +233,8 @@ There are 6 behaviors that can be divided in 2 categories:
   - `isValidOrLog` (returns true or false and log first error, never throws)
 - Collect all Errors:
   - `hasErrors` (return null or array of errors, never throws)
-  - `isValidOrLogAllErrors` (returns true or false and log all errors, never throws)
-  - `isValidOrThrowAllErrors` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
+  - `isValidOrLogAll` (returns true or false and log all errors, never throws)
+  - `isValidOrThrowAll` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
 
 The default export is `isValidOrThrow`
 
@@ -565,7 +565,7 @@ If a validation fails by default it will throw `new TypeError(meaningfulMessage)
 
 If using a custom validator throws an error , that error will be thrown.
 
-### SchemaValidationError using isValidOrThrowAllErrors
+### SchemaValidationError using isValidOrThrowAll
 
 If more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
 
@@ -578,7 +578,7 @@ SchemaValidationError inherits from AggregateError,
 ```js
 // more than 2 keys fails
 try {
-  isValidOrThrowAllErrors({ a: 1, b: 2 })({});
+  isValidOrThrowAll({ a: 1, b: 2 })({});
 } catch (error) {
   console.log(error instanceof SchemaValidationError); // true
   console.log(error instanceof AggregateError); // true
@@ -587,7 +587,7 @@ try {
 
 // only 1 key fails
 try {
-  isValidOrThrowAllErrors({ a: 1 })({});
+  isValidOrThrowAll({ a: 1 })({});
 } catch (error) {
   console.log(error instanceof TypeError); // true
   console.log(error instanceof SchemaValidationError); // false
@@ -618,7 +618,7 @@ try {
 }
 ```
 
-### SeriesValidationError using isValidOrThrowAllErrors
+### SeriesValidationError using isValidOrThrowAll
 
 If fails all items of a serie of validations, it will throw a SeriesValidationError with all Errors aggregated in error.errors
 
@@ -628,14 +628,14 @@ SeriesValidationError inherits from AggregateError.
 
 ```js
 try {
-  isValidOrThrowAllErrors(Boolean, String)(1);
+  isValidOrThrowAll(Boolean, String)(1);
 } catch (error) {
   console.log(error instanceof SeriesValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
-  isValidOrThrowAllErrors(Boolean)(1);
+  isValidOrThrowAll(Boolean)(1);
 } catch (error) {
   console.log(error instanceof SeriesValidationError); // false
   console.log(error instanceof TypeError); // true
@@ -1199,8 +1199,8 @@ describe("check with custom validator", () => {
 import {
   isValidOrThrow,
   hasErrors,
-  isValidOrLogAllErrors,
-  isValidOrThrowAllErrors,
+  isValidOrLogAll,
+  isValidOrThrowAll,
   SchemaValidationError,
   EnumValidationError,
   SeriesValidationError,
@@ -1211,7 +1211,7 @@ describe("AggregateError", () => {
     "if schema fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAllErrors({ a: Number, b: String })({});
+        isValidOrThrowAll({ a: Number, b: String })({});
       }).toThrow(ErrorType);
     }
   );
@@ -1219,7 +1219,7 @@ describe("AggregateError", () => {
     "if enums fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAllErrors([Number, String])(true);
+        isValidOrThrowAll([Number, String])(true);
       }).toThrow(ErrorType);
     }
   );
@@ -1227,13 +1227,13 @@ describe("AggregateError", () => {
     "if Series fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAllErrors(Number, String)(true);
+        isValidOrThrowAll(Number, String)(true);
       }).toThrow(ErrorType);
     }
   );
   test("checking schema should throw SchemaValidationError or TypeError", () => {
     try {
-      isValidOrThrowAllErrors({ a: 1, b: 2 })({});
+      isValidOrThrowAll({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
@@ -1248,7 +1248,7 @@ describe("AggregateError", () => {
 
     // only 1 key fails
     try {
-      isValidOrThrowAllErrors({ a: 1 })({});
+      isValidOrThrowAll({ a: 1 })({});
     } catch (error) {
       expect(error instanceof TypeError).toBe(true);
       expect(error instanceof SchemaValidationError).toBe(false);
@@ -1271,14 +1271,14 @@ describe("AggregateError", () => {
   });
   test("checking series should throw SeriesValidationError or TypeError ", () => {
     try {
-      isValidOrThrowAllErrors(Boolean, String)(1);
+      isValidOrThrowAll(Boolean, String)(1);
     } catch (error) {
       expect(error instanceof SeriesValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
-      isValidOrThrowAllErrors(Boolean)(1);
+      isValidOrThrowAll(Boolean)(1);
     } catch (error) {
       expect(error instanceof SeriesValidationError).toBe(false);
       expect(error instanceof TypeError).toBe(true);
@@ -1340,7 +1340,7 @@ describe("check errors", () => {
   });
   test("should throw anything", () => {
     try {
-      isValidOrThrowAllErrors(
+      isValidOrThrowAll(
         () => {
           throw 1;
         },
@@ -1623,18 +1623,18 @@ describe("hasErrors", () => {
   });
 });
 
-describe("isValidOrThrowAllErrors ", () => {
+describe("isValidOrThrowAll ", () => {
   jest.spyOn(globalThis.console, "error");
 
   test("should throw AggregateError with all errors", () => {
     try {
-      isValidOrThrowAllErrors(Number, String)(true);
+      isValidOrThrowAll(Number, String)(true);
       throw "ups";
     } catch (error) {
       expect(error).toBeInstanceOf(AggregateError);
     }
     try {
-      isValidOrThrowAllErrors(Number, String)(true);
+      isValidOrThrowAll(Number, String)(true);
 
       throw "ups";
     } catch (error) {
@@ -1643,28 +1643,28 @@ describe("isValidOrThrowAllErrors ", () => {
   });
   test("should throw 2 errors", () => {
     try {
-      isValidOrThrowAllErrors(Number, Boolean, String)(true);
+      isValidOrThrowAll(Number, Boolean, String)(true);
     } catch (error) {
       expect(error.errors.length).toBe(2);
     }
   });
 });
-describe("isValidOrLogAllErrors", () => {
+describe("isValidOrLogAll", () => {
   test("should return true or false", () => {
     jest.spyOn(globalThis.console, "error");
-    expect(isValidOrLogAllErrors(Number, String)(true)).toBe(false);
+    expect(isValidOrLogAll(Number, String)(true)).toBe(false);
 
-    expect(isValidOrLogAllErrors(Boolean, true)(true)).toBe(true);
+    expect(isValidOrLogAll(Boolean, true)(true)).toBe(true);
   });
   test("should log 2 errors", () => {
     jest.spyOn(globalThis.console, "error");
 
-    isValidOrLogAllErrors(Number, Boolean, String)(true);
+    isValidOrLogAll(Number, Boolean, String)(true);
     expect(globalThis.console.error).toHaveBeenCalledTimes(2);
   });
   test("should log meaningful errors", () => {
     jest.spyOn(globalThis.console, "error");
-    isValidOrLogAllErrors(Number, Boolean, String)(true);
+    isValidOrLogAll(Number, Boolean, String)(true);
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
       new TypeError("value true do not match type Number")
@@ -1675,7 +1675,7 @@ describe("isValidOrLogAllErrors", () => {
   });
   test("should log meaningful errors in schemas", () => {
     jest.spyOn(globalThis.console, "error");
-    isValidOrLogAllErrors(
+    isValidOrLogAll(
       { x: Number },
       { y: Boolean },
       { z: String }
@@ -1692,7 +1692,7 @@ describe("isValidOrLogAllErrors", () => {
 
 // describe("Composable errors", () => {
 //   test("should ", () => {
-//     const isNumber = isValidOrThrowAllErrors(
+//     const isNumber = isValidOrThrowAll(
 //       Number,
 //       BigInt,
 //       (num) => num === Number(num),

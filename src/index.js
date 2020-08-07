@@ -69,6 +69,7 @@ const throwErrors = (errors, data) => {
   throw new $Error(errors, formatErrorMessage(data), data);
 };
 
+// TODO rewrite recursivamente aggregateError
 const rewriteError = (error, data) => {
   const newData = { ...data, type: error.raw.type };
   // console.log(newData);
@@ -84,8 +85,8 @@ const validOrThrow = (input, data) => {
   throwError(data);
 };
 
-const onFinishSuccessDefault = () => true;
-const onFinishWithErrorDefault = (error) => {
+const onValidDefault = () => true;
+const onInvalidDefault = (error) => {
   throw error;
 };
 
@@ -189,8 +190,8 @@ const validMainValidatorOrThrow = (data) => {
     let newConf = {
       ...data.conf,
       // collectAllErrors: false,
-      onFinishSuccess: onFinishSuccessDefault,
-      onFinishWithError: onFinishWithErrorDefault,
+      onValid: onValidDefault,
+      onInvalid: onInvalidDefault,
     };
     return fn(value, { [configurationSymbol]: newConf });
   } catch (error) {
@@ -281,10 +282,10 @@ const run = (conf) => (...types) => {
     try {
       validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
-      return currentConf.onFinishWithError(error);
+      return currentConf.onInvalid(error);
     }
 
-    return currentConf.onFinishSuccess(value);
+    return currentConf.onValid(value);
   }
   runner[validatorSymbol] = true;
 
@@ -293,9 +294,9 @@ const run = (conf) => (...types) => {
 
 const config = ({
   collectAllErrors = false,
-  onFinishSuccess = onFinishSuccessDefault,
-  onFinishWithError = onFinishWithErrorDefault,
-}) => run({ collectAllErrors, onFinishSuccess, onFinishWithError });
+  onValid = onValidDefault,
+  onInvalid = onInvalidDefault,
+}) => run({ collectAllErrors, onValid, onInvalid });
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
@@ -304,12 +305,12 @@ const logErrorsAndReturnFalse = (error) => {
 };
 
 export const isValid = config({
-  onFinishWithError: () => false,
+  onInvalid: () => false,
   // collectAllErrors: false, // default
 });
 
 export const isValidOrLog = config({
-  onFinishWithError: logErrorsAndReturnFalse,
+  onInvalid: logErrorsAndReturnFalse,
   // collectAllErrors: false, // default
 });
 
@@ -323,18 +324,18 @@ const flatAggregateError = (error) => {
 };
 
 export const hasErrors = config({
-  onFinishWithError: (error) => flatAggregateError(error),
-  onFinishSuccess: () => null,
+  onInvalid: (error) => flatAggregateError(error),
+  onValid: () => null,
   collectAllErrors: true,
 });
 
-export const isValidOrLogAllErrors = config({
-  onFinishWithError: logErrorsAndReturnFalse,
-  // onFinishSuccess: () => true, // default
+export const isValidOrLogAll = config({
+  onInvalid: logErrorsAndReturnFalse,
+  // onValid: () => true, // default
   collectAllErrors: true,
 });
 
-export const isValidOrThrowAllErrors = config({
+export const isValidOrThrowAll = config({
   collectAllErrors: true,
 });
 

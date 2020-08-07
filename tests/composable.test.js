@@ -1,6 +1,6 @@
 import isValidOrThrow, {
   TypeValidationError,
-  isValidOrThrowAllErrors,
+  isValidOrThrowAll,
   SeriesValidationError,
   hasErrors,
   isValidOrLog,
@@ -25,7 +25,7 @@ describe("composable", () => {
       let validator = isValidOrThrow(Number, String);
 
       try {
-        isValidOrThrowAllErrors(validator)(null);
+        isValidOrThrowAll(validator)(null);
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(SeriesValidationError);
@@ -34,7 +34,7 @@ describe("composable", () => {
       }
     });
     test("should fail with TypeValidationError collecting one error", () => {
-      let validator = isValidOrThrowAllErrors(Number, String);
+      let validator = isValidOrThrowAll(Number, String);
 
       try {
         isValidOrThrow(validator)(null);
