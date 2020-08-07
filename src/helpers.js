@@ -1,8 +1,7 @@
 import "./polyfills.js";
-import { AsyncFunction,GeneratorFunction,constructors } from "./constants.js";
+import { AsyncFunction, GeneratorFunction, constructors } from "./constants.js";
 
 const isProxy = Proxy.isProxy;
-
 
 export const validatorSymbol = Symbol("validator mark");
 export const configurationSymbol = Symbol("rewrite configuration");

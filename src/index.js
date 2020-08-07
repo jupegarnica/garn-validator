@@ -20,9 +20,11 @@ export {
 
 const formatErrorMessage = (data) => {
   const { type, value, path = [] } = data;
-  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
-    value
-  )} do not match type ${stringify(type)}`;
+  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${
+    stringify(
+      value,
+    )
+  } do not match type ${stringify(type)}`;
 };
 
 const descriptor = (data) => ({
@@ -49,7 +51,6 @@ export class EnumValidationError extends AggregateError {
 export class SchemaValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
-
     this.name = "SchemaValidationError";
     Object.defineProperty(this, "raw", descriptor(data));
   }
@@ -66,7 +67,6 @@ export class SeriesValidationError extends AggregateError {
 const throwError = (data) => {
   const { $Error = TypeValidationError } = data;
   throw new $Error(formatErrorMessage(data), data);
-
 };
 const throwErrors = (errors, data) => {
   if (errors.length === 1) throw errors[0];
@@ -83,8 +83,6 @@ const onFinishSuccessDefault = () => true;
 const onFinishWithErrorDefault = (error) => {
   throw error;
 };
-
-
 
 const validSchemaOrThrow = (data) => {
   const { conf, type: schema, value: object, root = object, path = [] } = data;
@@ -144,7 +142,7 @@ const validSchemaOrThrow = (data) => {
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key),
     );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
@@ -199,7 +197,6 @@ const validCustomValidatorOrThrow = (data) => {
   return validOrThrow(fn(value, root, keyName), data);
 };
 
-
 const validConstructorOrThrow = (data) =>
   validOrThrow(checkConstructor(data.type, data.value), data);
 const validPrimitiveOrThrow = (data) =>
@@ -208,7 +205,7 @@ const validPrimitiveOrThrow = (data) =>
 const validRegExpOrThrow = (data) =>
   validOrThrow(
     data.value.constructor === String && checkRegExp(data.type, data.value),
-    data
+    data,
   );
 
 const validSeriesOrThrow = (conf, types, value) => {
@@ -263,34 +260,36 @@ const isValidTypeOrThrow = (data) => {
 
     case "invalid":
       throw new SyntaxError(
-        `checking with validator ${stringify(data.type)} not supported`
+        `checking with validator ${stringify(data.type)} not supported`,
       );
   }
 };
 
-const run = (conf) => (...types) => {
-  function runner(value, secret = {}) {
-    let currentConf = conf;
-    if (secret[configurationSymbol]) currentConf = secret[configurationSymbol];
-    try {
-      validSeriesOrThrow(currentConf, types, value);
-    } catch (error) {
-      return currentConf.onFinishWithError(error);
+const run = (conf) =>
+  (...types) => {
+    function runner(value, secret = {}) {
+      let currentConf = conf;
+      if (secret[configurationSymbol]) {
+        currentConf = secret[configurationSymbol];
+      }
+      try {
+        validSeriesOrThrow(currentConf, types, value);
+      } catch (error) {
+        return currentConf.onFinishWithError(error);
+      }
+
+      return currentConf.onFinishSuccess(value);
     }
+    runner[validatorSymbol] = true;
 
-    return currentConf.onFinishSuccess();
-  }
-  runner[validatorSymbol] = true;
-
-  return runner;
-};
+    return runner;
+  };
 
 const config = ({
   collectAllErrors = false,
   onFinishSuccess = onFinishSuccessDefault,
   onFinishWithError = onFinishWithErrorDefault,
-}) =>
-  run({ collectAllErrors, onFinishSuccess, onFinishWithError });
+}) => run({ collectAllErrors, onFinishSuccess, onFinishWithError });
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
