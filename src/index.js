@@ -179,23 +179,23 @@ const validSchemaOrThrow = (data) => {
   return true;
 };
 
+const validMainValidatorOrThrow = (data) => {
+  const { type: fn, value } = data;
+
+  try {
+    let newConf = {
+      ...data.conf,
+      onFinishSuccess: onFinishSuccessDefault,
+      onFinishWithError: onFinishWithErrorDefault,
+    };
+    return fn(value, { [configurationSymbol]: newConf });
+  } catch (error) {
+    if (error.raw) throwError({ ...data, type: error.raw.type });
+    throw error;
+  }
+};
 const validCustomValidatorOrThrow = (data) => {
   const { type: fn, value, root, keyName } = data;
-
-  if (fn[validatorSymbol]) {
-    try {
-      let newConf = {
-        ...data.conf,
-        onFinishSuccess: onFinishSuccessDefault,
-        onFinishWithError: onFinishWithErrorDefault,
-      };
-      return fn(value, { [configurationSymbol]: newConf });
-    } catch (error) {
-      if (error.raw) throwError({ ...data, type: error.raw.type });
-      throw error;
-    }
-  }
-
   return validOrThrow(fn(value, root, keyName), data);
 };
 
@@ -258,6 +258,8 @@ const isValidTypeOrThrow = (data) => {
       return validSchemaOrThrow(data);
     case "validator":
       return validCustomValidatorOrThrow(data);
+    case "main-validator":
+      return validMainValidatorOrThrow(data);
 
     case "invalid":
       throw new SyntaxError(

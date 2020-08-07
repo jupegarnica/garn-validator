@@ -7,8 +7,9 @@ import {
   stringify,
   isClass,
   whatTypeIs,
-} from "../src/utils.js";
+} from "../src/helpers.js";
 
+import { isValid } from "garn-validator";
 import { constructors, numbers, strings, notConstructors } from "./data.js";
 
 class MyClass {}
@@ -291,7 +292,8 @@ describe("whatTypeIs", () => {
     [undefined, "primitive"],
     ["undefined", "primitive"],
     [() => {}, "validator"],
-    // [VALIDATOR, 'validator'],
+    [VALIDATOR, 'validator'],
+    [isValid(Number), 'main-validator'],
     [class Car{}, "constructor"],
 
     [async () => {}, "invalid"], // noy yet supported

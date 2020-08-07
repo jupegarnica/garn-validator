@@ -7,6 +7,8 @@ const isProxy = Proxy.isProxy;
 export const validatorSymbol = Symbol("validator mark");
 export const configurationSymbol = Symbol("rewrite configuration");
 
+const isMainValidator = (type) => type && !!type[validatorSymbol];
+
 export const isNullish = (val) => val === undefined || val === null;
 
 export const checkConstructor = (type, val) =>
@@ -47,6 +49,7 @@ export const whatTypeIs = (type) => {
   if (Array.isArray(type)) return "enum";
   if (checkConstructor(RegExp, type)) return "regex";
   if (isConstructor(type)) return "constructor";
+  if (isMainValidator(type)) return "main-validator";
   if (isCustomValidator(type)) return "validator";
   return "invalid";
 };
