@@ -196,7 +196,7 @@ const validMainValidatorOrThrow = (data) => {
     return fn(value, { [configurationSymbol]: newConf });
   } catch (error) {
     if (error.raw) {
-      rewriteError(error, {...data, $Error: error.constructor});
+      rewriteError(error, { ...data, $Error: error.constructor });
     }
     throw error;
   }
@@ -334,10 +334,12 @@ export const isValidOrLogAll = config({
   // onValid: () => true, // default
   collectAllErrors: true,
 });
+export const isValidOrLogAllErrors = isValidOrLogAll;
 
 export const isValidOrThrowAll = config({
   collectAllErrors: true,
 });
+export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
 export const isValidOrThrow = config({});
 
