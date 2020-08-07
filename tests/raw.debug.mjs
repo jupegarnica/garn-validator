@@ -9,9 +9,10 @@ import {
 // let validator = isValidOrThrow(Number, String);
 
 //   isValidOrThrowAll({a:validator})({a:null});
+try {
 
-let validator = isValidOrLogAll([Number, String]);
-let errors = hasErrors({
+let validator = isValidOrLogAll(Number, String);
+let errors = isValidOrThrowAll({
   a: validator,
   b: {
     c: {
@@ -28,3 +29,8 @@ let errors = hasErrors({
 });
 
 console.log(errors.map((e) => e.message));
+
+} catch (error) {
+
+  console.log(error);
+}

@@ -29,7 +29,7 @@ describe("composable", () => {
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(SeriesValidationError);
-        expect(error.message).toMatch("[Number,String]");
+        expect(error.message).toMatch("serie Number,String");
         expect(error.errors.length).toBe(2);
       }
     });

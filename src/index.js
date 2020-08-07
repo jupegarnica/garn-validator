@@ -16,10 +16,13 @@ import {
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 const formatErrorMessage = (data) => {
-  const { type, value, path = [] } = data;
+  const { type, value, path = [], kind } = data;
+
+  let typeString = stringify(type);
+  typeString = kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
   return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
     value
-  )} do not match ${whatTypeIs(type)} ${stringify(type)}`;
+  )} do not match ${kind || whatTypeIs(type)} ${typeString}`;
 };
 
 const descriptor = (data) => ({
@@ -75,22 +78,18 @@ const throwErrors = (errors, data) => {
   throw createAggregateError(errors, data);
 };
 
-
 const mapError = (error, data) => {
   if (!error.raw) return error;
-  const overriddenPath = { ...error.raw, path: data.path};
+  const overriddenPath = { ...error.raw, path: data.path };
 
   if (error instanceof AggregateError) {
-    const errors = error.errors.map((e) =>
-      mapError(e, data)
-    );
+    const errors = error.errors.map((e) => mapError(e, data));
     return createAggregateError(errors, data);
   } else {
     return createError(overriddenPath);
   }
 };
 
-// TODO rewrite recursivamente aggregateError
 const reThrowError = (error, data) => {
   const newData = { ...data, ...error.raw, $Error: error.constructor };
   throw mapError(error, newData);
@@ -194,6 +193,7 @@ const validSchemaOrThrow = (data) => {
     throwErrors(errors, {
       ...data,
       $Error: SchemaValidationError,
+      kind: "schema",
     });
   }
   return true;
@@ -244,7 +244,12 @@ const validSeriesOrThrow = (conf, types, value) => {
     }
   }
   if (errors.length > 0) {
-    throwErrors(errors, { type: types, value, $Error: SeriesValidationError });
+    throwErrors(errors, {
+      type: types,
+      value,
+      $Error: SeriesValidationError,
+      kind: "serie",
+    });
   }
   return true;
 };
@@ -263,6 +268,7 @@ const validEnumOrThrow = (data) => {
   throwErrors(errors, {
     ...data,
     $Error: EnumValidationError,
+    kind: "enum",
   });
 };
 

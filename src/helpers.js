@@ -71,6 +71,9 @@ const parser = () => {
       }
       seen.set(value, key);
     }
+    if (typeof value === "function" && value[validatorSymbol]) {
+      return addStripMark(value.name);
+    }
     if (typeof value === "function" && isConstructor(value)) {
       return addStripMark(value.name);
     }
