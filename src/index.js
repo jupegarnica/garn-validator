@@ -13,18 +13,13 @@ import {
   configurationSymbol,
 } from "./helpers.js";
 
-export {
-  AsyncFunction,
-  GeneratorFunction,
-} from "./constants.js";
+export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 const formatErrorMessage = (data) => {
-  const { type, value, path = [] } = data;
-  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${
-    stringify(
-      value,
-    )
-  } do not match type ${stringify(type)}`;
+  const { type, value, path = [] , $Error} = data;
+  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
+    value
+  )} do not match ${'type' || whatTypeIs(type)} ${stringify(type)}`;
 };
 
 const descriptor = (data) => ({
@@ -72,6 +67,16 @@ const throwErrors = (errors, data) => {
   if (errors.length === 1) throw errors[0];
   const { $Error = AggregateError } = data;
   throw new $Error(errors, formatErrorMessage(data), data);
+};
+
+const rewriteError = (error, data) => {
+  const newData = { ...data, type: error.raw.type };
+  // console.log(newData);
+  if (error instanceof AggregateError) {
+    throwErrors(error.errors, newData);
+  } else {
+    throwError(newData);
+  }
 };
 
 const validOrThrow = (input, data) => {
@@ -142,7 +147,7 @@ const validSchemaOrThrow = (data) => {
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key),
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
     );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
@@ -183,12 +188,15 @@ const validMainValidatorOrThrow = (data) => {
   try {
     let newConf = {
       ...data.conf,
+      // collectAllErrors: false,
       onFinishSuccess: onFinishSuccessDefault,
       onFinishWithError: onFinishWithErrorDefault,
     };
     return fn(value, { [configurationSymbol]: newConf });
   } catch (error) {
-    if (error.raw) throwError({ ...data, type: error.raw.type });
+    if (error.raw) {
+      rewriteError(error, {...data, $Error: error.constructor});
+    }
     throw error;
   }
 };
@@ -205,7 +213,7 @@ const validPrimitiveOrThrow = (data) =>
 const validRegExpOrThrow = (data) =>
   validOrThrow(
     data.value.constructor === String && checkRegExp(data.type, data.value),
-    data,
+    data
   );
 
 const validSeriesOrThrow = (conf, types, value) => {
@@ -257,33 +265,31 @@ const isValidTypeOrThrow = (data) => {
       return validCustomValidatorOrThrow(data);
     case "main-validator":
       return validMainValidatorOrThrow(data);
-
     case "invalid":
       throw new SyntaxError(
-        `checking with validator ${stringify(data.type)} not supported`,
+        `checking with validator ${stringify(data.type)} not supported`
       );
   }
 };
 
-const run = (conf) =>
-  (...types) => {
-    function runner(value, secret = {}) {
-      let currentConf = conf;
-      if (secret[configurationSymbol]) {
-        currentConf = secret[configurationSymbol];
-      }
-      try {
-        validSeriesOrThrow(currentConf, types, value);
-      } catch (error) {
-        return currentConf.onFinishWithError(error);
-      }
-
-      return currentConf.onFinishSuccess(value);
+const run = (conf) => (...types) => {
+  function runner(value, secret = {}) {
+    let currentConf = conf;
+    if (secret[configurationSymbol]) {
+      currentConf = secret[configurationSymbol];
     }
-    runner[validatorSymbol] = true;
+    try {
+      validSeriesOrThrow(currentConf, types, value);
+    } catch (error) {
+      return currentConf.onFinishWithError(error);
+    }
 
-    return runner;
-  };
+    return currentConf.onFinishSuccess(value);
+  }
+  runner[validatorSymbol] = true;
+
+  return runner;
+};
 
 const config = ({
   collectAllErrors = false,
