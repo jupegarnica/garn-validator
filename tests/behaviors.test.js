@@ -1,11 +1,8 @@
 import {
   isValid,
-  isValidOrThrow,
   isValidOrThrowAll,
   isValidOrLogAll,
   hasErrors,
-  arrayOf,
-  objectOf,
   AsyncFunction,
   GeneratorFunction,
   TypeValidationError,

@@ -16,10 +16,11 @@ import {
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 const formatErrorMessage = (data) => {
-  const { type, value, path  , kind } = data;
+  const { type, value, path, kind } = data;
 
   let typeString = stringify(type);
-  typeString = kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
+  typeString =
+    kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
   return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
     value
   )} do not match ${kind || whatTypeIs(type)} ${typeString}`;
@@ -63,14 +64,14 @@ export class SerieValidationError extends AggregateError {
 const createError = (data) => {
   data.$Error = data.$Error || TypeValidationError;
   data.path = data.path || [];
-  data.message = formatErrorMessage(data)
+  data.message = formatErrorMessage(data);
   return new data.$Error(data.message, data);
 };
 
 const createAggregateError = (errors, data) => {
-  data.$Error = data.$Error || AggregateError;
+  data.$Error = data.$Error;
   data.path = data.path || [];
-  data.message = formatErrorMessage(data)
+  data.message = formatErrorMessage(data);
   return new data.$Error(errors, data.message, data);
 };
 const throwError = (data) => {
@@ -84,7 +85,11 @@ const throwErrors = (errors, data) => {
 const mapError = (error, data) => {
   if (!error.raw) return error;
   data.path = data.path || [];
-  const overriddenPath = { ...error.raw, path: [...data.path, ...error.raw.path], $Error: error.constructor};
+  const overriddenPath = {
+    ...error.raw,
+    path: [...data.path, ...error.raw.path],
+    $Error: error.constructor,
+  };
 
   if (error instanceof AggregateError) {
     const errors = error.errors.map((e) => mapError(e, data));
@@ -95,7 +100,6 @@ const mapError = (error, data) => {
 };
 
 const reThrowError = (error, data) => {
-
   throw mapError(error, data);
 };
 
@@ -262,9 +266,7 @@ const validEnumOrThrow = (data) => {
   const errors = [];
   for (const type of types) {
     try {
-      if (isValidTypeOrThrow({ conf, type, value, root, keyName, path })) {
-        return true;
-      }
+      return isValidTypeOrThrow({ conf, type, value, root, keyName, path });
     } catch (error) {
       errors.push(error);
     }

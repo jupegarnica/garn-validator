@@ -35,9 +35,9 @@ export const isInvalidType = (fn) =>
 
 export function isConstructor(f) {
   if (!f) return false;
+  // if (!f.constructor) return false;
   if (typeof f !== "function") return false;
   if (!f.name) return false;
-  if (!f.constructor) return false;
   if (isClass(f)) return true;
   return constructors.some((c) => c === f);
 }
@@ -88,7 +88,7 @@ const parser = () => {
 };
 
 export const optionalRegex = /[?$]$/;
-export const isOptionalKey = (key = "") => optionalRegex.test(key);
+export const isOptionalKey = (key) => optionalRegex.test(key);
 export const isRequiredKey = (key) => notIsRegExp(key) && !isOptionalKey(key);
 
 export const stringify = (val) => {

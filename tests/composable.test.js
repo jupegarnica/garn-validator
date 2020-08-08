@@ -60,6 +60,33 @@ describe("composable", () => {
         expect(error.raw.path).toEqual([]);
       }
     });
+    test("should not rewrite user custom errors", () => {
+      let validator = isValidOrThrow(Number, (num) => {
+        if (num > 0) throw new RangeError("ups");
+      });
+
+      try {
+        isValidOrThrow({ a: validator })({ a: 1 });
+        throw "mec";
+      } catch (error) {
+        expect(error).toBeInstanceOf(RangeError);
+        expect(error.raw).toBeUndefined();
+      }
+    });
+    test("should not rewrite user custom errors inside aggregateError", () => {
+      let validator = isValidOrThrow(Number, (num) => {
+        if (num > 0) throw new RangeError("ups");
+      }, null);
+
+      try {
+        isValidOrThrowAll({ a: validator })({ a: 1 });
+        throw "mec";
+      } catch (error) {
+
+        expect(error.errors[0]).toBeInstanceOf(RangeError);
+
+      }
+    });
     test("should rewrite errors injecting the new nested path", () => {
       try {
         isValidOrThrow({ a: validator })({ a: null });
@@ -222,10 +249,10 @@ describe("composable", () => {
         expect(isValid(isValidTelephone)({ num: 123 })).toBe(true);
       });
 
-      test('throw one error', () => {
+      test("throw one error", () => {
         expect(() => {
-          isValidPerson({tel:{num:'123'}, country: 'esp'})
-        }).toThrow(TypeValidationError)
+          isValidPerson({ tel: { num: "123" }, country: "esp" });
+        }).toThrow(TypeValidationError);
       });
     });
   });
