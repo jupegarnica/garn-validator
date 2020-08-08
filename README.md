@@ -8,7 +8,8 @@ Ultra fast runtime type validator without dependencies.
 
 <h1>Features</h1>
 
-- Supports checking primitives or objects with schemas
+- Supports checking primitives or objects with **schemas**
+- Composable
 - Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
 - 6 behaviors: `hasErrors`, `isValid`, `isValidOrThrow`,`isValidOrLog`, `isValidOrLogAll` and `isValidOrThrowAll`.
@@ -44,10 +45,13 @@ Ultra fast runtime type validator without dependencies.
       - [Regexp keys](#regexp-keys)
       - [Custom validation used in schemas](#custom-validation-used-in-schemas)
   - [Errors](#errors)
-    - [SchemaValidationError using isValidOrThrowAll](#schemavalidationerror-using-isValidOrThrowAll)
-    - [EnumValidationError](#enumvalidationerror)
-    - [SeriesValidationError using isValidOrThrowAll](#seriesvalidationerror-using-isValidOrThrowAll)
-    - [hasErrors](#haserrors)
+    - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
+    - [AggregateError](#aggregateerror)
+      - [SchemaValidationError](#schemavalidationerror)
+      - [EnumValidationError](#enumvalidationerror)
+      - [SerieValidationError](#serievalidationerror)
+      - [hasErrors](#haserrors)
+    - [Raw Error data](#raw-error-data)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
     - [arrayOf](#arrayof)
@@ -61,7 +65,6 @@ Ultra fast runtime type validator without dependencies.
 # Get started
 
 ## Node
-
 
 ```bash
 npm install garn-validator
@@ -84,7 +87,7 @@ const { isValidOrThrow } = require("garn-validator/commonjs");
 const isValidOrThrow = require("garn-validator/commonjs").default;
 ```
 
-##  Deno
+## Deno
 
 The library can be used as is in typescript
 
@@ -98,8 +101,6 @@ import is from "https://deno.land/x/garn_validator/src/index.js";
 <!-- import * as garnValidator from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.d.ts";
 // import IsValidOrThrow from "garn-validator/src/index.d.ts";
 // isValidOrThrow as typeof IsValidOrThrow; -->
-
-
 
 <!-- TODO ## Browser -->
 <!-- https://jspm.org/ -->
@@ -227,18 +228,18 @@ isValidUser({
 
 There are 6 behaviors that can be divided in 2 categories:
 
-- Stop in first Error:
+- Stop in first Error (quickest)
+
   - `isValidOrThrow` (returns true of throw the first error found)
   - `isValid` (returns true or false, never throws)
   - `isValidOrLog` (returns true or false and log first error, never throws)
+
 - Collect all Errors:
   - `hasErrors` (return null or array of errors, never throws)
   - `isValidOrLogAll` (returns true or false and log all errors, never throws)
-  - `isValidOrThrowAll` (returns true or throw [AggregateError](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found)
+  - `isValidOrThrowAll` (returns true or throw )
 
 The default export is `isValidOrThrow`
-
-Learn more at [errors.test.js](https://github.com/jupegarnica/garn-validator/blob/master/tests/errors.test.js)
 
 ```js
 import { isValid } from "garn-validator";
@@ -262,12 +263,24 @@ import { hasErrors } from "garn-validator";
 // return null or array or errors
 // checks until the end
 hasErrors(/[a-z]/)("g"); // null
-hasErrors(/[a-z]/, Number)("G"); // [TypeError, TypeError]
+hasErrors(/[a-z]/, Number)("G"); // [TypeValidationError, TypeValidationError]
 ```
+
+```js
+import { isValidOrThrowAll } from "garn-validator";
+
+// return null or array or errors
+// checks until the end
+isValidOrThrowAll(/[a-z]/)("g"); // true
+isValidOrThrowAll(/[a-z]/, Number)("G"); // throw AggregateError a key errors with  [TypeValidationError, TypeValidationError]
+```
+
+Learn more at [Errors](#errors)
 
 # In depth
 
 ## Types of validations
+
 There are 6 types of validations: Primitives, Constructors, RegExp, Enums, Schemas and Custom functions
 
 ### Primitives
@@ -311,9 +324,11 @@ is(Car)(honda); // honda.constructor === Car  --> true
 > **You cannot use a normal function used as constructor from the old JS times.**
 
 ```js
-function Car(name) { this.name = name}
-let honda = new Car('honda');
-is(Car)(honda);  // throws.  Car is detected as custom validator function
+function Car(name) {
+  this.name = name;
+}
+let honda = new Car("honda");
+is(Car)(honda); // throws.  Car is detected as custom validator function
 ```
 
 All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constants.js#L8) are supported
@@ -346,13 +361,13 @@ is(() => [])(10); // true
 
 To fail a validation may return falsy or throw an error.
 
-if it returns a falsy value the default error will be thrown: TypeError
+if it returns a falsy value the default error will be thrown: TypeValidationError
 
 if it throws an error that error will be thrown.
 
 ```js
-is( () => false ) (10); // throws TypeError
-is( () => 0 ) (10); // throws TypeError
+is( () => false ) (10); // throws TypeValidationError
+is( () => 0 ) (10); // throws TypeValidationError
 
 is( () => {
   throw new RangeError('ups);
@@ -420,11 +435,10 @@ let obj = {
 is(schema)(obj); // true
 ```
 
-> **Only the keys in the schema will be checked.  Any key not present in the schema won't be checked**
+> **Only the keys in the schema will be checked. Any key not present in the schema won't be checked**
 
 ```js
-is({})({a:1}); // true , a is not in the schema
-
+is({})({ a: 1 }); // true , a is not in the schema
 ```
 
 #### Optional Keys
@@ -436,10 +450,10 @@ is({ x$: Number })({ x: 1 }); // true, x is present and is Number
 is({ x$: String })({ x: 1 }); // it throws, x is present but is not String
 
 is({ x$: String })({}); // true, x is undefined
-is({ x$: String })({ x: undefined}); // true, x is undefined
+is({ x$: String })({ x: undefined }); // true, x is undefined
 is({ x$: String })({ x: null }); // true, x is null
-
 ```
+
 You can use `key$` or `'key?'`. It would be nicer to have `key?` without quotes but is not valid JS
 
 ```js
@@ -449,23 +463,22 @@ is({ "x?": String })({}); // true
 #### Regexp keys
 
 You can validate multiple keys at once using a regexp key
-```js
 
+```js
 is({
-  [/./]: String
+  [/./]: String,
 })({
-  a: 'a',
-  b: 'b',
+  a: "a",
+  b: "b",
 }); // true
 
 // or write it as plain string
 is({
-  '/./': String
+  "/./": String,
 })({
-  a: 'a',
+  a: "a",
   b: 1, // fails
 }); // throws
-
 
 // only checks the keys that matches regex
 is({
@@ -480,33 +493,31 @@ is({
 
 > **The required keys and optional won't be check against a regexp key**
 
-
 ```js
 is({
   [/./]: Number,
-  x: String,   //  this required key has priority against regex key
+  x: String, //  this required key has priority against regex key
 })({
-  x:'x' // not checked as Number, checked as String
+  x: "x", // not checked as Number, checked as String
 }); // true,  x is String
 
 is({
   [/./]: Number,
   x: String,
 })({
-  x:'x', // not checked as Number, checked as String
-  y:'y', // checked as Number, fails
-});      // throw
-
+  x: "x", // not checked as Number, checked as String
+  y: "y", // checked as Number, fails
+}); // throw
 
 is({
   [/./]: Number,
   $x: String,
   y: String,
 })({
-  x:'x', // not checked as Number, checked as String
-  y:'y', // checked as String
-  z:1    // checked as Number, fails
-});      // throw
+  x: "x", // not checked as Number, checked as String
+  y: "y", // checked as String
+  z: 1, // checked as Number, fails
+}); // throw
 ```
 
 This feature is perfect to note that any key not specified in schema is not allowed
@@ -516,18 +527,17 @@ is({
   x: String,
   [/./]: () => false,
 })({
-  x:'x',
-  y: 'y', // fails
+  x: "x",
+  y: "y", // fails
 });
-
 ```
 
 #### Custom validation used in schemas
 
-When using a custom validator inside an schema will be run with 3 arguments:  `(value, root, keyName) => {}`
+When using a custom validator inside an schema will be run with 3 arguments: `(value, root, keyName) => {}`
 
-- value:  the value present in that key from the object
-- root: the whole object,  not matter how deep the validation occurs
+- value: the value present in that key from the object
+- root: the whole object, not matter how deep the validation occurs
 - keyName: the name of the key to be checked.
 
 ```js
@@ -556,18 +566,124 @@ is({
   longKey: 1, // valid key
 }); // it throws, max key is too short
 ```
+
 <!-- TODO ## Validations in series -->
 <!-- TODO ## Proxy detection -->
 
 ## Errors
 
-If a validation fails by default it will throw `new TypeError(meaningfulMessage)`;
+If a validation fails it will throw `new TypeValidationError(meaningfulMessage)` which inherits from `TypeError`. It can be imported.
 
 If using a custom validator throws an error , that error will be thrown.
 
-### SchemaValidationError using isValidOrThrowAll
+```js
+import { isValidOrThrow, TypeValidationError } from "garn-validator";
 
-If more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
+try {
+  isValidOrThrow(Boolean)(33);
+} catch (error) {
+  error instanceof TypeValidationError; // true
+  error instanceof TypeError; // true
+}
+
+try {
+  isValidOrThrow(() => {
+    throw "ups";
+  })(33);
+} catch (error) {
+  error === "ups"; // true
+}
+
+try {
+  isValidOrThrow(() => {
+    throw new RangeError("out of range");
+  })(33);
+} catch (error) {
+  error instanceof RangeError; // true
+  error instanceof TypeError; // false
+}
+```
+
+
+### isValidOrThrow vs isValidOrThrowAll
+
+`isValidOrThrow` will always throw the first `TypeValidationError` it finds.
+
+```js
+try {
+  isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
+} catch (error) {
+  error instanceof TypeValidationError; // true
+  error.message; // on path /a value null do not match constructor Number
+}
+```
+
+`isValidOrThrowAll` will throw a [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
+
+
+```js
+try {
+  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: null });
+} catch (error) {
+  error instanceof AggregateError; // true
+  error instanceof SchemaValidationError; // true
+  console.log(error);
+  /*
+    SchemaValidationError: value {"a":null,"b":null} do not match schema {"a":Number,"b":String}
+  */
+  console.log(error.errors);
+  /*
+    [
+      TypeValidationError: on path /a value null do not match constructor Number ,
+      TypeValidationError: on path /b value null do not match constructor String ,
+    ]
+  */
+}
+```
+But if it only finds one error it will throw `TypeValidationError`
+
+```js
+try {
+  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: "str" });
+} catch (error) {
+  console.log(error);
+  /*
+    TypeValidationError: on path /a value null do not match constructor Number ,
+  */
+  error instanceof TypeValidationError; // true
+  error instanceof SchemaValidationError; // false
+}
+```
+
+### AggregateError
+
+There are 3 types a `AggregateError` that can be thrown:
+
+- `SchemaValidationError`:  thrown when more than one key fails checking an schema
+- `EnumValidationError`:  thrown when all validations fails checking an enum
+- `SerieValidationError`:  thrown when more than one validation fails checking an Serie
+
+All of them inherits from `AggregateError` and has a property errors with an array of all errors collected
+
+
+```js
+try {
+  isValidOrThrowAll(Number, String)(null);
+} catch (error) {
+  error instanceof AggregateError; // true
+  console.log(error.errors);
+  /*
+    [
+      TypeValidationError: value null do not match constructor Number ,
+      TypeValidationError: value null do not match constructor String ,
+    ]
+  */
+}
+```
+
+#### SchemaValidationError
+
+If using isValidOrThrowAll more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
 
 If only one key fail it will throw only that Error (not an AggregateError)
 
@@ -594,9 +710,9 @@ try {
 }
 ```
 
-### EnumValidationError
+#### EnumValidationError
 
-If fails all items of an enum, it will throw a EnumValidationError with all Errors aggregated in error.errors
+If all validations  of an enum fails, it will throw a EnumValidationError with all Errors aggregated in error.errors
 
 But if the length of the enum is 1, it will throw only that error.
 
@@ -618,33 +734,80 @@ try {
 }
 ```
 
-### SeriesValidationError using isValidOrThrowAll
+#### SerieValidationError
 
-If fails all items of a serie of validations, it will throw a SeriesValidationError with all Errors aggregated in error.errors
+If using isValidOrThrowAll fails all validations of a serie , it will throw a SerieValidationError with all Errors aggregated in error.errors
 
 But if the length of the enum is 1. it will throw only this error.
 
-SeriesValidationError inherits from AggregateError.
+SerieValidationError inherits from AggregateError.
 
 ```js
 try {
   isValidOrThrowAll(Boolean, String)(1);
 } catch (error) {
-  console.log(error instanceof SeriesValidationError); // true
+  console.log(error instanceof SerieValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
   isValidOrThrowAll(Boolean)(1);
 } catch (error) {
-  console.log(error instanceof SeriesValidationError); // false
+  console.log(error instanceof SerieValidationError); // false
   console.log(error instanceof TypeError); // true
 }
 ```
 
-### hasErrors
+#### hasErrors
 
+<!-- TODO -->
 hasError will flatMap all errors found. No AggregateError will be in the array returned.
+
+### Raw Error data
+
+All errors the library throws has a property raw with the raw data collected in that error:
+
+
+```js
+try {
+  isValidOrThrow({ a: Number})({ a: null });
+} catch (error) {
+  console.log(error.raw);
+}
+/*
+{
+
+  //  the validation failing
+  type: [Function: Number],
+
+  //  the value evaluated
+  value: null,
+
+  // the root object
+  root: { a: null },
+
+  // the key failing
+  keyName: 'a',
+
+  // the whole path where the evaluation happens as an array
+  path: [ 'a' ],
+
+  // the error message
+  message: 'on path /a value null do not match constructor Number',
+
+   // the error constructor
+  '$Error': [class TypeValidationError extends TypeError],
+
+  // the behavior applied
+  conf: {
+    collectAllErrors: false,
+    onValid: [Function: onValidDefault],
+    onInvalid: [Function: onInvalidDefault]
+  },
+}
+ */
+
+```
 
 ## Especial cases
 
@@ -723,13 +886,13 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 Watch folder [tests](https://github.com/jupegarnica/garn-validator/tree/master/tests) to learn more.
 
 <!-- inject tests -->
+
 #### schema.test.js
 
 [schema.test.js](https://github.com/jupegarnica/garn-validator/tree/master/tests/schema.test.js)
 
 ```js
 import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
-
 
 describe("check schema", () => {
   test("check with constructor", () => {
@@ -926,8 +1089,8 @@ describe("optional keys", () => {
     expect(isValid({ a$: Number })({})).toBe(true);
   });
   test("if the key is null or undefined should be valid", () => {
-    expect(isValid({ a$: Number })({a:undefined})).toBe(true);
-    expect(isValid({ a$: Number })({a:null})).toBe(true);
+    expect(isValid({ a$: Number })({ a: undefined })).toBe(true);
+    expect(isValid({ a$: Number })({ a: null })).toBe(true);
   });
   test("should work ending with $ or ?", () => {
     expect(isValid({ "a?": Number })({ a: 1 })).toBe(true);
@@ -996,7 +1159,7 @@ describe("special cases", () => {
     }).toThrow();
   });
 });
-describe('check Array against an schema', () => {
+describe("check Array against an schema", () => {
   test("should check an Array as an object", () => {
     expect(() => {
       isValidOrThrow({
@@ -1037,7 +1200,6 @@ describe("check String against an schema", () => {
       })("Lorem");
     }).toThrow();
   });
-
 });
 
 describe("check a function against an schema", () => {
@@ -1054,7 +1216,6 @@ describe("check a function against an schema", () => {
       })(fn);
     }).toThrow();
   });
-
 });
 
 describe("arrayOf", () => {
@@ -1133,7 +1294,6 @@ describe("should check instances", () => {
     }).toThrow();
   });
 });
-
 ```
 
 #### custom-validator.test.js
@@ -1142,7 +1302,6 @@ describe("should check instances", () => {
 
 ```js
 import isValidOrThrow from "garn-validator";
-
 
 describe("check with custom validator", () => {
   test("you can return true or false", () => {
@@ -1159,19 +1318,17 @@ describe("check with custom validator", () => {
       isValidOrThrow(() => {
         throw "ups";
       })(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBe('ups');
-
+      expect(error).toBe("ups");
     }
   });
   test("by default throws TypeError", () => {
     try {
       isValidOrThrow(Boolean)(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBeInstanceOf(TypeError)
-
+      expect(error).toBeInstanceOf(TypeError);
     }
   });
   test("you can throw a custom type of error", () => {
@@ -1179,16 +1336,13 @@ describe("check with custom validator", () => {
       isValidOrThrow((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
-      throw 'mec'
+      throw "mec";
     } catch (error) {
-      expect(error).toBeInstanceOf(RangeError)
-      expect(error).not.toBeInstanceOf(TypeError)
-
+      expect(error).toBeInstanceOf(RangeError);
+      expect(error).not.toBeInstanceOf(TypeError);
     }
-
   });
 });
-
 ```
 
 #### errors.test.js
@@ -1203,8 +1357,8 @@ import {
   isValidOrThrowAll,
   SchemaValidationError,
   EnumValidationError,
-  SeriesValidationError,
-  TypeValidationError
+  SerieValidationError,
+  TypeValidationError,
 } from "garn-validator";
 
 describe("AggregateError", () => {
@@ -1224,7 +1378,7 @@ describe("AggregateError", () => {
       }).toThrow(ErrorType);
     }
   );
-  test.each([AggregateError, SeriesValidationError, Error])(
+  test.each([AggregateError, SerieValidationError, Error])(
     "if Series fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
@@ -1270,18 +1424,18 @@ describe("AggregateError", () => {
       expect(error instanceof TypeValidationError).toBe(true);
     }
   });
-  test("checking series should throw SeriesValidationError or TypeValidationError ", () => {
+  test("checking series should throw SerieValidationError or TypeValidationError ", () => {
     try {
       isValidOrThrowAll(Boolean, String)(1);
     } catch (error) {
-      expect(error instanceof SeriesValidationError).toBe(true);
+      expect(error instanceof SerieValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
       isValidOrThrowAll(Boolean)(1);
     } catch (error) {
-      expect(error instanceof SeriesValidationError).toBe(false);
+      expect(error instanceof SerieValidationError).toBe(false);
       expect(error instanceof TypeValidationError).toBe(true);
     }
   });
@@ -1405,7 +1559,7 @@ describe("checking enums", () => {
       throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(EnumValidationError);
-      expect(error.message).toMatch('enum');
+      expect(error.message).toMatch("enum");
       expect(error).toBeInstanceOf(AggregateError);
     }
   });
@@ -1421,7 +1575,9 @@ describe("hasErrors", () => {
     expect(
       hasErrors({ num: Number, str: String })({ num: "2", str: "str" })
     ).toEqual([
-      new TypeValidationError('on path /num value "2" do not match constructor Number'),
+      new TypeValidationError(
+        'on path /num value "2" do not match constructor Number'
+      ),
     ]);
   });
   test("should flat all aggregated Errors", () => {
@@ -1467,16 +1623,23 @@ describe("hasErrors", () => {
       [
         { num: Number, str: String },
         { num: "2", str: "str" },
-        [new TypeValidationError('on path /num value "2" do not match constructor Number')],
+        [
+          new TypeValidationError(
+            'on path /num value "2" do not match constructor Number'
+          ),
+        ],
       ],
       [
         { num: Number, str: String },
         { num: "2", str: null },
         [
-          new TypeValidationError('on path /num value "2" do not match constructor Number'),
-          new TypeValidationError("on path /str value null do not match constructor String"),
+          new TypeValidationError(
+            'on path /num value "2" do not match constructor Number'
+          ),
+          new TypeValidationError(
+            "on path /str value null do not match constructor String"
+          ),
         ],
-
       ],
     ])(
       "should return array of errors hasErrors(%p)(%p) === %p",
@@ -1496,7 +1659,11 @@ describe("hasErrors", () => {
       [
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: "str" } },
-        [new TypeValidationError('on path /obj/num value "2" do not match constructor Number')],
+        [
+          new TypeValidationError(
+            'on path /obj/num value "2" do not match constructor Number'
+          ),
+        ],
       ],
       [
         {
@@ -1511,8 +1678,12 @@ describe("hasErrors", () => {
         { obj: { num: Number, str: String } },
         { obj: { num: "2", str: null } },
         [
-          new TypeValidationError('on path /obj/num value "2" do not match constructor Number'),
-          new TypeValidationError("on path /obj/str value null do not match constructor String"),
+          new TypeValidationError(
+            'on path /obj/num value "2" do not match constructor Number'
+          ),
+          new TypeValidationError(
+            "on path /obj/str value null do not match constructor String"
+          ),
         ],
       ],
     ])(
@@ -1576,7 +1747,9 @@ describe("hasErrors", () => {
         new TypeValidationError(
           'on path /name value "Garn" do not match regex /^[a-z]{3,}$/'
         ),
-        new TypeValidationError("on path /age value 18 do not match validator age=>age>18"),
+        new TypeValidationError(
+          "on path /age value 18 do not match validator age=>age>18"
+        ),
         new EvalError("unexpected key"),
         new TypeValidationError(
           'on path /car/brand value "Honda" do not match primitive "honda"'
@@ -1591,7 +1764,9 @@ describe("hasErrors", () => {
           "on path /car/country/name value undefined do not match constructor String"
         ),
 
-        new TypeValidationError("on path /optional value false do not match primitive true"),
+        new TypeValidationError(
+          "on path /optional value false do not match primitive true"
+        ),
       ]);
     });
   });
@@ -1609,9 +1784,15 @@ describe("hasErrors", () => {
         y: 1,
       };
       expect(hasErrors(schema1, schema2)(obj)).toEqual([
-        new TypeValidationError("on path /x value true do not match constructor Number"),
-        new TypeValidationError("on path /y value 1 do not match constructor Boolean"),
-        new TypeValidationError("on path /z value undefined do not match constructor Function"),
+        new TypeValidationError(
+          "on path /x value true do not match constructor Number"
+        ),
+        new TypeValidationError(
+          "on path /y value 1 do not match constructor Boolean"
+        ),
+        new TypeValidationError(
+          "on path /z value undefined do not match constructor Function"
+        ),
       ]);
     });
   });
@@ -1676,10 +1857,14 @@ describe("isValidOrLogAll", () => {
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("on path /y value 2 do not match constructor Boolean")
+      new TypeValidationError(
+        "on path /y value 2 do not match constructor Boolean"
+      )
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("on path /z value 3 do not match constructor String")
+      new TypeValidationError(
+        "on path /z value 3 do not match constructor String"
+      )
     );
   });
 });
@@ -1695,5 +1880,4 @@ describe("isValidOrLogAll", () => {
 
 //   });
 // });
-
 ```

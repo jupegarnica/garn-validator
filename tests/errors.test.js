@@ -5,7 +5,7 @@ import {
   isValidOrThrowAll,
   SchemaValidationError,
   EnumValidationError,
-  SeriesValidationError,
+  SerieValidationError,
   TypeValidationError
 } from "garn-validator";
 
@@ -26,7 +26,7 @@ describe("AggregateError", () => {
       }).toThrow(ErrorType);
     }
   );
-  test.each([AggregateError, SeriesValidationError, Error])(
+  test.each([AggregateError, SerieValidationError, Error])(
     "if Series fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
@@ -72,18 +72,18 @@ describe("AggregateError", () => {
       expect(error instanceof TypeValidationError).toBe(true);
     }
   });
-  test("checking series should throw SeriesValidationError or TypeValidationError ", () => {
+  test("checking series should throw SerieValidationError or TypeValidationError ", () => {
     try {
       isValidOrThrowAll(Boolean, String)(1);
     } catch (error) {
-      expect(error instanceof SeriesValidationError).toBe(true);
+      expect(error instanceof SerieValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
       isValidOrThrowAll(Boolean)(1);
     } catch (error) {
-      expect(error instanceof SeriesValidationError).toBe(false);
+      expect(error instanceof SerieValidationError).toBe(false);
       expect(error instanceof TypeValidationError).toBe(true);
     }
   });
@@ -485,15 +485,3 @@ describe("isValidOrLogAll", () => {
     );
   });
 });
-
-// describe("Composable errors", () => {
-//   test("should ", () => {
-//     const isNumber = isValidOrThrowAll(
-//       Number,
-//       BigInt,
-//       (num) => num === Number(num),
-//     );
-//     throw hasErrors(isNumber)("a");
-
-//   });
-// });

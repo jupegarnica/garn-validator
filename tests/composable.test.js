@@ -1,7 +1,7 @@
 import isValidOrThrow, {
   TypeValidationError,
   isValidOrThrowAll,
-  SeriesValidationError,
+  SerieValidationError,
   hasErrors,
   isValidOrLog,
   isValidOrLogAll,
@@ -31,7 +31,7 @@ describe("composable", () => {
         isValidOrThrowAll(validator)(null);
         throw "mec";
       } catch (error) {
-        expect(error).toBeInstanceOf(SeriesValidationError);
+        expect(error).toBeInstanceOf(SerieValidationError);
         expect(error.message).toMatch("serie Number,String");
         expect(error.errors.length).toBe(2);
       }
@@ -145,7 +145,7 @@ describe("composable", () => {
         expect(error.raw.path).toEqual(["friend", "tel"]);
       }
     });
-    test("should rewrite path of SeriesValidationError", () => {
+    test("should rewrite path of SerieValidationError", () => {
       let isValidPerson = isValidOrThrow(Number, String);
       try {
         isValidOrThrowAll({
@@ -214,7 +214,7 @@ describe("composable", () => {
       test("inherits behavior", () => {
         expect(() => {
           isValidTelephone({ num: "123" });
-        }).toThrow(SeriesValidationError);
+        }).toThrow(SerieValidationError);
       });
 
       test("rewrite behavior ", () => {

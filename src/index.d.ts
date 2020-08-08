@@ -13,7 +13,7 @@ export declare class EnumValidationError extends AggregateError {
 export declare class SchemaValidationError extends AggregateError {
 }
 
-export declare class SeriesValidationError extends AggregateError {
+export declare class SerieValidationError extends AggregateError {
 }
 
 export function arrayOf(type: any): Function;

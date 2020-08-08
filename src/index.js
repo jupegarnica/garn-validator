@@ -52,10 +52,10 @@ export class SchemaValidationError extends AggregateError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
-export class SeriesValidationError extends AggregateError {
+export class SerieValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
-    this.name = "SeriesValidationError";
+    this.name = "SerieValidationError";
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
@@ -251,7 +251,7 @@ const validSeriesOrThrow = (conf, types, value) => {
     throwErrors(errors, {
       type: types,
       value,
-      $Error: SeriesValidationError,
+      $Error: SerieValidationError,
       kind: "serie",
     });
   }
