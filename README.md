@@ -95,9 +95,17 @@ Import from deno third party modules: [deno.land/x/garn_validator](https://deno.
 import is from "https://deno.land/x/garn_validator/src/index.js";
 ```
 
-<!-- import * as garnValidator from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.d.ts";
-// import IsValidOrThrow from "garn-validator/src/index.d.ts";
-// isValidOrThrow as typeof IsValidOrThrow; -->
+To have type definitions you can do:
+
+```js
+
+import * as garnValidator from "https://deno.land/x/garn_validator/src/index.js";
+import * as ValidatorTypes from "https://deno.land/x/garn_validator/src/index.d.ts";
+garnValidator as typeof ValidatorTypes;
+
+const { isValidOrThrow } = garnValidator;
+
+```
 
 <!-- TODO ## Browser -->
 <!-- https://jspm.org/ -->
@@ -571,7 +579,7 @@ The validator constructor can receive as many validations as needed.
 All will be checked until one fails
 
 ```js
-const isArrayOfLength2 =  is(Array, (array) => array.length === 2)
+const isArrayOfLength2 = is(Array, (array) => array.length === 2);
 isArrayOfLength2([1, 2]); // true
 
 is(
@@ -582,16 +590,16 @@ is(
 
 ```js
 const isValidPassword = is(
-  String,  // must be and String
-  (str) => str.length >= 8,  // and its length must be at least 8
-  /[a-z]/,  // and must have at least one  lowercase
+  String, // must be and String
+  (str) => str.length >= 8, // and its length must be at least 8
+  /[a-z]/, // and must have at least one  lowercase
   /[A-Z]/, // and must have at least one  uppercase
   /[0-9]/, // and must have at least one  number
   /[-_/!·$%&/()]/ // and must have at least one  especial character
 );
 
-isValidPassword('12345wW-'); // true
-isValidPassword('12345ww-'); // fails
+isValidPassword("12345wW-"); // true
+isValidPassword("12345ww-"); // fails
 ```
 
 <!-- TODO ## Proxy detection -->
@@ -630,7 +638,6 @@ try {
 }
 ```
 
-
 ### isValidOrThrow vs isValidOrThrowAll
 
 `isValidOrThrow` will always throw the first `TypeValidationError` it finds.
@@ -645,7 +652,6 @@ try {
 ```
 
 `isValidOrThrowAll` will throw a [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
-
 
 ```js
 try {
@@ -666,6 +672,7 @@ try {
   */
 }
 ```
+
 But if it only finds one error it will throw `TypeValidationError`
 
 ```js
@@ -685,12 +692,11 @@ try {
 
 There are 3 types a `AggregateError` that can be thrown:
 
-- `SchemaValidationError`:  thrown when more than one key fails checking an schema
-- `EnumValidationError`:  thrown when all validations fails checking an enum
-- `SerieValidationError`:  thrown when more than one validation fails checking an Serie
+- `SchemaValidationError`: thrown when more than one key fails checking an schema
+- `EnumValidationError`: thrown when all validations fails checking an enum
+- `SerieValidationError`: thrown when more than one validation fails checking an Serie
 
 All of them inherits from `AggregateError` and has a property errors with an array of all errors collected
-
 
 ```js
 try {
@@ -738,7 +744,7 @@ try {
 
 #### EnumValidationError
 
-If all validations  of an enum fails, it will throw a EnumValidationError with all Errors aggregated in error.errors
+If all validations of an enum fails, it will throw a EnumValidationError with all Errors aggregated in error.errors
 
 But if the length of the enum is 1, it will throw only that error.
 
@@ -798,25 +804,22 @@ hasErrors(/[a-z]/, Number)("G");
 ]
 */
 
-hasErrors({a:Number, b:String})({a:null, b:null});
+hasErrors({ a: Number, b: String })({ a: null, b: null });
 /*
 [
   TypeValidationError: on path /a value null do not match constructor Number,
   TypeValidationError: on path /b value null do not match constructor String
 ]
 */
-
-
 ```
 
 ### Raw Error data
 
 All errors the library throws has a property raw with the raw data collected in that error:
 
-
 ```js
 try {
-  isValidOrThrow({ a: Number})({ a: null });
+  isValidOrThrow({ a: Number })({ a: null });
 } catch (error) {
   console.log(error.raw);
 }
@@ -852,7 +855,6 @@ try {
   },
 }
  */
-
 ```
 
 ## Especial cases
