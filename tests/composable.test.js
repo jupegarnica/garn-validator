@@ -6,6 +6,7 @@ import isValidOrThrow, {
   isValidOrLog,
   isValidOrLogAll,
   isValid,
+  EnumValidationError,
 } from "garn-validator";
 describe("composable", () => {
   describe("basics", () => {
@@ -64,7 +65,7 @@ describe("composable", () => {
         isValidOrThrow({ a: validator })({ a: null });
         throw "mec";
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["a"]);
+        expect(error.raw.path).toEqual(["a"]);
       }
     });
     test("should rewrite no matter how deep is the validation", () => {
@@ -74,7 +75,7 @@ describe("composable", () => {
         });
         throw "mec";
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["a", "b", "c", "d"]);
+        expect(error.raw.path).toEqual(["a", "b", "c", "d"]);
       }
     });
     test("should all errors", () => {
@@ -129,7 +130,7 @@ describe("composable", () => {
           friend: isValidPerson,
         })({ friend: { age: 100 } });
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["friend", "age"]);
+        expect(error.raw.path).toEqual(["friend", "age"]);
       }
     });
     test("should rewrite path of SchemaValidationError", () => {
@@ -141,7 +142,7 @@ describe("composable", () => {
           friend: isValidPerson,
         })({ friend: { tel: { num: "19872", prefix: 19 } } });
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["friend", "tel"]);
+        expect(error.raw.path).toEqual(["friend", "tel"]);
       }
     });
     test("should rewrite path of SeriesValidationError", () => {
@@ -151,28 +152,31 @@ describe("composable", () => {
           friend: isValidPerson,
         })({ friend: null });
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["friend"]);
+        expect(error.raw.path).toEqual(["friend"]);
       }
     });
     test("should rewrite path even is nested", () => {
-      let isInteger = isValidOrThrow(Number, Number.isInteger)
+      let isInteger = isValidOrThrow(Number, Number.isInteger);
       let isValidTelephone = isValidOrThrow({ num: isInteger });
       let isValidCountry = isValid(String, /^[A-Z]{3,}$/u);
 
-      let isValidPerson = isValidOrThrow({ tel: isValidTelephone, country: isValidCountry });
+      let isValidPerson = isValidOrThrow({
+        tel: isValidTelephone,
+        country: isValidCountry,
+      });
 
       try {
         isValidOrThrowAll({
           friend: isValidPerson,
-        })({ friend: { tel: { num: '19872' }, country:'ESP' } });
+        })({ friend: { tel: { num: "19872" }, country: "ESP" } });
       } catch (error) {
-        expect(error.raw.path).toStrictEqual(["friend", "tel", "num"]);
+        expect(error.raw.path).toEqual(["friend", "tel", "num"]);
       }
     });
   });
 
-  describe("Should rewrite configuration to match outer validation", () => {
-    test("should work no matter which behavior is using in the sub-validation", () => {
+  describe("Should inherit behavior", () => {
+    test("should work", () => {
       let validator = hasErrors(Number, String);
 
       try {
@@ -191,6 +195,38 @@ describe("composable", () => {
       let errors = hasErrors(validator)(null);
       expect(errors.length).toBe(2);
       expect(globalThis.console.error).toHaveBeenCalledTimes(0);
+    });
+    describe("should work not matter what", () => {
+      let isInteger = isValid(Number, Number.isInteger);
+      let isValidTelephone = isValidOrThrowAll({ num: isInteger });
+      let isValidCountry = hasErrors(String, /^[A-Z]{3,}$/u);
+
+      let isValidPerson = isValidOrThrow({
+        tel: isValidTelephone,
+        country: isValidCountry,
+      });
+
+      test("normal behavior", () => {
+        expect(isInteger(2)).toBe(true);
+        expect(isInteger("2")).toBe(false);
+      });
+
+      test("inherits behavior", () => {
+        expect(() => {
+          isValidTelephone({ num: "123" });
+        }).toThrow(SeriesValidationError);
+      });
+
+      test("rewrite behavior ", () => {
+        expect(isValid(isValidTelephone)({ num: "123" })).toBe(false);
+        expect(isValid(isValidTelephone)({ num: 123 })).toBe(true);
+      });
+
+      test('throw one error', () => {
+        expect(() => {
+          isValidPerson({tel:{num:'123'}, country: 'esp'})
+        }).toThrow(TypeValidationError)
+      });
     });
   });
 
