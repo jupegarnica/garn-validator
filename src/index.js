@@ -328,7 +328,7 @@ const config = ({
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
-  errors.forEach((e) => console.error(e));
+  errors.forEach((e) => console.error(e && e.message || e));
   return false;
 };
 

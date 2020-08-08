@@ -315,10 +315,10 @@ describe("isValidOrLogAll", () => {
     isValidOrLogAll(Number, Boolean, String)(true);
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("value true do not match constructor Number")
+      "value true do not match constructor Number"
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError("value true do not match constructor String")
+      "value true do not match constructor String"
     );
   });
   test("should log meaningful errors in schemas", () => {
@@ -326,18 +326,18 @@ describe("isValidOrLogAll", () => {
     isValidOrLogAll(
       { x: Number },
       { y: Boolean },
-      { z: String }
+      { z: String },
+      { h() {throw 'ups'}}
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError(
-        "on path /y value 2 do not match constructor Boolean"
-      )
+      "on path /y value 2 do not match constructor Boolean"
     );
     expect(globalThis.console.error).toHaveBeenCalledWith(
-      new TypeValidationError(
-        "on path /z value 3 do not match constructor String"
-      )
+      "on path /z value 3 do not match constructor String"
+    );
+    expect(globalThis.console.error).toHaveBeenCalledWith(
+      "ups"
     );
   });
 });
