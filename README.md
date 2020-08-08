@@ -9,7 +9,7 @@ Ultra fast runtime type validator without dependencies.
 <h1>Features</h1>
 
 - Supports checking primitives or objects with **schemas**
-- Composable
+- It's totally composable
 - Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
 - 6 behaviors:
@@ -37,7 +37,11 @@ const isValidPassword = is(
   /[-_/!·$%&/()]/
 );
 
+isValidPassword('12345Aa?'); // true
+
 const isValidName = is(String, (name) => name.length >= 3);
+
+isValidName('qw'); // fails
 
 const isValidAge = is(
   Number,
@@ -45,11 +49,15 @@ const isValidAge = is(
   (age) => age < 40
 );
 
+isValidAge(15); // fails
+
+// composition
+
 const isValidUser = is({
   name: isValidName,
   age: isValidAge,
   password: isValidPassword,
-  country: ["ES", "UK"],
+  country: ["ES", "UK"], // 'ES' or 'UK'
 });
 
 isValidUser({
@@ -96,6 +104,7 @@ isValidUser({
       - [SerieValidationError](#serievalidationerror)
       - [hasErrors](#haserrors)
     - [Raw Error data](#raw-error-data)
+    - [Composable in depth](#composable-in-depth)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
     - [arrayOf](#arrayof)
@@ -868,6 +877,60 @@ try {
   },
 }
  */
+```
+
+
+### Composable in depth
+
+You can create you own validators and use them as custom validation creating new ones.
+
+```js
+const isPositive = isValidOrThrow((v) => v > 0);
+const isNotBig = isValidOrThrow((v) => v < 100);
+const isNumber = isValidOrThrow([Number, String], (num) => num == Number(num));
+
+isValidOrThrow(isNumber, isPositive, isNotBig)('10'); // true
+isValidOrThrow(isNumber, isPositive, isNotBig)(200); // it throws
+```
+
+But when used inside another behavior it inherits the behavior from where its used.
+
+```js
+const isNotBig = isValidOrLog((v) => v < 100);
+// its normal behavior
+isNotBig(200); // false, logs 'value 200 do not match validator (v) => v < 100'
+
+isValid(isNotBig)(200); // false , and won't log
+isValidOrThrow(isNotBig)(200); // fails , and won't log
+hasErrors(isNotBig)(200); // array,  won't log
+/*
+[
+  new TypeValidationError('value 200 do not match validator (v) => v < 100')
+]
+ */
+```
+
+Actually it's not treated as custom validation function. No matter is your are using hasErrors which return null when nothing fails, and it will work.
+
+```js
+const isBigNumber = hasErrors(
+  [Number, String],
+  (num) => num == Number(num),
+  num => num > 1000
+  );
+
+// its normal behavior
+isBigNumber('a12');
+/* [
+  new TypeValidationError("value "a12" do not match validator (num) => num == Number(num)"),
+  new TypeValidationError("value "a12" do not match validator num => num > 1000"),
+];
+ */
+
+// inherit behavior
+isValidOrLog(isBigNumber)('a12'); // false, and log only one error value "a10" do not match validator (num) => num == Number(num)
+
+
 ```
 
 ## Especial cases
