@@ -9,10 +9,10 @@ Ultra fast runtime type validator without dependencies.
 <h1>Features</h1>
 
 - Supports checking primitives or objects with **schemas**
-- It's totally composable
-- Ultra light and **fast** with **0 dependencies**
-- Easy to use and simple to learn but powerful
-- 6 behaviors:
+- Easy to use and learn but **powerful**
+- It's totally **composable**
+- **Fast** and **without dependencies**
+- Six behaviors:
   - `isValidOrThrow` returns true or fails (default export)
   - `isValid`  returns true or false
   - `hasErrors` returns null or Array of errors
@@ -104,7 +104,7 @@ isValidUser({
       - [SerieValidationError](#serievalidationerror)
       - [hasErrors](#haserrors)
     - [Raw Error data](#raw-error-data)
-    - [Composable in depth](#composable-in-depth)
+    - [Composition in depth](#composition-in-depth)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
     - [arrayOf](#arrayof)
@@ -253,15 +253,15 @@ is(isPositive, isNotBig)(200); // it throws
 
 ### Behaviors
 
-There are 6 behaviors that can be divided in 2 categories:
+There are six behaviors that can be divided in two categories:
 
-- Stop in first Error (quickest)
+- It stops in first Error (quickest):
 
   - `isValidOrThrow` (returns true of throw the first error found)
   - `isValid` (returns true or false, never throws)
   - `isValidOrLog` (returns true or false and log first error, never throws)
 
-- Collect all Errors:
+- It collects all Errors:
   - `hasErrors` (return null or array of errors, never throws)
   - `isValidOrLogAll` (returns true or false and log all errors, never throws)
   - `isValidOrThrowAll` (returns true or throw )
@@ -308,7 +308,7 @@ Learn more at [Errors](#errors)
 
 ## Types of validations
 
-There are 6 types of validations: Primitives, Constructors, RegExp, Enums, Schemas and Custom functions
+There are six types of validations: Primitives, Constructors, RegExp, Enums, Schemas and Custom functions
 
 ### Primitives
 
@@ -340,7 +340,7 @@ is(Number)(2); // (2).constructor === Number  --> true
 is(Symbol)(Symbol()); // true
 ```
 
-A valid constructor is a `class` or any built-in constructors.
+A valid constructor is a `class` or any built-in constructor.
 
 ```js
 class Car {}
@@ -348,7 +348,7 @@ let honda = new Car();
 is(Car)(honda); // honda.constructor === Car  --> true
 ```
 
-> **You cannot use a normal function used as constructor from the old JS times.**
+> **You can't use a normal function used as constructor from the old JS times.**
 
 ```js
 function Car(name) {
@@ -374,9 +374,9 @@ is(new RegExp(/^[a-z]+$/))("honda"); //  true
 
 ### Custom function
 
-Any function that is not a constructor is treated as custom validator
+Any function that is not a constructor is treated as custom validator.
 
-It must return any truthy value to pass the validation.
+It must return any truthy value in order to pass the validation.
 
 ```js
 is((val) => val >= 0)(10); // true
@@ -386,17 +386,17 @@ is(() => "I am truthy")(10); // true
 is(() => [])(10); // true
 ```
 
-To fail a validation may return falsy or throw an error.
+To fail a validation may return a falsy value or throw an error.
 
-if it returns a falsy value the default error will be thrown: TypeValidationError
+If it returns a falsy value, the default error will be thrown: TypeValidationError
 
-if it throws an error that error will be thrown.
+If it throws an error, that error will be thrown.
 
 ```js
-is( () => false ) (10); // throws TypeValidationError
-is( () => 0 ) (10); // throws TypeValidationError
+is(() => false) (10); // throws TypeValidationError
+is(() => 0) (10); // throws TypeValidationError
 
-is( () => {
+is(() => {
   throw new RangeError('ups);
 } ) (10); // throws RangeError
 
@@ -415,12 +415,12 @@ is(cities)("valencia"); // true
 is(cities)("madrid"); // throws
 ```
 
-But is much more powerful than checking against primitives. It can contain any type of validator (Primitives, Constructors, RegExp, Enums, Schemas and Custom functions).
+But it's much more powerful than checking against primitives. It can contain any type of validator.
 
-It check every item until one passes.
+It checks every item until one passes.
 
 ```js
-let isNumberOrBigInt = [Number, BigInt];
+let isNumberOrBigInt = [Number, BigInt]; // must be Number or BigInt
 is(isNumberOrBigInt)(1n); // true
 is(isNumberOrBigInt)(1); // true
 
@@ -612,12 +612,12 @@ is(
 
 ```js
 const isValidPassword = is(
-  String, // must be and String
+  String, // must be an String
   (str) => str.length >= 8, // and its length must be at least 8
-  /[a-z]/, // and must have at least one  lowercase
-  /[A-Z]/, // and must have at least one  uppercase
-  /[0-9]/, // and must have at least one  number
-  /[-_/!·$%&/()]/ // and must have at least one  especial character
+  /[a-z]/, // and must have at least one lowercase
+  /[A-Z]/, // and must have at least one uppercase
+  /[0-9]/, // and must have at least one number
+  /[-_/!·$%&/()]/ // and must have at least one especial character
 );
 
 isValidPassword("12345wW-"); // true
@@ -630,7 +630,7 @@ isValidPassword("12345ww-"); // fails
 
 If a validation fails it will throw `new TypeValidationError(meaningfulMessage)` which inherits from `TypeError`. It can be imported.
 
-If using a custom validator throws an error , that error will be thrown.
+If it throws an error from a custom validator, that error will be thrown.
 
 ```js
 import { isValidOrThrow, TypeValidationError } from "garn-validator";
@@ -673,7 +673,7 @@ try {
 }
 ```
 
-`isValidOrThrowAll` will throw a [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
+`isValidOrThrowAll` will throw an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
 
 ```js
 try {
@@ -695,7 +695,7 @@ try {
 }
 ```
 
-But if it only finds one error it will throw `TypeValidationError`
+But if it finds only one error, it will throw `TypeValidationError`, no AggregateError
 
 ```js
 try {
@@ -837,7 +837,7 @@ hasErrors({ a: Number, b: String })({ a: null, b: null });
 
 ### Raw Error data
 
-All errors the library throws has a property raw with the raw data collected in that error:
+All errors the library throws has the raw data collected in a property called `raw`.
 
 ```js
 try {
@@ -880,9 +880,9 @@ try {
 ```
 
 
-### Composable in depth
+### Composition in depth
 
-You can create you own validators and use them as custom validation creating new ones.
+You can create your own validators and use them as custom validation creating new ones.
 
 ```js
 const isPositive = isValidOrThrow((v) => v > 0);
@@ -893,7 +893,7 @@ isValidOrThrow(isNumber, isPositive, isNotBig)('10'); // true
 isValidOrThrow(isNumber, isPositive, isNotBig)(200); // it throws
 ```
 
-But when used inside another behavior it inherits the behavior from where its used.
+When used inside another kind of behavior, it will inherit the behavior from where it has been used.
 
 ```js
 const isNotBig = isValidOrLog((v) => v < 100);
@@ -910,7 +910,7 @@ hasErrors(isNotBig)(200); // array,  won't log
  */
 ```
 
-Actually it's not treated as custom validation function. No matter is your are using hasErrors which return null when nothing fails, and it will work.
+Actually, it's not treated as a custom validation function. No matter is your are using `hasErrors` which return null when nothing fails, and it's just works.
 
 ```js
 const isBigNumber = hasErrors(
@@ -937,7 +937,7 @@ isValidOrLog(isBigNumber)('a12'); // false, and log only one error value "a10" d
 
 ### AsyncFunction & GeneratorFunction
 
-`AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the 3 JS environments (node, browser or node). If you need to check an async function or a generator you can import them from garn-validator.
+`AsyncFunction` and `GeneratorFunction` constructors are not in the global scope of any of the three JS environments (node, browser or deno). If you need to check an async function or a generator you can import them from garn-validator.
 
 > Note: Async functions and generators are not normal function, so it will fail against Function constructor
 
@@ -953,7 +953,7 @@ is(Function)(async function () {}); // throws
 
 ### arrayOf
 
-As we use the array `[]` as enum, if you need to check the items of an array you should treat it as an object and check against an schema.
+As we use the array `[]` as enum, if you need to check the items of an array, you should treat it as an object and check against an schema.
 
 ```js
 import is from "garn-validator";
@@ -962,7 +962,7 @@ is(Array, { [/\d/]: Number })([1, 2, 3]); // true
 is(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
 ```
 
-To not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
+In order to not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
 
 `export const arrayOf = type => isValid(Array, {[/^\d$/]: type})`
 
@@ -1000,7 +1000,7 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 - [x] Schema with optionals key `{ 'optionalKey?': Number }` or `{ optionalKey$: Number }`
 - [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [x] Support for deno
-<!-- - [ ] Support for browser -->
-- [ ] behavior applyDefaultsOnError
+- [ ] Support for browser
+- [ ] Behavior applyDefaultsOnError. (syntax `is(Number).or(0)`)
 - [ ] Async validation support
 - [ ] More built-in utils functions (containsText, startWith, endsWith, min, max, isLowercase, isUppercase, ...)
