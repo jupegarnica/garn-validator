@@ -16,6 +16,43 @@ Ultra fast runtime type validator without dependencies.
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
+<h2>Example</h2>
+
+
+```js
+import is from 'garn-validator';
+
+const isValidPassword = is(
+  String,
+  (str) => str.length >= 8,
+  /[a-z]/,
+  /[A-Z]/,
+  /[0-9]/,
+  /[-_/!·$%&/()]/
+);
+
+const isValidName = is(String, (name) => name.length >= 3);
+
+const isValidAge = is(
+  Number,
+  (age) => age > 18,
+  (age) => age < 40
+);
+
+const isValidUser = is({
+  name: isValidName,
+  age: isValidAge,
+  password: isValidPassword,
+  country: ["ES", "UK"],
+});
+
+isValidUser({
+  name: "garn",
+  age: 38,
+  password: "1234", // incorrect
+  country: "ES",
+}); // it throws
+```
 <h1>Contents</h1>
 
 - [Get started](#get-started)
@@ -197,36 +234,6 @@ isPositive(-2); // it throws
 
 is(isPositive, isNotBig)(200); // it throws
 
-// Real example
-const isValidPassword = is(
-  String,
-  (str) => str.length >= 8,
-  /[a-z]/,
-  /[A-Z]/,
-  /[0-9]/,
-  /[-_/!·$%&/()]/
-);
-
-const isValidName = is(String, (name) => name.length >= 3);
-const isValidAge = is(
-  Number,
-  (age) => age > 18,
-  (age) => age < 40
-);
-
-const isValidUser = is({
-  name: isValidName,
-  age: isValidAge,
-  password: isValidPassword,
-  country: ["ES", "UK"],
-});
-
-isValidUser({
-  name: "garn",
-  age: 38,
-  password: "1234", // incorrect
-  country: "ES",
-}); // it throws
 ```
 
 ### Behaviors
