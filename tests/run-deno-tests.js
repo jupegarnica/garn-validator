@@ -7,7 +7,7 @@ const test = (name, fn) => {
 test.each = (table) => (name, run) => {
   table.forEach((paramOrParam) => {
     let params = Array.isArray(paramOrParam) ? paramOrParam : [paramOrParam];
-    test({
+    Deno.test({
       name: name,
       fn: () => run(...params),
     });
@@ -17,8 +17,8 @@ test.skip = (name, fn) => {
   return Deno.test({ name, fn, ignore: true });
 };
 
-function describe(name, fn) {
-  return fn();
+function describe(_, fn) {
+  fn();
 }
 describe.skip = (name, fn) => {
   return Deno.test({ name, fn, ignore: true });
