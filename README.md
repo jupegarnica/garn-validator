@@ -12,7 +12,7 @@ Ultra fast runtime type validator without dependencies.
 - Easy to use and learn but **powerful**
 - It's totally **composable**
 - **Fast** and **without dependencies**
-- Six behaviors:
+- **Six behaviors**:
   - `isValidOrThrow` returns true or fails (default export)
   - `isValid`  returns true or false
   - `hasErrors` returns null or Array of errors
@@ -20,10 +20,10 @@ Ultra fast runtime type validator without dependencies.
   - `isValidOrLogAll` returns true or false and log all errors
   - `isValidOrThrowAll` returns true or throws AggregateError
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
-- Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
+- Works in all modern browsers
+- Works in all frontend frameworks: **React, Angular, Vue,** etc...
 
 <h2>Example</h2>
-
 
 ```js
 import is from 'garn-validator';
