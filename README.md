@@ -6,7 +6,8 @@ Ultra fast runtime type validator without dependencies.
 
 ![Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Tests%20CI/badge.svg)
 
-<h1>Features</h1>
+[![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
+
 
 - Supports checking primitives or objects with **schemas**
 - Easy to use and learn but **powerful**
