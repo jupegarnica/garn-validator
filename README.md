@@ -12,7 +12,13 @@ Ultra fast runtime type validator without dependencies.
 - Composable
 - Ultra light and **fast** with **0 dependencies**
 - Easy to use and simple to learn but powerful
-- 6 behaviors: `hasErrors`, `isValid`, `isValidOrThrow`,`isValidOrLog`, `isValidOrLogAll` and `isValidOrThrowAll`.
+- 6 behaviors:
+  - `isValidOrThrow` returns true or fails (default export)
+  - `isValid`  returns true or false
+  - `hasErrors` returns null or Array of errors
+  - `isValidOrLog` returns true or false and log error
+  - `isValidOrLogAll` returns true or false and log all errors
+  - `isValidOrThrowAll` returns true or throws AggregateError
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all frontend frameworks under babel (**React, Angular, Vue, etc...**)
 
