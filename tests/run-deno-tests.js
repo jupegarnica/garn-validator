@@ -35,15 +35,10 @@ globalThis.jest = {
   },
 };
 
-await import("./use.test.js");
-await import("./unit.test.js");
-await import("./strings.test.js");
-await import("./speed.test.js");
-await import("./schema.test.js");
-await import("./numbers.test.js");
-await import("./esm.test.js");
-await import("./errors.test.js");
-await import("./enums.test.js");
-await import("./custom-validator.test.js");
-await import("./constructors.test.js");
-await import("./composable.test.js");
+const testMatcher = /(?<!skip-deno)(\.test\.js)$/
+for await (const {name,isFile} of Deno.readDir("./tests")) {
+  if(isFile && testMatcher.test(name)) {
+    console.log(name);
+    await import('./'+name);
+  }
+}
