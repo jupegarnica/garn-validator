@@ -35,7 +35,7 @@
     "predeploy": "npm run build && npm run build:commit",
     "deploy": "git push origin master",
     "#postdeploy": "npm run publi",
-    "readme": "node makeReadme.js",
+    "#readme": "node makeReadme.js",
     "postreadme": "git add README.md && git commit -m 'readme updated' || exit 0",
     "prepubli": "npm whoami || npm login",
     "publi": "npm publish"

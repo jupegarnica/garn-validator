@@ -1,7 +1,6 @@
 import isValidOrThrow from "garn-validator";
 
-
-describe("check with custom validator", () => {
+describe("Custom validator", () => {
   test("you can return true or false", () => {
     expect(() => {
       isValidOrThrow(() => true)(33);
