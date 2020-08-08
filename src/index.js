@@ -16,7 +16,7 @@ import {
 export { AsyncFunction, GeneratorFunction } from "./constants.js";
 
 const formatErrorMessage = (data) => {
-  const { type, value, path = [], kind } = data;
+  const { type, value, path  , kind } = data;
 
   let typeString = stringify(type);
   typeString = kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
@@ -31,7 +31,6 @@ const descriptor = (data) => ({
   enumerable: false,
   configurable: false,
 });
-
 export class TypeValidationError extends TypeError {
   constructor(msg, data) {
     super(msg);
@@ -53,7 +52,6 @@ export class SchemaValidationError extends AggregateError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
-
 export class SeriesValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);
@@ -61,14 +59,19 @@ export class SeriesValidationError extends AggregateError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
+
 const createError = (data) => {
   data.$Error = data.$Error || TypeValidationError;
-  return new data.$Error(formatErrorMessage(data), data);
+  data.path = data.path || [];
+  data.message = formatErrorMessage(data)
+  return new data.$Error(data.message, data);
 };
 
 const createAggregateError = (errors, data) => {
   data.$Error = data.$Error || AggregateError;
-  return new data.$Error(errors, formatErrorMessage(data), data);
+  data.path = data.path || [];
+  data.message = formatErrorMessage(data)
+  return new data.$Error(errors, data.message, data);
 };
 const throwError = (data) => {
   throw createError(data);
@@ -80,19 +83,20 @@ const throwErrors = (errors, data) => {
 
 const mapError = (error, data) => {
   if (!error.raw) return error;
-  const overriddenPath = { ...error.raw, path: data.path };
+  data.path = data.path || [];
+  const overriddenPath = { ...error.raw, path: [...data.path, ...error.raw.path], $Error: error.constructor};
 
   if (error instanceof AggregateError) {
     const errors = error.errors.map((e) => mapError(e, data));
-    return createAggregateError(errors, data);
+    return createAggregateError(errors, overriddenPath);
   } else {
     return createError(overriddenPath);
   }
 };
 
 const reThrowError = (error, data) => {
-  const newData = { ...data, ...error.raw, $Error: error.constructor };
-  throw mapError(error, newData);
+
+  throw mapError(error, data);
 };
 
 const validOrThrow = (input, data) => {
@@ -296,7 +300,7 @@ const isValidTypeOrThrow = (data) => {
 };
 
 const run = (conf) => (...types) => {
-  function runner(value, secret = {}) {
+  function validator(value, secret = {}) {
     let currentConf = conf;
     if (secret[configurationSymbol]) {
       currentConf = secret[configurationSymbol];
@@ -309,9 +313,9 @@ const run = (conf) => (...types) => {
 
     return currentConf.onValid(value);
   }
-  runner[validatorSymbol] = true;
+  validator[validatorSymbol] = true;
 
-  return runner;
+  return validator;
 };
 
 const config = ({

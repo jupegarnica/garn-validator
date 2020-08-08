@@ -4,9 +4,11 @@ import isValidOrThrow, {
   SeriesValidationError,
   hasErrors,
   isValidOrLog,
+  isValidOrLogAll,
+  isValid,
 } from "garn-validator";
 describe("composable", () => {
-  describe("errors", () => {
+  describe("basics", () => {
     test("should work", () => {
       expect(isValidOrThrow(isValidOrThrow(Number))(1)).toBe(true);
     });
@@ -44,6 +46,127 @@ describe("composable", () => {
         expect(error.message).not.toMatch("Number,String");
         expect(error.message).toMatch("Number");
         expect(error.errors).toBe(undefined);
+      }
+    });
+  });
+  describe("composable errors", () => {
+    let validator = isValidOrThrow(Number, String);
+    test("the validator should throw the path error depending of it relative value", () => {
+      try {
+        validator(null);
+        throw "mec";
+      } catch (error) {
+        expect(error.raw.path).toEqual([]);
+      }
+    });
+    test("should rewrite errors injecting the new nested path", () => {
+      try {
+        isValidOrThrow({ a: validator })({ a: null });
+        throw "mec";
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["a"]);
+      }
+    });
+    test("should rewrite no matter how deep is the validation", () => {
+      try {
+        isValidOrThrow({ a: { b: { c: { d: validator } } } })({
+          a: { b: { c: { d: null } } },
+        });
+        throw "mec";
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["a", "b", "c", "d"]);
+      }
+    });
+    test("should all errors", () => {
+      try {
+        throw hasErrors({ a: { b: { c: { d: validator, e: validator } } } })({
+          a: { b: { c: { d: null } } },
+        });
+      } catch (errors) {
+        errors.forEach((error) => {
+          expect(error.message).toMatch(/\/a\/b\/c\/[de]/);
+        });
+      }
+    });
+    test("should work rewrite path checking schemas inside schemas", () => {
+      let isValidPerson = isValidOrThrow({ age: Number });
+
+      try {
+        isValidOrThrow({
+          user: isValidPerson,
+        })({
+          user: {
+            age: "33",
+          },
+        });
+      } catch (error) {
+        expect(error.raw.path).toEqual(["user", "age"]);
+      }
+    });
+    test("should work in circular objects", () => {
+      let isValidPerson = isValidOrThrow({ age: Number });
+      let obj = {
+        user: {
+          age: "33",
+        },
+      };
+      obj.friend = obj.user;
+      try {
+        throw hasErrors({
+          friend: isValidPerson,
+          user: isValidPerson,
+        })(obj);
+      } catch (errors) {
+        errors.forEach((error) => {
+          expect(error.message).toMatch(/\/(user|friend)\/age/);
+        });
+      }
+    });
+    test("should rewrite path of EnumValidationError", () => {
+      let isValidPerson = isValidOrThrow({ age: [20, 30] });
+      try {
+        isValidOrThrowAll({
+          friend: isValidPerson,
+        })({ friend: { age: 100 } });
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["friend", "age"]);
+      }
+    });
+    test("should rewrite path of SchemaValidationError", () => {
+      let isValidPerson = isValidOrThrow({
+        tel: { num: Number, prefix: String },
+      });
+      try {
+        isValidOrThrowAll({
+          friend: isValidPerson,
+        })({ friend: { tel: { num: "19872", prefix: 19 } } });
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["friend", "tel"]);
+      }
+    });
+    test("should rewrite path of SeriesValidationError", () => {
+      let isValidPerson = isValidOrThrow(Number, String);
+      try {
+        isValidOrThrowAll({
+          friend: isValidPerson,
+        })({ friend: null });
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["friend"]);
+      }
+    });
+    test("should rewrite path even is nested", () => {
+      let isInteger = isValidOrThrow(Number, Number.isInteger)
+      let isValidTelephone = isValidOrThrow({ num: isInteger });
+      let isValidCountry = isValid(String, /^[A-Z]{3,}$/u);
+
+      let isValidPerson = isValidOrThrow({ tel: isValidTelephone, country: isValidCountry });
+
+      try {
+        isValidOrThrowAll({
+          friend: isValidPerson,
+        })({ friend: { tel: { num: '19872' }, country:'ESP' } });
+      } catch (error) {
+        expect(error.raw.path).toStrictEqual(["friend", "tel", "num"]);
       }
     });
   });
