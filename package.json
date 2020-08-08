@@ -30,7 +30,7 @@
     "postrelease": "git push origin master --tags",
     "build:watch": "npm run build -- --watch",
     "build": "rimraf commonjs && npm run env && babel src --out-dir commonjs --ignore \"src/*.test.js\"",
-    "build:commit": "git add commonjs && git commit -m 'build done'",
+    "build:commit": "git add commonjs && git commit -m 'build done' || exit 0",
     "env": "NODE_ENV=production || set NODE_ENV=production",
     "predeploy": "npm run build && npm run build:commit",
     "deploy": "git push origin master",
