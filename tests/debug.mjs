@@ -31,9 +31,14 @@ import {
 //   console.log(  error
 //     );
 // }
-try {
-  isValidOrThrow({ a: Number})({ a: null });
-} catch (error) {
-  console.log(error.raw);
+// try {
+//   isValidOrThrow({ a: Number})({ a: null });
+// } catch (error) {
+//   console.log(error.raw);
 
-}
+// }
+
+console.log(
+  hasErrors({a:Number, b:String})({a:null, b:null})
+
+);

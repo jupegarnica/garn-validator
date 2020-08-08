@@ -44,6 +44,7 @@ Ultra fast runtime type validator without dependencies.
       - [Optional Keys](#optional-keys)
       - [Regexp keys](#regexp-keys)
       - [Custom validation used in schemas](#custom-validation-used-in-schemas)
+    - [Validations in serie (AND operator)](#validations-in-serie-and-operator)
   - [Errors](#errors)
     - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
     - [AggregateError](#aggregateerror)
@@ -563,7 +564,36 @@ is({
 }); // it throws, max key is too short
 ```
 
-<!-- TODO ## Validations in series -->
+### Validations in serie (AND operator)
+
+The validator constructor can receive as many validations as needed.
+
+All will be checked until one fails
+
+```js
+const isArrayOfLength2 =  is(Array, (array) => array.length === 2)
+isArrayOfLength2([1, 2]); // true
+
+is(
+  (v) => v > 0,
+  (v) => v < 50 // will fail
+)(100); // it throws
+```
+
+```js
+const isValidPassword = is(
+  String,  // must be and String
+  (str) => str.length >= 8,  // and its length must be at least 8
+  /[a-z]/,  // and must have at least one  lowercase
+  /[A-Z]/, // and must have at least one  uppercase
+  /[0-9]/, // and must have at least one  number
+  /[-_/!·$%&/()]/ // and must have at least one  especial character
+);
+
+isValidPassword('12345wW-'); // true
+isValidPassword('12345ww-'); // fails
+```
+
 <!-- TODO ## Proxy detection -->
 
 ## Errors
@@ -756,8 +786,28 @@ try {
 
 #### hasErrors
 
-<!-- TODO -->
-hasError will flatMap all errors found. No AggregateError will be in the array returned.
+`hasErrors` will flatMap all errors found. No AggregateError will be in the array returned.
+
+```js
+hasErrors(/[a-z]/)("g"); // null
+hasErrors(/[a-z]/, Number)("G");
+/*
+[
+  TypeValidationError: value "G" do not match regex /[a-z]/,
+  TypeValidationError: value "G" do not match constructor Number ,
+]
+*/
+
+hasErrors({a:Number, b:String})({a:null, b:null});
+/*
+[
+  TypeValidationError: on path /a value null do not match constructor Number,
+  TypeValidationError: on path /b value null do not match constructor String
+]
+*/
+
+
+```
 
 ### Raw Error data
 
