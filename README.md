@@ -1002,6 +1002,6 @@ is(objectOf(Number))({ a: 1, b: "2" }); // throws
 - [x] Setting for check all keys (no matter if it fails) and return (or throw) an array of errors
 - [x] Support for deno
 - [ ] Support for browser
-- [ ] Behavior applyDefaultsOnError. (syntax `is(Number).or(0)`)
+- [ ] Behavior applyDefaultsOnError. (syntax `mustBe(Number).or(0)`)
 - [ ] Async validation support
-- [ ] More built-in utils functions (containsText, startWith, endsWith, min, max, isLowercase, isUppercase, ...)
+- [ ] More built-in utils functions

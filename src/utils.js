@@ -3,27 +3,22 @@ import { isValid } from "./lib.js";
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
 
-// Logical
+// LOGICAL
 
 // TODO Rethink to collect all errors if posible
 export const not = (...args) => (val) => !isValid(...args)(val);
 export const or = (...args) => args;
 export const and = (...args) => isValid(...args);
 
-// Numbers
-
-
+// NUMBERS
 export const gt = (limit) => (value) => value > limit;
 export const ge = (limit) => (value) => value >= limit;
 
 export const lt = (limit) => (value) => value < limit;
 export const le = (limit) => (value) => value <= limit;
 
-export const between = (min, max) =>
-  and(
-    ge(min),
-    le(max),
-  );
+// TODO TEST IT
+export const between = (min, max) => and(ge(min), le(max));
 
 export const Integer = and(Number, Number.isInteger);
 export const Numeric = and(
@@ -49,7 +44,22 @@ export const SafeNumber = and(
   between(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
 );
 
-// TODO UTILS
+export const min = gte;
+export const max = lte;
+
+// TODO STRINGS
+// export const match = null;
+// export const contains = null;
+// export const startWith = null;
+// export const endsWith = null;
+// export const isLowercase = null;
+// export const isUppercase = null;
+
+// TODO REGEX
+// export const insensitiveCase = null;
+// export const insensitiveAccents = null;
+
+
 
 // not
 
