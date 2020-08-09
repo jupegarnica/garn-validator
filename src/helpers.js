@@ -1,5 +1,6 @@
 import "./polyfills.js";
-import { AsyncFunction, GeneratorFunction, constructors } from "./constants.js";
+import { AsyncFunction, GeneratorFunction } from "./utils.js";
+import { constructors } from "./constructors.js";
 
 const isProxy = Proxy.isProxy;
 

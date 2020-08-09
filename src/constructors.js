@@ -1,7 +1,9 @@
+
+
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
-  .constructor;
+.constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
-  .constructor;
+.constructor;
 
 export const constructors = [
   Object,

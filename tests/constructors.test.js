@@ -1,4 +1,7 @@
-import isValidOrThrow , {AsyncFunction, GeneratorFunction }from "garn-validator";
+import isValidOrThrow, {
+  AsyncFunction,
+  GeneratorFunction,
+} from "garn-validator";
 
 describe("check with constructors", () => {
   class MyClass {}
@@ -19,11 +22,11 @@ describe("check with constructors", () => {
     [Proxy, new Proxy({}, {})],
     [Proxy, new Proxy([], {})],
 
-    [Object, new Proxy({},{})],
-    [Array, new Proxy([],{})],
-    [URL, new URL('https://developer.mozilla.org')],
-    [AsyncFunction, async ()=> {}],
-    [GeneratorFunction, function*(){}],
+    [Object, new Proxy({}, {})],
+    [Array, new Proxy([], {})],
+    [URL, new URL("https://developer.mozilla.org")],
+    [AsyncFunction, async () => {}],
+    [GeneratorFunction, function* () {}],
 
     [Date, new Date()],
     [Map, new Map()],
@@ -40,21 +43,20 @@ describe("check with constructors", () => {
     [Number, "1"],
     [Boolean, null],
     [RegExp, "/s/"],
-    [Function, async ()=> {}],
-    [Function, function*(){}],
+    [Function, async () => {}],
+    [Function, function* () {}],
     [Function, new MyClass()],
     [Error, new RangeError()],
     [RangeError, new Error()],
     [Object, []],
-    [Object, new Proxy([],{})],
+    [Object, new Proxy([], {})],
     [Object, null],
     [Array, {}],
-    [Array, new Proxy({},{})],
+    [Array, new Proxy({}, {})],
     [Map, new WeakMap()],
     [Set, new WeakSet()],
-    [URL, 'https://developer.mozilla.org'],
-    [String, new URL('https://developer.mozilla.org')],
-
+    [URL, "https://developer.mozilla.org"],
+    [String, new URL("https://developer.mozilla.org")],
   ])("should throw isValidOrThrow(%p)(%p)", (constructor, value) => {
     expect(() => {
       isValidOrThrow(constructor)(value);
