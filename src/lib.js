@@ -316,22 +316,30 @@ const createValidator = (types, conf) => {
   }
 
   validator[validatorSymbol] = true;
+  validator.or = createOr(types, conf);
+  validator.transform = createTransform(types, conf);
+
   return validator;
 };
 
-const applyTransformer = (types, conf) => (defaultValue) =>
+const createOr = (types, conf) => (defaultValue) =>
   createValidator(types, {
     ...conf,
     onInvalid: (error, value) => {
-      if (defaultValue instanceof Function)
-        return defaultValue(value, error);
+      if (defaultValue instanceof Function) return defaultValue(value, error);
       return defaultValue;
     },
   });
 
+const createTransform = (types, conf) => (transformer) =>
+  createValidator(types, {
+    ...conf,
+    onValid: transformer
+  });
+
 const run = (conf) => (...types) => {
   let validator = createValidator(types, conf);
-  validator.or = applyTransformer(types, conf);
+
 
   return validator;
 };

@@ -7,6 +7,7 @@ import {
   GeneratorFunction,
   TypeValidationError,
   mustBe,
+  Numeric,
 } from "garn-validator";
 
 describe("isValid", () => {
@@ -363,7 +364,15 @@ describe("mustBe", () => {
       expect(mustBe(Number).or(0)(2)).toBe(2);
     });
     test("should apply transformer if fails", () => {
-      expect(mustBe(Number).or( val => Number(val))('2')).toBe(2);
+      expect(mustBe(Number).or( val => Number(val) )('2')).toBe(2);
+    });
+    describe('mustBe().transform()', () => {
+      test("should apply transformer if fails", () => {
+        expect(mustBe(Numeric).transform( val => Number(val) * 2)('2')).toBe(4);
+      });
+      test("should apply or and transform", () => {
+        expect(mustBe(Number).or(1).transform( val => Number(val) * 2)(null)).toBe(2);
+      });
     });
   });
 });
