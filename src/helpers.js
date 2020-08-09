@@ -76,6 +76,9 @@ const parser = () => {
     if (Number.isNaN(value)) {
       return addStripMark(value);
     }
+    if ((value) === Infinity || value == -Infinity) {
+      return addStripMark(value);
+    }
     if (typeof value === "function" && value[validatorSymbol]) {
       return addStripMark(value.name);
     }
