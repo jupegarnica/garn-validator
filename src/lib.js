@@ -371,7 +371,4 @@ export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
 export const isValidOrThrow = config({});
 
-export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
-export const objectOf = (type) => isValid(Object, { [/./]: type });
-
 export default isValidOrThrow;

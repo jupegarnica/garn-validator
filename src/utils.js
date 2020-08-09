@@ -1,9 +1,7 @@
+import { isValid } from "./lib.js";
 
-import {isValid} from './lib.js';
-
-
-
-
+export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
+export const objectOf = (type) => isValid(Object, { [/./]: type });
 
 export const not = (...args) => !isValid(...args);
 
@@ -33,7 +31,6 @@ export const not = (...args) => !isValid(...args);
 // is.error (value)
 
 // isDateString
-
 
 // contains(str, seed [, options ])
 // equals(str, comparison)
