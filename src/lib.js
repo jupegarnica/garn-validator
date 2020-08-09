@@ -309,10 +309,10 @@ const createValidator = (types, conf) => {
     try {
       validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
-      return currentConf.onInvalid(error, value);
+      return currentConf.transform((currentConf.onInvalid(error, value)));
     }
 
-    return currentConf.onValid(value);
+    return currentConf.transform(currentConf.onValid(value));
   }
 
   validator[validatorSymbol] = true;
@@ -334,7 +334,7 @@ const createOr = (types, conf) => (defaultValue) =>
 const createTransform = (types, conf) => (transformer) =>
   createValidator(types, {
     ...conf,
-    onValid: transformer
+    transform: transformer
   });
 
 const run = (conf) => (...types) => {
@@ -348,7 +348,8 @@ const config = ({
   collectAllErrors = false,
   onValid = onValidDefault,
   onInvalid = onInvalidDefault,
-}) => run({ collectAllErrors, onValid, onInvalid });
+  transform = v => v,
+}) => run({ collectAllErrors, onValid, onInvalid ,transform});
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);

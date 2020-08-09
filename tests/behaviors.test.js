@@ -370,8 +370,14 @@ describe("mustBe", () => {
       test("should apply transformer if fails", () => {
         expect(mustBe(Numeric).transform( val => Number(val) * 2)('2')).toBe(4);
       });
-      test("should apply or and transform", () => {
-        expect(mustBe(Number).or(1).transform( val => Number(val) * 2)(null)).toBe(2);
+      test("should apply OR first and later transform", () => {
+        expect(mustBe(Numeric).transform( val => Number(val) * 2).or(1)(null)).toBe(2);
+      });
+      test("should apply OR first and later transform", () => {
+        expect(mustBe(Numeric).or(1).transform( val => Number(val) * 2)(null)).toBe(2);
+      });
+      test("should apply transform even if not OR is applied", () => {
+        expect(mustBe(Numeric).or(1).transform( val => Number(val) * 2)('2')).toBe(4);
       });
     });
   });
