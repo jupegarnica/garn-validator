@@ -2,6 +2,7 @@ import "./polyfills.js";
 import { AsyncFunction, GeneratorFunction } from "./utils.js";
 import { constructors } from "./constructors.js";
 
+// TODO enable proxy detection
 const isProxy = Proxy.isProxy;
 
 export const validatorSymbol = Symbol("validator mark");

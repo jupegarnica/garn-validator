@@ -3,7 +3,7 @@ import { isValid } from "./lib.js";
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
 
-export const not = (...args) => !isValid(...args);
+export const not = (...args) => (val) => !isValid(...args)(val);
 
 // TODO UTILS
 
