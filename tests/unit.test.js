@@ -239,6 +239,7 @@ describe("stringify", () => {
     [1, "1"],
     [true, "true"],
     [null, "null"],
+    [NaN, "NaN"],
     [{}, "{}"],
     [undefined, undefined], // doesn't stringify. Normal behavior of JSON.stringify
     ["string", '"string"'], // normal behavior,  in order to parse it back

@@ -1,6 +1,6 @@
 import "./polyfills.js";
-import { AsyncFunction, GeneratorFunction } from "./utils.js";
-import { constructors } from "./constructors.js";
+
+import { constructors , AsyncFunction, GeneratorFunction} from "./constructors.js";
 
 // TODO enable proxy detection
 const isProxy = Proxy.isProxy;
@@ -72,6 +72,9 @@ const parser = () => {
         return `[circular reference] -> ${oldKey || "rootObject"}`;
       }
       seen.set(value, key);
+    }
+    if (Number.isNaN(value)) {
+      return addStripMark(value);
     }
     if (typeof value === "function" && value[validatorSymbol]) {
       return addStripMark(value.name);
