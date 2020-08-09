@@ -4,6 +4,7 @@ export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
 
 export const not = (...args) => (val) => !isValid(...args)(val);
+export const or = (...args) => args;
 
 // TODO UTILS
 

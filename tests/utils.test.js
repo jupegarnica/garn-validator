@@ -6,6 +6,7 @@ import {
   isValidOrThrowAll,
   hasErrors,
 } from "garn-validator";
+import { or } from "../src/utils";
 
 describe("utils", () => {
   test("ArrayOf", () => {
@@ -122,6 +123,19 @@ describe("utils", () => {
         )(20);
       }).toThrow();
 
+    });
+  });
+
+  describe('or()', () => {
+    test('should work', () => {
+      expect(() => {
+        isValidOrThrow(or(Number, String))(2)
+      }).not.toThrow();
+    });
+    test('should throw', () => {
+      expect(() => {
+        isValidOrThrow(or(Number, String))(null)
+      }).toThrow();
     });
   });
 });
