@@ -6,42 +6,13 @@ import {
   isValidOrLog,
   isValidOrLogAll,
   TypeValidationError,
+  Integer,
+  Numeric,
+  SafeNumber
 } from "garn-validator";
 
+// isValidOrThrow(Numeric)(NaN);
 
+// isValidOrThrow(SafeNumber)(Number.MIN_SAFE_INTEGER - 10000);
 
-const isBigNumber = hasErrors(
-  [Number, String],
-  (num) => num == Number(num),
-  num => num > 1000
-  );
-
-// let s = Symbol('s')
-
-// let o = {
-//   [s]: 'hola',
-//   x:1
-// }
-
-
-// let i=1;
-// for (const key in o) {
-//   const element = o[key];
-//   console.log(key,element,i++);
-// }
-console.log(isBigNumber);
-
-isValid(isBigNumber)(2)
-// Object.values(o).forEach(console.log)
-// its normal behavior
-// isBigNumber('a12').forEach(e => console.log(e.message));
-/* [
-  new TypeValidationError("value 200 do not match validator (v) => v < 100"),
-  new TypeValidationError("value null do not match constructor Number"),
-  new TypeValidationError("value null do not match constructor String"),
-  new TypeValidationError("value null do not match validator (num) => num == Number(num)"),
-];
- */
-
-// inherit behavior
-// isValidOrLog(isBigNumber)('a12'); // false, and log only one error value "a12" do not match validator (num) => num == Number(num)
+isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
