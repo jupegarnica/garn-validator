@@ -6,6 +6,8 @@ export const objectOf = (type) => isValid(Object, { [/./]: type });
 export const not = (...args) => (val) => !isValid(...args)(val);
 export const or = (...args) => args;
 
+export const and = (...args) => isValid(...args);
+
 // TODO UTILS
 
 // logical:
