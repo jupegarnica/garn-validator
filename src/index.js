@@ -302,10 +302,10 @@ const isValidTypeOrThrow = (data) => {
 };
 
 const run = (conf) => (...types) => {
-  function validator(value, secret = {}) {
+  function validator(value, secretArg ) {
     let currentConf = conf;
-    if (secret[configurationSymbol]) {
-      currentConf = secret[configurationSymbol];
+    if (secretArg && secretArg[configurationSymbol]) {
+      currentConf = secretArg[configurationSymbol];
     }
     try {
       validSeriesOrThrow(currentConf, types, value);
