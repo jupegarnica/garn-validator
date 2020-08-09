@@ -6,6 +6,7 @@ import {
   AsyncFunction,
   GeneratorFunction,
   TypeValidationError,
+  mustBe,
 } from "garn-validator";
 
 describe("isValid", () => {
@@ -327,7 +328,11 @@ describe("isValidOrLogAll", () => {
       { x: Number },
       { y: Boolean },
       { z: String },
-      { h() {throw 'ups'}}
+      {
+        h() {
+          throw "ups";
+        },
+      }
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
@@ -336,8 +341,29 @@ describe("isValidOrLogAll", () => {
     expect(globalThis.console.error).toHaveBeenCalledWith(
       "on path /z value 3 do not match constructor String"
     );
-    expect(globalThis.console.error).toHaveBeenCalledWith(
-      "ups"
-    );
+    expect(globalThis.console.error).toHaveBeenCalledWith("ups");
+  });
+});
+
+describe("mustBe", () => {
+  test("should return the value", () => {
+    expect(mustBe(Number)(2)).toBe(2);
+    expect(mustBe(String)("3")).toBe("3");
+  });
+  test("should throw", () => {
+    expect(() => {
+      mustBe(Number)("");
+    }).toThrow();
+  });
+  describe("mustBe().or()", () => {
+    test("should return default value", () => {
+      expect(mustBe(Number).or(0)(null)).toBe(0);
+    });
+    test("should return value if not fails", () => {
+      expect(mustBe(Number).or(0)(2)).toBe(2);
+    });
+    test("should apply transformer if fails", () => {
+      expect(mustBe(Number).or( val => Number(val))('2')).toBe(2);
+    });
   });
 });

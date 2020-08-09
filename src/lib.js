@@ -213,7 +213,6 @@ const validMainValidatorOrThrow = (data) => {
   try {
     let newConf = {
       ...data.conf,
-      // collectAllErrors: false,
       onValid: onValidDefault,
       onInvalid: onInvalidDefault,
     };
@@ -301,21 +300,38 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-const run = (conf) => (...types) => {
-  function validator(value, secretArg ) {
+const createValidator = (types, conf) => {
+  function validator(value, secretArg) {
     let currentConf = conf;
     if (secretArg && secretArg[configurationSymbol]) {
-      currentConf = secretArg[configurationSymbol];
+      currentConf = { ...conf, ...secretArg[configurationSymbol] };
     }
     try {
       validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
-      return currentConf.onInvalid(error);
+      return currentConf.onInvalid(error, value);
     }
 
     return currentConf.onValid(value);
   }
+
   validator[validatorSymbol] = true;
+  return validator;
+};
+
+const applyTransformer = (types, conf) => (defaultValue) =>
+  createValidator(types, {
+    ...conf,
+    onInvalid: (error, value) => {
+      if (defaultValue instanceof Function)
+        return defaultValue(value, error);
+      return defaultValue;
+    },
+  });
+
+const run = (conf) => (...types) => {
+  let validator = createValidator(types, conf);
+  validator.or = applyTransformer(types, conf);
 
   return validator;
 };
@@ -328,7 +344,7 @@ const config = ({
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
-  errors.forEach((e) => console.error(e && e.message || e));
+  errors.forEach((e) => console.error((e && e.message) || e));
   return false;
 };
 
@@ -370,5 +386,9 @@ export const isValidOrThrowAll = config({
 export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
 export const isValidOrThrow = config({});
+
+export const mustBe = config({
+  onValid: (value) => value, // default
+});
 
 export default isValidOrThrow;
