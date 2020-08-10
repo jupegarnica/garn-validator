@@ -142,6 +142,7 @@ describe("isConstructor", () => {
     [class MyClass {}, true],
     [Promise, true],
     [Date, true],
+    [Proxy, true],
     [Function, true],
     [null, false],
     [undefined, false],

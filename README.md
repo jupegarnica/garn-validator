@@ -8,14 +8,13 @@ Ultra fast runtime type validator without dependencies.
 
 [![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 
-
 - Supports checking primitives or objects with **schemas**
 - Easy to use and learn but **powerful**
 - It's totally **composable**
 - **Fast** and **without dependencies**
 - **Six behaviors**:
   - `isValidOrThrow` returns true or fails (default export)
-  - `isValid`  returns true or false
+  - `isValid` returns true or false
   - `hasErrors` returns null or Array of errors
   - `isValidOrLog` returns true or false and log error
   - `isValidOrLogAll` returns true or false and log all errors
@@ -27,7 +26,7 @@ Ultra fast runtime type validator without dependencies.
 <h2>Example</h2>
 
 ```js
-import is from 'garn-validator';
+import is from "garn-validator";
 
 const isValidPassword = is(
   String,
@@ -38,11 +37,11 @@ const isValidPassword = is(
   /[-_/!·$%&/()]/
 );
 
-isValidPassword('12345Aa?'); // true
+isValidPassword("12345Aa?"); // true
 
 const isValidName = is(String, (name) => name.length >= 3);
 
-isValidName('qw'); // fails
+isValidName("qw"); // fails
 
 const isValidAge = is(
   Number,
@@ -68,6 +67,7 @@ isValidUser({
   country: "ES",
 }); // it throws
 ```
+
 <h1>Contents</h1>
 
 - [Get started](#get-started)
@@ -89,6 +89,7 @@ isValidUser({
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
     - [Constructors](#constructors)
+    - [Proxy detection](#proxy-detection)
     - [RegExp](#regexp)
     - [Custom function](#custom-function)
     - [Enums](#enums)
@@ -249,7 +250,6 @@ const isNotBig = is((v) => v < 100);
 isPositive(-2); // it throws
 
 is(isPositive, isNotBig)(200); // it throws
-
 ```
 
 ### Behaviors
@@ -360,6 +360,35 @@ is(Car)(honda); // throws.  Car is detected as custom validator function
 ```
 
 All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constants.js#L8) are supported
+
+### Proxy detection
+
+In order to Detect an Object (or Array) intercepted by a Proxy we intercept the creation of Proxies to know these object are Proxies.
+
+To have that functionality you must `import "garn-validator/src/proxyDetection.js"` before any creation of Proxies you need to detect;
+
+```js
+import "garn-validator/src/proxyDetection.js";
+
+const target = { a: 1 };
+const proxy = new Proxy(target, {
+  get: () => 33,
+});
+
+isValidOrThrow(Proxy)(proxy); // true
+```
+
+without running garn-validator/src/proxyDetection.js
+
+```js
+// NO IMPORT
+const target = { a: 1 };
+const proxy = new Proxy(target, {
+  get: () => 33,
+});
+
+isValidOrThrow(Proxy)(proxy); // fails
+```
 
 ### RegExp
 
@@ -625,8 +654,6 @@ isValidPassword("12345wW-"); // true
 isValidPassword("12345ww-"); // fails
 ```
 
-<!-- TODO ## Proxy detection -->
-
 ## Errors
 
 If a validation fails it will throw `new TypeValidationError(meaningfulMessage)` which inherits from `TypeError`. It can be imported.
@@ -880,7 +907,6 @@ try {
  */
 ```
 
-
 ### Composition in depth
 
 You can create your own validators and use them as custom validation creating new ones.
@@ -890,7 +916,7 @@ const isPositive = isValidOrThrow((v) => v > 0);
 const isNotBig = isValidOrThrow((v) => v < 100);
 const isNumber = isValidOrThrow([Number, String], (num) => num == Number(num));
 
-isValidOrThrow(isNumber, isPositive, isNotBig)('10'); // true
+isValidOrThrow(isNumber, isPositive, isNotBig)("10"); // true
 isValidOrThrow(isNumber, isPositive, isNotBig)(200); // it throws
 ```
 
@@ -917,11 +943,11 @@ Actually, it's not treated as a custom validation function. No matter is your ar
 const isBigNumber = hasErrors(
   [Number, String],
   (num) => num == Number(num),
-  num => num > 1000
-  );
+  (num) => num > 1000
+);
 
 // its normal behavior
-isBigNumber('a12');
+isBigNumber("a12");
 /* [
   new TypeValidationError("value "a12" do not match validator (num) => num == Number(num)"),
   new TypeValidationError("value "a12" do not match validator num => num > 1000"),
@@ -929,9 +955,7 @@ isBigNumber('a12');
  */
 
 // inherit behavior
-isValidOrLog(isBigNumber)('a12'); // false, and log only one error value "a10" do not match validator (num) => num == Number(num)
-
-
+isValidOrLog(isBigNumber)("a12"); // false, and log only one error value "a10" do not match validator (num) => num == Number(num)
 ```
 
 ## Especial cases

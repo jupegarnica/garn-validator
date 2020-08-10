@@ -5,7 +5,8 @@ export const AsyncFunction = Object.getPrototypeOf(async function () {})
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
 .constructor;
 
-export const constructors = [
+export const constructors = new Proxy([
+  Proxy, // intercepted to return the ProxyIntercepted
   Object,
   Function,
   Array,
@@ -21,7 +22,6 @@ export const constructors = [
   Set,
   WeakMap,
   WeakSet,
-  Proxy,
 
   Error,
   EvalError,
@@ -51,4 +51,9 @@ export const constructors = [
   AsyncFunction,
   // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
-];
+], {get(target, key) {
+  if(key == 0) {
+    return Proxy; //  if the proxy is intercepted it will return ProxyIntercepted
+  }
+  return target[key]
+}});
