@@ -44,8 +44,8 @@ export const SafeNumber = and(
   between(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
 );
 
-export const min = gte;
-export const max = lte;
+export const min = ge;
+export const max = le;
 
 // TODO STRINGS
 // export const match = null;
