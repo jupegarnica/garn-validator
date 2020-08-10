@@ -21,6 +21,7 @@ if (typeof Proxy === "function" && typeof __isProxy !== "function") {
   }
 
   globalThis.Proxy = ProxyIntercepted;
+  // globalThis.__ProxyIntercepted = ProxyIntercepted;
   // globalThis.__Proxy = __Proxy;
   globalThis.__isProxy = isProxy;
 }

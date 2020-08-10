@@ -53,7 +53,9 @@ export const constructors = new Proxy([
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ], {get(target, key) {
   if(key == 0) {
-    return Proxy; //  if the proxy is intercepted it will return ProxyIntercepted
+    //  if the proxy is intercepted it will return ProxyIntercepted
+    return Proxy;
+    // return typeof __ProxyIntercepted === 'function' ? __ProxyIntercepted : Proxy;
   }
   return target[key]
 }});
