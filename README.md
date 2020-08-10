@@ -240,18 +240,6 @@ is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 is({ x$: String })({}); // true
 ```
 
-### Composable
-
-```js
-// Simple example
-const isPositive = is((v) => v > 0);
-const isNotBig = is((v) => v < 100);
-
-isPositive(-2); // it throws
-
-is(isPositive, isNotBig)(200); // it throws
-```
-
 ### Behaviors
 
 There are six behaviors that can be divided in two categories:
