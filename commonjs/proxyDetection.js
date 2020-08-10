@@ -1,0 +1,1 @@
+"use strict";if(typeof Proxy==="function"&&typeof __isProxy!=="function"){const proxies=new WeakSet;const __Proxy=Proxy;function ProxyIntercepted(target,handler={}){let proxy=new __Proxy(target,handler);proxies.add(proxy);return proxy}function isProxy(obj){return proxies.has(obj)}globalThis.Proxy=ProxyIntercepted;globalThis.__isProxy=isProxy}
