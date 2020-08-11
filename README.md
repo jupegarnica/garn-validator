@@ -83,7 +83,6 @@ isValidUser({
     - [Check against enums (OR operator)](#check-against-enums-or-operator)
     - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
     - [Check object against an schema](#check-object-against-an-schema)
-    - [Composable](#composable)
     - [Behaviors](#behaviors)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
@@ -355,6 +354,9 @@ In order to Detect an Object (or Array) intercepted by a Proxy we intercept the 
 
 To have that functionality you must `import "garn-validator/src/proxyDetection.js"` before any creation of Proxies you need to detect;
 
+> NOT YET WORKING IN DENO
+
+
 ```js
 import "garn-validator/src/proxyDetection.js";
 
@@ -415,7 +417,7 @@ is(() => false) (10); // throws TypeValidationError
 is(() => 0) (10); // throws TypeValidationError
 
 is(() => {
-  throw new RangeError('ups);
+  throw new RangeError('ups');
 } ) (10); // throws RangeError
 
 is( () => {
