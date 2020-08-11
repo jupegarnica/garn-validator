@@ -22,7 +22,7 @@ describe("check with constructors", () => {
     [Object, {}],
 
     [Proxy, new Proxy({}, {})],
-    // [Proxy, new Proxy([], {})],
+    [Proxy, new Proxy([], {})],
 
     [Object, new Proxy({}, {})],
     [Array, new Proxy([], {})],
