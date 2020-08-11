@@ -1,9 +1,12 @@
 import "./polyfills.js";
 
-import { constructors , AsyncFunction, GeneratorFunction} from "./constructors.js";
+import {
+  constructors,
+  AsyncFunction,
+  GeneratorFunction,
+} from "./constructors.js";
 
-// TODO enable proxy detection
-const isProxy = Proxy.isProxy;
+const isProxy = (v) => (globalThis.__isProxy ? globalThis.__isProxy(v) : false);
 
 export const validatorSymbol = Symbol("validator mark");
 export const configurationSymbol = Symbol("rewrite configuration");
@@ -12,9 +15,12 @@ const isMainValidator = (type) => type && !!type[validatorSymbol];
 
 export const isNullish = (val) => val === undefined || val === null;
 
-export const checkConstructor = (type, val) =>
-  (!isNullish(val) && val.constructor === type) ||
-  (Proxy === type && isProxy(val));
+export const checkConstructor = (type, val) => {
+  if (Proxy === type) {
+    return isProxy(val);
+  }
+  return !isNullish(val) && val.constructor === type;
+};
 
 export const isClass = (fn) =>
   typeof fn === "function" &&
@@ -26,14 +32,14 @@ export const isFunctionHacked = (fn) =>
   fn.toString.toString() !== "function toString() { [native code] }";
 
 export const isCustomValidator = (fn) =>
-  checkConstructor(Function, fn) &&
+  typeof fn === "function" &&
+  fn instanceof Function &&
   !isInvalidType(fn) &&
   !isClass(fn) &&
   !isConstructor(fn);
 
 export const isInvalidType = (fn) =>
-  checkConstructor(AsyncFunction, fn) ||
-  checkConstructor(GeneratorFunction, fn);
+  fn instanceof AsyncFunction || fn instanceof GeneratorFunction;
 
 export function isConstructor(f) {
   if (!f) return false;
@@ -43,17 +49,28 @@ export function isConstructor(f) {
   if (isClass(f)) return true;
   return constructors.some((c) => c === f);
 }
-
 export const whatTypeIs = (type) => {
-  if (checkConstructor(Object, type)) return "schema";
+  if (type && type.constructor === Object) return "schema";
   if (isPrimitive(type)) return "primitive";
   if (Array.isArray(type)) return "enum";
-  if (checkConstructor(RegExp, type)) return "regex";
+  if (type instanceof RegExp) return "regex";
   if (isConstructor(type)) return "constructor";
   if (isMainValidator(type)) return "main-validator";
   if (isCustomValidator(type)) return "validator";
   return "invalid";
 };
+
+// export const whatTypeIs = (type) => {
+
+//   if (isPrimitive(type)) return "primitive";
+//   if (Array.isArray(type)) return "enum";
+//   if (type && type.constructor === Object) return "schema";
+//   if (type instanceof RegExp) return "regex";
+//   if (isCustomValidator(type)) return "validator";
+//   if (isConstructor(type)) return "constructor";
+//   if (isMainValidator(type)) return "main-validator";
+//   return "invalid";
+// };
 
 // fails in ArrayBuffer
 // export const isPrimitive = (value) => !(value instanceof Object) || (value.constructor === Number || value.constructor === String);
@@ -76,7 +93,7 @@ const parser = () => {
     if (Number.isNaN(value)) {
       return addStripMark(value);
     }
-    if ((value) === Infinity || value == -Infinity) {
+    if (value === Infinity || value == -Infinity) {
       return addStripMark(value);
     }
     if (typeof value === "function" && value[validatorSymbol]) {

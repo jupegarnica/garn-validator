@@ -3,6 +3,8 @@ import isValidOrThrow, {
   GeneratorFunction,
 } from "garn-validator";
 
+import 'garn-validator/src/proxyDetection.js';
+
 describe("check with constructors", () => {
   class MyClass {}
 
@@ -49,9 +51,10 @@ describe("check with constructors", () => {
     [Error, new RangeError()],
     [RangeError, new Error()],
     [Object, []],
-    [Object, new Proxy([], {})],
     [Object, null],
     [Array, {}],
+    [Object, new Proxy([], {})],
+    [Proxy, {}],
     [Array, new Proxy({}, {})],
     [Map, new WeakMap()],
     [Set, new WeakSet()],

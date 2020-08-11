@@ -1,5 +1,6 @@
 {
   "imports": {
-     "garn-validator": "./src/index.js"
+     "garn-validator": "./src/index.js",
+     "garn-validator/src/proxyDetection.js": "./src/proxyDetection.js"
   }
 }
