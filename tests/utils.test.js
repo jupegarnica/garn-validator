@@ -17,6 +17,12 @@ import {
   Negative,
   SafeInteger,
   SafeNumber,
+  insensitiveCase,
+  contains,
+  Lowercase,
+  Uppercase,
+  startsWith,
+  endsWith,
 } from "garn-validator";
 
 describe("utils", () => {
@@ -433,6 +439,84 @@ describe("utils", () => {
       }).toThrow();
       expect(() => {
         isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
+      }).toThrow();
+    });
+  });
+  describe("contains()", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(contains("ipsum"))("lorem ipsum hello");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(contains("hi"))("lorem ipsum hello");
+      }).toThrow();
+    });
+  });
+  describe("insensitiveCase()", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(insensitiveCase("IPSUM"))("lorem ipsum hello");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(insensitiveCase("HI"))("lorem ipsum hello");
+      }).toThrow();
+    });
+  });
+  describe("Lowercase", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(Lowercase)("lorem ipsum hello 33 & $  ?");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(Lowercase)("Lorem ipsum hello 33 & $  ?");
+      }).toThrow();
+    });
+  });
+  describe("Uppercase", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(Uppercase)("LOREM IPSUM HELLO 33 & $  ?");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(Uppercase)("Lorem ipsum hello 33 & $  ?");
+      }).toThrow();
+    });
+  });
+  describe("startsWith", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(startsWith("LOREM"))("LOREM IPSUM HELLO 33 & $  ?");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(startsWith("lorem"))("Lorem ipsum hello 33 & $  ?");
+      }).toThrow();
+    });
+  });
+  describe("endsWith", () => {
+    test("should work", () => {
+      expect(() => {
+        isValidOrThrow(endsWith("HELLO"))("LOREM IPSUM HELLO");
+      }).not.toThrow();
+    });
+    // TODO: MAKE IT WORK WITH REGEX
+    test.skip("should work with regex", () => {
+      expect(() => {
+        isValidOrThrow(endsWith(/HELLO/))("LOREM IPSUM HELLO");
+      }).not.toThrow();
+    });
+    test("should throw", () => {
+      expect(() => {
+        isValidOrThrow(endsWith("HELLO"))("Lorem ipsum hello 33");
       }).toThrow();
     });
   });
