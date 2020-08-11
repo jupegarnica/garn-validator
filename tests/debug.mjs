@@ -8,16 +8,21 @@ import {
   TypeValidationError,
   Integer,
   Numeric,
-  SafeNumber
+  SafeNumber,
+  mustBe,
 } from "garn-validator";
-import "garn-validator/src/proxyDetection.js";
+import { stringify } from "../src/helpers.js";
 
-// isValidOrThrow(Numeric)(NaN);
-
-// isValidOrThrow(SafeNumber)(Number.MIN_SAFE_INTEGER - 10000);
-
-// isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
-
-console.log(
-  isValidOrThrow(Proxy)([])
-);
+try {
+  const NumericOrZero = mustBe(Number).or(0);
+  // console.log(
+  //   NumericOrZero(null)
+  // );
+  const res = mustBe({ a: NumericOrZero })({ a: 'NaN' });
+} catch (error) {
+  console.log(error.raw);
+  // for (const key in error.raw.conf) {
+  //   const element = error.raw.conf[key];
+  //   console.log(key, stringify(element));
+  // }
+}

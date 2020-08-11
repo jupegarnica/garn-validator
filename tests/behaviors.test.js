@@ -364,21 +364,46 @@ describe("mustBe", () => {
       expect(mustBe(Number).or(0)(2)).toBe(2);
     });
     test("should apply transformer if fails", () => {
-      expect(mustBe(Number).or( val => Number(val) )('2')).toBe(2);
+      expect(mustBe(Number).or((val) => Number(val))("2")).toBe(2);
     });
-    describe('mustBe().transform()', () => {
-      test("should apply transformer if fails", () => {
-        expect(mustBe(Numeric).transform( val => Number(val) * 2)('2')).toBe(4);
-      });
-      test("should apply OR first and later transform", () => {
-        expect(mustBe(Numeric).transform( val => Number(val) * 2).or(1)(null)).toBe(2);
-      });
-      test("should apply OR first and later transform", () => {
-        expect(mustBe(Numeric).or(1).transform( val => Number(val) * 2)(null)).toBe(2);
-      });
-      test("should apply transform even if not OR is applied", () => {
-        expect(mustBe(Numeric).or(1).transform( val => Number(val) * 2)('2')).toBe(4);
-      });
+    test("should work nested", () => {
+      const NumericOrZero = mustBe(Numeric).or(0);
+      const res = mustBe({ a: NumericOrZero })({ a: null });
+      expect(res).toEqual({ a: 0 });
+    });
+  });
+  describe("mustBe().transform()", () => {
+    test("should apply transform always", () => {
+      expect(mustBe(Numeric).transform((val) => Number(val) * 2)("2")).toBe(4);
+    });
+    test.skip("should apply transform twice", () => {
+      expect(
+        mustBe(Number)
+          .transform((val) => val + 2)
+          .transform((val) => val + 7)(0)
+      ).toBe(4);
+    });
+    test("should apply OR first and later transform", () => {
+      expect(
+        mustBe(Numeric)
+          .or(1)
+          .transform((val) => Number(val) * 2)
+          (null)
+      ).toBe(2);
+    });
+    test("should apply OR first and later transform", () => {
+      expect(
+        mustBe(Numeric)
+          .or(1)
+          .transform((val) => Number(val) * 2)(null)
+      ).toBe(2);
+    });
+    test("should apply transform even if not OR is applied", () => {
+      expect(
+        mustBe(Numeric)
+          .or(1)
+          .transform((val) => Number(val) * 2)("2")
+      ).toBe(4);
     });
   });
 });
