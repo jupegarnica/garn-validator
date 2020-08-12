@@ -300,8 +300,8 @@ const logErrorsAndReturnFalse = (error) => {
   if (error instanceof AggregateError) {
     console.group(error.name + ':');
     error.errors.forEach(logErrorsAndReturnFalse);
-  } else if (error.raw) {
-    console.error(formatErrorMessage(error.raw));
+  // } else if (error.raw) {
+  //   console.error(formatErrorMessage(error.raw));
 
   } else {
     console.error((error && error.message) || error);
