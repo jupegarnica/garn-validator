@@ -20,6 +20,12 @@ import {
   SchemaValidationError,
 } from "./constructors";
 
+
+const onValidDefault = () => true;
+const onInvalidDefault = (error) => {
+  throw error;
+};
+
 const formatErrorMessage = (data) => {
   const { type, value, path, kind } = data;
 
@@ -78,10 +84,7 @@ const validOrThrow = (input, data) => {
   throwError(data);
 };
 
-const onValidDefault = () => true;
-const onInvalidDefault = (error) => {
-  throw error;
-};
+
 
 const validSchemaOrThrow = (data) => {
   const { conf, type: schema, value: object, root = object, path = [] } = data;
