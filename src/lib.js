@@ -83,17 +83,24 @@ const truthyOrThrow = (input, data) => {
   throwError(data);
 };
 
+const applyDefault = (ref, key, value) => {
+  try {
+    ref[key] = value;
+  } catch {
+    // key not configurable
+  }
+};
+
 const validSchemaOrThrow = (data) => {
   const { conf, type: schema, value: object, root = object, path = [] } = data;
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
-  let valueTransformed = data.value;
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
     try {
-      valueTransformed = isValidTypeOrThrow({
+      let newValue = isValidTypeOrThrow({
         conf,
         type: schema[keyName],
         value: object[keyName],
@@ -101,6 +108,7 @@ const validSchemaOrThrow = (data) => {
         keyName,
         path: [...path, keyName],
       });
+      applyDefault(object, keyName, newValue);
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -116,12 +124,9 @@ const validSchemaOrThrow = (data) => {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
       let value = object[keyNameStripped];
-
-      if (isNullish(value)) {
-        valueTransformed = value;
-      } else {
+      if (!isNullish(value)) {
         let type = schema[keyName];
-        valueTransformed = isValidTypeOrThrow({
+        let newValue = isValidTypeOrThrow({
           conf,
           type,
           value,
@@ -129,6 +134,7 @@ const validSchemaOrThrow = (data) => {
           keyName: keyNameStripped,
           path: [...path, keyNameStripped],
         });
+        applyDefault(object, keyNameStripped, newValue);
       }
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -151,7 +157,7 @@ const validSchemaOrThrow = (data) => {
     );
     for (const keyName of keys) {
       try {
-        valueTransformed = isValidTypeOrThrow({
+        let newValue = isValidTypeOrThrow({
           conf,
           type: schema[regexpString],
           value: object[keyName],
@@ -159,6 +165,7 @@ const validSchemaOrThrow = (data) => {
           keyName,
           path: [...path, keyName],
         });
+        applyDefault(object, keyName, newValue);
       } catch (error) {
         if (!conf.collectAllErrors) {
           throw error;
@@ -175,32 +182,25 @@ const validSchemaOrThrow = (data) => {
       kind: "schema",
     });
   }
-  return valueTransformed;
+  return object;
 };
 
 const validMainValidatorOrThrow = (data) => {
   const { type: fn, value } = data;
   // console.log("validMainValidatorOrThrow");
   try {
-    let newConf = {
-      ...data.conf,
-      onValid: onValidDefault,
-      onInvalid: onInvalidDefault,
-    };
-    // console.log('newConf :>> ', newConf);
-    // console.log('data.conf :>> ', data.conf);
-    // console.log("value :>> ", value);
-
-    // if (data.conf.applyOr) {
-    //   newConf = {
-    //     ...newConf,
-    //     onValid: (v) => v,
-    //   };
-
-    //   console.log("newConf :>> ", newConf);
-    // }
-
-    return fn(value, { [configurationSymbol]: newConf });
+    if (fn.applyDefault) {
+      return fn(value, {
+        ...data.conf,
+      });
+    } else {
+      let newConf = {
+        ...data.conf,
+        onValid: onValidDefault,
+        onInvalid: onInvalidDefault,
+      };
+      return fn(value, { [configurationSymbol]: newConf });
+    }
   } catch (error) {
     if (error.raw) {
       reThrowError(error, data);
@@ -291,8 +291,8 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-function createValidator (types, conf) {
-  function validatorFrom(value, secretArg) {
+function createValidator(types, conf) {
+  function validator(value, secretArg) {
     let currentConf = conf;
     if (secretArg && secretArg[configurationSymbol]) {
       currentConf = secretArg[configurationSymbol];
@@ -301,31 +301,30 @@ function createValidator (types, conf) {
     try {
       valueTransformed = validSeriesOrThrow(currentConf, types, value);
     } catch (error) {
-      if (currentConf.applyOr) {
-        return currentConf.applyOr(error, valueTransformed);
+      if (currentConf.applyDefault) {
+        return currentConf.applyDefault(error, valueTransformed);
       }
       return currentConf.onInvalid(error, valueTransformed);
     }
 
     return currentConf.transform(currentConf.onValid(valueTransformed));
   }
-  validatorFrom[validatorSymbol] = true;
-  validatorFrom.displayName = `${validatorFrom.name}(${[...arguments].map(
-    stringify
-  )})`;
-  validatorFrom.or = createOr(types, conf);
-  validatorFrom.transform = createTransform(types, conf);
+  validator[validatorSymbol] = true;
+  validator.applyDefault = !!conf.applyDefault;
+  validator.displayName = `validatorFrom(${[...arguments].map(stringify)})`;
+  validator.or = createOr(types, conf);
+  validator.transform = createTransform(types, conf);
 
-  return validatorFrom;
-};
+  return validator;
+}
 
 const createOr = (types, conf) => (defaultValue) =>
   createValidator(types, {
     ...conf,
+    name: "validateOr",
     onValid: (value) => value,
-    applyOr: (error, value) => {
+    applyDefault: (error, value) => {
       if (defaultValue instanceof Function) return defaultValue(value, error);
-      // console.warn("defaultValue", defaultValue);
       return defaultValue;
     },
   });
@@ -336,20 +335,15 @@ const createTransform = (types, conf) => (transformer) =>
     transform: transformer,
   });
 
-const run = (conf) => (...types) => {
-  let validatorFrom = createValidator(types, conf);
-
-
-  return validatorFrom;
-};
+const run = (conf) => (...types) => createValidator(types, conf);
 
 const config = ({
   collectAllErrors = false,
   onValid = onValidDefault,
   onInvalid = onInvalidDefault,
   transform = (v) => v,
-  applyOr = false,
-}) => run({ collectAllErrors, onValid, onInvalid, transform, applyOr });
+  applyDefault = false,
+}) => run({ collectAllErrors, onValid, onInvalid, transform, applyDefault });
 
 const logErrorsAndReturnFalse = (error) => {
   if (error instanceof AggregateError) {

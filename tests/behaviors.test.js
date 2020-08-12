@@ -373,10 +373,86 @@ describe("mustBe", () => {
     test("should apply transformer if fails", () => {
       expect(mustBe(Number).or((val) => Number(val))("2")).toBe(2);
     });
+    test("should fail if OR fails", () => {
+      const NumberOrZero = mustBe(Number).or(() => {
+        throw new Error("ups");
+      });
+      expect(() => {
+        mustBe(NumberOrZero)(null);
+      }).toThrow("ups");
+    });
+
+    test("should stop collecting errors if OR fails", () => {
+      jest.spyOn(globalThis.console, "log");
+
+      const NumberOrZero = mustBe(Number).or(() => {
+        throw new Error("ups");
+      });
+      try {
+        mustBe(NumberOrZero, () => console.log("i run?"))(null);
+      } catch {}
+
+      expect(globalThis.console.log).not.toHaveBeenCalled();
+    });
+
     test("should work nested", () => {
-      const NumericOrZero = mustBe(Numeric).or(0);
-      const res = mustBe({ a: NumericOrZero })({ a: null });
+      const NumberOrZero = mustBe(Numeric).or(0);
+      const res = mustBe({ a: NumberOrZero })({ a: null });
       expect(res).toEqual({ a: 0 });
+    });
+    test("should work nested with regex and optional keys", () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      const res = mustBe({
+        a: NumberOrZero,
+        [/b/]: NumberOrZero,
+        c$: NumberOrZero,
+        d$: NumberOrZero,
+      })({
+        a: null,
+        b: null,
+        //  c: undefined,
+        d: "null",
+      });
+      expect(res).toEqual({ a: 0, b: 0, d: 0 });
+    });
+    test("should work nested deeper", () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      const res = mustBe({
+        a: NumberOrZero,
+        b: {
+          c: NumberOrZero,
+        },
+      })({
+        a: null,
+        b: {
+          c: null,
+        },
+      });
+      expect(res).toEqual({
+        a: 0,
+        b: {
+          c: 0,
+        },
+      });
+    });
+
+    test("should not modify original object", () => {
+      let obj = {
+        a: null,
+      };
+      const NumberOrZero = mustBe(Number).or(0);
+      let newObject = mustBe({ a: NumberOrZero })(obj);
+      expect(obj.a).not.toBe(newObject.a);
+      expect(newObject).not.toBe(obj);
+    });
+    test("should not modify original object", () => {
+      let obj = {
+        a: {b: null},
+      };
+      const NumberOrZero = mustBe(Number).or(0);
+      let newObject = mustBe({ a: {b:NumberOrZero} })(obj);
+      expect(obj.a.b).not.toBe(newObject.a.b);
+      expect(newObject).not.toBe(obj);
     });
   });
   describe("mustBe().transform()", () => {
@@ -394,8 +470,7 @@ describe("mustBe", () => {
       expect(
         mustBe(Numeric)
           .or(1)
-          .transform((val) => Number(val) * 2)
-          (null)
+          .transform((val) => Number(val) * 2)(null)
       ).toBe(2);
     });
     test("should apply OR first and later transform", () => {
@@ -412,6 +487,5 @@ describe("mustBe", () => {
           .transform((val) => Number(val) * 2)("2")
       ).toBe(4);
     });
-
   });
 });
