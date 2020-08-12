@@ -273,6 +273,8 @@ describe("hasErrors", () => {
 
 describe("isValidOrThrowAll ", () => {
   jest.spyOn(globalThis.console, "error");
+  jest.spyOn(globalThis.console, "group");
+  jest.spyOn(globalThis.console, "groupEnd");
 
   test("should throw AggregateError with all errors", () => {
     try {
@@ -300,18 +302,24 @@ describe("isValidOrThrowAll ", () => {
 describe("isValidOrLogAll", () => {
   test("should return true or false", () => {
     jest.spyOn(globalThis.console, "error");
+    jest.spyOn(globalThis.console, "group");
+    jest.spyOn(globalThis.console, "groupEnd");
     expect(isValidOrLogAll(Number, String)(true)).toBe(false);
 
     expect(isValidOrLogAll(Boolean, true)(true)).toBe(true);
   });
   test("should log 2 errors", () => {
     jest.spyOn(globalThis.console, "error");
+    jest.spyOn(globalThis.console, "group");
+    jest.spyOn(globalThis.console, "groupEnd");
 
     isValidOrLogAll(Number, Boolean, String)(true);
     expect(globalThis.console.error).toHaveBeenCalledTimes(2);
   });
   test("should log meaningful errors", () => {
     jest.spyOn(globalThis.console, "error");
+    jest.spyOn(globalThis.console, "group");
+    jest.spyOn(globalThis.console, "groupEnd");
     isValidOrLogAll(Number, Boolean, String)(true);
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
@@ -323,11 +331,17 @@ describe("isValidOrLogAll", () => {
   });
   test("should log meaningful errors in schemas", () => {
     jest.spyOn(globalThis.console, "error");
+    jest.spyOn(globalThis.console, "group");
+    jest.spyOn(globalThis.console, "groupEnd");
     isValidOrLogAll(
       { x: Number },
       { y: Boolean },
       { z: String },
-      { h() {throw 'ups'}}
+      {
+        h() {
+          throw "ups";
+        },
+      }
     )({ x: 1, y: 2, z: 3 });
 
     expect(globalThis.console.error).toHaveBeenCalledWith(
@@ -336,8 +350,6 @@ describe("isValidOrLogAll", () => {
     expect(globalThis.console.error).toHaveBeenCalledWith(
       "on path /z value 3 do not match constructor String"
     );
-    expect(globalThis.console.error).toHaveBeenCalledWith(
-      "ups"
-    );
+    expect(globalThis.console.error).toHaveBeenCalledWith("ups");
   });
 });

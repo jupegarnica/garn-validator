@@ -8,10 +8,9 @@
 <script type="module">
   // Statically:
   // import is from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
-  import is from 'https://jspm.dev/garn-validator';
-  console.log(is);
+  import {isValidOrLogAll} from 'https://jspm.dev/garn-validator';
 
-  is(Number)(1)
+  isValidOrLogAll([Number, Boolean, String, {a:1,b:2}])({a:true, b: 1});
 </script>
 <body>
 

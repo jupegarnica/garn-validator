@@ -20,7 +20,6 @@ import {
   SchemaValidationError,
 } from "./constructors.js";
 
-
 const onValidDefault = () => true;
 const onInvalidDefault = (error) => {
   throw error;
@@ -28,13 +27,13 @@ const onInvalidDefault = (error) => {
 
 const formatErrorMessage = (data) => {
   const { type, value, path, kind } = data;
+  let _value = stringify(value);
+  let _type = stringify(type);
+  let _kind = kind || whatTypeIs(type);
+  let _path = path.length ? `on path /${path.join("/")} ` : "";
+  let _typeString = kind === "serie" ? _type.replace(/[\[\]]/g, "") : _type;
 
-  let typeString = stringify(type);
-  typeString =
-    kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
-  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
-    value
-  )} do not match ${kind || whatTypeIs(type)} ${typeString}`;
+  return `${_path}value ${_value} do not match ${_kind} ${_typeString}`;
 };
 
 const createError = (data) => {
@@ -83,8 +82,6 @@ const validOrThrow = (input, data) => {
   if (input) return true;
   throwError(data);
 };
-
-
 
 const validSchemaOrThrow = (data) => {
   const { conf, type: schema, value: object, root = object, path = [] } = data;
@@ -300,8 +297,15 @@ const config = ({
 }) => run({ collectAllErrors, onValid, onInvalid });
 
 const logErrorsAndReturnFalse = (error) => {
-  const errors = flatAggregateError(error);
-  errors.forEach((e) => console.error((e && e.message) || e));
+  if (error instanceof AggregateError) {
+    console.group(error.name + ':');
+    error.errors.forEach(logErrorsAndReturnFalse);
+  } else if (error.raw) {
+    console.error(formatErrorMessage(error.raw));
+
+  } else {
+    console.error((error && error.message) || error);
+  }
   return false;
 };
 

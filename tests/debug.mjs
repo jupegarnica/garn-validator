@@ -18,6 +18,8 @@ import "garn-validator/src/proxyDetection.js";
 
 // isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
 
-console.log(
-  isValidOrThrow(Proxy)([])
-);
+// console.log(
+//   isValidOrThrow(Proxy)([])
+// );
+
+isValidOrLogAll([Number, Boolean, String, {a:1,b:2}])({a:true, b: 1});
