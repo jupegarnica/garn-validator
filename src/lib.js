@@ -13,7 +13,12 @@ import {
   configurationSymbol,
 } from "./helpers.js";
 
-export { AsyncFunction, GeneratorFunction } from "./constructors.js";
+import {
+  TypeValidationError,
+  SerieValidationError,
+  EnumValidationError,
+  SchemaValidationError,
+} from "./constructors";
 
 const formatErrorMessage = (data) => {
   const { type, value, path, kind } = data;
@@ -25,41 +30,6 @@ const formatErrorMessage = (data) => {
     value
   )} do not match ${kind || whatTypeIs(type)} ${typeString}`;
 };
-
-const descriptor = (data) => ({
-  value: data,
-  writable: false,
-  enumerable: false,
-  configurable: false,
-});
-export class TypeValidationError extends TypeError {
-  constructor(msg, data) {
-    super(msg);
-    this.name = "TypeValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class EnumValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "EnumValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class SchemaValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "SchemaValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class SerieValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "SerieValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
 
 const createError = (data) => {
   data.$Error = data.$Error || TypeValidationError;
@@ -302,7 +272,7 @@ const isValidTypeOrThrow = (data) => {
 };
 
 const run = (conf) => (...types) => {
-  function validator(value, secretArg ) {
+  function validator(value, secretArg) {
     let currentConf = conf;
     if (secretArg && secretArg[configurationSymbol]) {
       currentConf = secretArg[configurationSymbol];
@@ -328,7 +298,7 @@ const config = ({
 
 const logErrorsAndReturnFalse = (error) => {
   const errors = flatAggregateError(error);
-  errors.forEach((e) => console.error(e && e.message || e));
+  errors.forEach((e) => console.error((e && e.message) || e));
   return false;
 };
 
