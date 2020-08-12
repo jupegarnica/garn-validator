@@ -13,12 +13,12 @@ Ultra fast runtime type validator without dependencies.
 - It's totally **composable**
 - **Fast** and **without dependencies**
 - **Six behaviors**:
-  - `isValidOrThrow` returns true or fails (default export)
-  - `isValid` returns true or false
+  - `isValidOrThrow` returns `true` or fails (default export)
+  - `isValid` returns `true` or `false`
   - `hasErrors` returns null or Array of errors
-  - `isValidOrLog` returns true or false and log error
-  - `isValidOrLogAll` returns true or false and log all errors
-  - `isValidOrThrowAll` returns true or throws AggregateError
+  - `isValidOrLog` returns `true` or `false` and log error
+  - `isValidOrLogAll` returns `true` or `false` and log all errors
+  - `isValidOrThrowAll` returns `true` or throws AggregateError
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all modern browsers
 - Works in all frontend frameworks: **React, Angular, Vue,** etc...
@@ -83,12 +83,12 @@ isValidUser({
     - [Check against enums (OR operator)](#check-against-enums-or-operator)
     - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
     - [Check object against an schema](#check-object-against-an-schema)
-    - [Behaviors](#behaviors)
+  - [Behaviors](#behaviors)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
     - [Constructors](#constructors)
-    - [Proxy detection](#proxy-detection)
+      - [Proxy detection](#proxy-detection)
     - [RegExp](#regexp)
     - [Custom function](#custom-function)
     - [Enums](#enums)
@@ -182,6 +182,8 @@ is(String)(2); // it throws
 is(Array)([1, 2]); // true
 is(Object)([1, 2]); // it throws
 ```
+Learn more in depth at [Constructors](#constructors)
+
 
 ### Check against primitive
 
@@ -189,6 +191,8 @@ is(Object)([1, 2]); // it throws
 is("a")("a"); // true
 is(true)(false); // it throws
 ```
+Learn more in depth at [Primitives](#primitives)
+
 
 ### Check string against regex
 
@@ -196,6 +200,8 @@ is(true)(false); // it throws
 is(/a*/)("a"); // true
 is(/a/)("b"); // it throws
 ```
+Learn more in depth at [RegExp](#regexp)
+
 
 ### Check against custom function
 
@@ -205,6 +211,7 @@ is((value) => value > 0)(-1); // wil throw
 is(Number.isNaN)(NaN); // true
 is(Number.isInteger)(1.1); // wil throw
 ```
+Learn more in depth at [Custom function](#custom-function)
 
 ### Check against enums (OR operator)
 
@@ -214,6 +221,7 @@ is(["a", "b"])("c"); // it throws
 is([Number, String])("18"); // true
 is([null, undefined, false, 0, ""])(18); // it throws
 ```
+Learn more in depth at [Enums](#enums)
 
 ### Check multiple validations (AND operator)
 
@@ -224,6 +232,8 @@ is(
   (v) => v < 50
 )(100); // it throws
 ```
+Learn more in depth at [Validations in serie (AND operator)](#validations-in-serie-and-operator)
+
 
 ### Check object against an schema
 
@@ -238,8 +248,10 @@ is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 // Optional keys
 is({ x$: String })({}); // true
 ```
+Learn more in depth at [Schema](#schema)
 
-### Behaviors
+
+## Behaviors
 
 There are six behaviors that can be divided in two categories:
 
@@ -291,6 +303,12 @@ isValidOrThrowAll(/[a-z]/, Number)("G"); // throw AggregateError a key errors wi
 ```
 
 Learn more at [Errors](#errors)
+
+<!-- TODO
+
+## Utils
+ -->
+
 
 # In depth
 
@@ -346,16 +364,15 @@ let honda = new Car("honda");
 is(Car)(honda); // throws.  Car is detected as custom validator function
 ```
 
-All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constants.js#L8) are supported
+All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constructors.js#L47) are supported
 
-### Proxy detection
-
-In order to Detect an Object (or Array) intercepted by a Proxy we intercept the creation of Proxies to know these object are Proxies.
-
-To have that functionality you must `import "garn-validator/src/proxyDetection.js"` before any creation of Proxies you need to detect;
+#### Proxy detection
 
 > NOT YET WORKING IN DENO
 
+In order to detect any Object (or Array) is a Proxy we intercept the creation of Proxies.
+
+To have that functionality you must `import "garn-validator/src/proxyDetection.js"` before any creation of Proxies you need to detect;
 
 ```js
 import "garn-validator/src/proxyDetection.js";
