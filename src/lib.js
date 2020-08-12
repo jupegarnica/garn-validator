@@ -18,7 +18,7 @@ import {
   SerieValidationError,
   EnumValidationError,
   SchemaValidationError,
-} from "./constructors";
+} from "./constructors.js";
 
 
 const onValidDefault = () => true;
