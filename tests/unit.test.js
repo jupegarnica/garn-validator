@@ -7,6 +7,7 @@ import {
   stringify,
   isClass,
   whatTypeIs,
+  deepClone,
 } from "../src/helpers.js";
 import "garn-validator/src/proxyDetection.js";
 import { constructors } from "./data.js";
@@ -285,5 +286,31 @@ describe("whatTypeIs", () => {
     [function* () {}, "invalid"], // noy yet supported
   ])("whatTypeIs(%s) is %p", (input, output) => {
     expect(whatTypeIs(input)).toBe(output);
+  });
+});
+
+describe("deepClone", () => {
+  test("should clone objects", () => {
+    let obj = {
+      a: { b: null },
+    };
+
+    let newObject = deepClone(obj);
+    expect(obj.a).not.toBe(newObject.a);
+    expect(newObject).not.toBe(obj);
+  });
+  test("should clone arrays", () => {
+    let obj = [{ a: 1 }, { b: 2 }];
+
+    let newObject = deepClone(obj);
+    expect(obj[0]).not.toBe(newObject[0]);
+    expect(newObject).not.toBe(obj);
+  });
+  test("should not clone primitive", () => {
+    let obj = 1;
+
+    let newObject = deepClone(obj);
+
+    expect(obj).toBe(newObject);
   });
 });

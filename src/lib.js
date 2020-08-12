@@ -11,6 +11,7 @@ import {
   whatTypeIs,
   validatorSymbol,
   configurationSymbol,
+  deepClone,
 } from "./helpers.js";
 
 import {
@@ -96,6 +97,7 @@ const validSchemaOrThrow = (data) => {
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
+  const clonedObject = deepClone(object);
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
@@ -103,12 +105,12 @@ const validSchemaOrThrow = (data) => {
       let newValue = isValidTypeOrThrow({
         conf,
         type: schema[keyName],
-        value: object[keyName],
+        value: clonedObject[keyName],
         root,
         keyName,
         path: [...path, keyName],
       });
-      applyDefault(object, keyName, newValue);
+      applyDefault(clonedObject, keyName, newValue);
     } catch (error) {
       if (!conf.collectAllErrors) {
         throw error;
@@ -123,7 +125,7 @@ const validSchemaOrThrow = (data) => {
   for (const keyName of optionalKeys) {
     try {
       const keyNameStripped = keyName.replace(optionalRegex, "");
-      let value = object[keyNameStripped];
+      let value = clonedObject[keyNameStripped];
       if (!isNullish(value)) {
         let type = schema[keyName];
         let newValue = isValidTypeOrThrow({
@@ -134,7 +136,7 @@ const validSchemaOrThrow = (data) => {
           keyName: keyNameStripped,
           path: [...path, keyNameStripped],
         });
-        applyDefault(object, keyNameStripped, newValue);
+        applyDefault(clonedObject, keyNameStripped, newValue);
       }
     } catch (error) {
       if (!conf.collectAllErrors) {
@@ -145,7 +147,7 @@ const validSchemaOrThrow = (data) => {
   }
   let regexErrors = [];
   const regexKeys = Object.keys(schema).filter(isRegExp);
-  const untestedKeys = Object.keys(object)
+  const untestedKeys = Object.keys(clonedObject)
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
@@ -160,12 +162,12 @@ const validSchemaOrThrow = (data) => {
         let newValue = isValidTypeOrThrow({
           conf,
           type: schema[regexpString],
-          value: object[keyName],
+          value: clonedObject[keyName],
           root,
           keyName,
           path: [...path, keyName],
         });
-        applyDefault(object, keyName, newValue);
+        applyDefault(clonedObject, keyName, newValue);
       } catch (error) {
         if (!conf.collectAllErrors) {
           throw error;
@@ -182,17 +184,14 @@ const validSchemaOrThrow = (data) => {
       kind: "schema",
     });
   }
-  return object;
+  return clonedObject;
 };
 
 const validMainValidatorOrThrow = (data) => {
   const { type: fn, value } = data;
-  // console.log("validMainValidatorOrThrow");
   try {
     if (fn.applyDefault) {
-      return fn(value, {
-        ...data.conf,
-      });
+      return fn(value);
     } else {
       let newConf = {
         ...data.conf,

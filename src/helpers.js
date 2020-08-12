@@ -80,6 +80,7 @@ export const isPrimitive = (value) =>
   value.constructor === String;
 
 const addStripMark = (str) => `__strip__${str}__strip__`;
+
 const parser = () => {
   const seen = new WeakMap();
   return (key, value) => {
@@ -100,7 +101,7 @@ const parser = () => {
       return addStripMark(value.displayName || value.name);
     }
     if (typeof value === "bigint") {
-      return addStripMark(Number(value) + 'n');
+      return addStripMark(Number(value) + "n");
     }
     if (typeof value === "function" && isConstructor(value)) {
       return addStripMark(value.name);
@@ -132,3 +133,20 @@ export const notIsRegExp = (value) => !isRegExp(value);
 
 // export const isError = (e) => e && e.stack && e.message;
 // export const isError = (e) => e instanceof Error
+const isObjectOrArray = (obj) =>
+  obj && obj.constructor !== Date && (Array.isArray(obj) || typeof obj === "object");
+
+export const deepClone = (obj) => {
+  if (!isObjectOrArray(obj)) return obj;
+  let clone = Object.assign({}, obj);
+  Object.keys(clone).forEach(
+    (key) =>
+      (clone[key] =
+        typeof obj[key] === "object" ? deepClone(obj[key]) : obj[key])
+  );
+  return Array.isArray(obj) && obj.length
+    ? (clone.length = obj.length) && Array.from(clone)
+    : Array.isArray(obj)
+    ? Array.from(obj)
+    : clone;
+};
