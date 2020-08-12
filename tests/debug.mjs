@@ -22,4 +22,4 @@ import "garn-validator/src/proxyDetection.js";
 //   isValidOrThrow(Proxy)([])
 // );
 
-isValidOrLogAll([Number, Boolean, String, {a:1,b:2}])({a:true, b: 1});
+isValidOrLogAll([Number, Boolean, String, {a:1,b:2}, null])({a:true, b: 1});

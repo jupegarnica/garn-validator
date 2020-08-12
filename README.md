@@ -687,7 +687,7 @@ try {
   isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
 } catch (error) {
   error instanceof TypeValidationError; // true
-  error.message; // on path /a value null do not match constructor Number
+  error.message; // At path /a null do not match constructor Number
 }
 ```
 
@@ -706,8 +706,8 @@ try {
   console.log(error.errors);
   /*
     [
-      TypeValidationError: on path /a value null do not match constructor Number ,
-      TypeValidationError: on path /b value null do not match constructor String ,
+      TypeValidationError: At path /a null do not match constructor Number ,
+      TypeValidationError: At path /b null do not match constructor String ,
     ]
   */
 }
@@ -721,7 +721,7 @@ try {
 } catch (error) {
   console.log(error);
   /*
-    TypeValidationError: on path /a value null do not match constructor Number ,
+    TypeValidationError: At path /a null do not match constructor Number ,
   */
   error instanceof TypeValidationError; // true
   error instanceof SchemaValidationError; // false
@@ -847,8 +847,8 @@ hasErrors(/[a-z]/, Number)("G");
 hasErrors({ a: Number, b: String })({ a: null, b: null });
 /*
 [
-  TypeValidationError: on path /a value null do not match constructor Number,
-  TypeValidationError: on path /b value null do not match constructor String
+  TypeValidationError: At path /a null do not match constructor Number,
+  TypeValidationError: At path /b null do not match constructor String
 ]
 */
 ```
@@ -882,7 +882,7 @@ try {
   path: [ 'a' ],
 
   // the error message
-  message: 'on path /a value null do not match constructor Number',
+  message: 'At path /a null do not match constructor Number',
 
    // the error constructor
   '$Error': [class TypeValidationError extends TypeError],
@@ -915,14 +915,14 @@ When used inside another kind of behavior, it will inherit the behavior from whe
 ```js
 const isNotBig = isValidOrLog((v) => v < 100);
 // its normal behavior
-isNotBig(200); // false, logs 'value 200 do not match validator (v) => v < 100'
+isNotBig(200); // false, logs '200 do not match validator (v) => v < 100'
 
 isValid(isNotBig)(200); // false , and won't log
 isValidOrThrow(isNotBig)(200); // fails , and won't log
 hasErrors(isNotBig)(200); // array,  won't log
 /*
 [
-  new TypeValidationError('value 200 do not match validator (v) => v < 100')
+  new TypeValidationError('200 do not match validator (v) => v < 100')
 ]
  */
 ```
@@ -939,8 +939,8 @@ const isBigNumber = hasErrors(
 // its normal behavior
 isBigNumber("a12");
 /* [
-  new TypeValidationError("value "a12" do not match validator (num) => num == Number(num)"),
-  new TypeValidationError("value "a12" do not match validator num => num > 1000"),
+  new TypeValidationError(""a12" do not match validator (num) => num == Number(num)"),
+  new TypeValidationError(""a12" do not match validator num => num > 1000"),
 ];
  */
 

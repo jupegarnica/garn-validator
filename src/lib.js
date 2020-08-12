@@ -30,10 +30,10 @@ const formatErrorMessage = (data) => {
   let _value = stringify(value);
   let _type = stringify(type);
   let _kind = kind || whatTypeIs(type);
-  let _path = path.length ? `on path /${path.join("/")} ` : "";
+  let _path = path.length ? `At path /${path.join("/")} ` : "";
   let _typeString = kind === "serie" ? _type.replace(/[\[\]]/g, "") : _type;
 
-  return `${_path}value ${_value} do not match ${_kind} ${_typeString}`;
+  return `${_path}${_value} do not match ${_kind} ${_typeString}`;
 };
 
 const createError = (data) => {
@@ -300,8 +300,7 @@ const logErrorsAndReturnFalse = (error) => {
   if (error instanceof AggregateError) {
     console.group(error.name + ':');
     error.errors.forEach(logErrorsAndReturnFalse);
-  // } else if (error.raw) {
-  //   console.error(formatErrorMessage(error.raw));
+    console.groupEnd(error.name + ':');
 
   } else {
     console.error((error && error.message) || error);
