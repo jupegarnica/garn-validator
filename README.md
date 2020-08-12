@@ -34,7 +34,7 @@ const isValidPassword = is(
   /[a-z]/,
   /[A-Z]/,
   /[0-9]/,
-  /[-_/!·$%&/()]/
+  /[-_/!¡?¿$%&/()]/
 );
 
 isValidPassword("12345Aa?"); // true

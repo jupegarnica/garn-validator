@@ -245,6 +245,7 @@ describe("stringify", () => {
     [Infinity, "Infinity"],
     [-Infinity, "-Infinity"],
     [{}, "{}"],
+    [1n, "1n"],
     [undefined, undefined], // doesn't stringify. Normal behavior of JSON.stringify
     ["string", '"string"'], // normal behavior,  in order to parse it back
   ])(" %p should be %p", (input, expected) => {

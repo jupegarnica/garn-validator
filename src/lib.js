@@ -271,24 +271,27 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-const run = (conf) => (...types) => {
-  function validator(value, secretArg) {
-    let currentConf = conf;
-    if (secretArg && secretArg[configurationSymbol]) {
-      currentConf = secretArg[configurationSymbol];
-    }
-    try {
-      validSeriesOrThrow(currentConf, types, value);
-    } catch (error) {
-      return currentConf.onInvalid(error);
-    }
 
-    return currentConf.onValid(value);
-  }
-  validator[validatorSymbol] = true;
+const run = (conf) => {
+  return function (...types){
+    function validatorFrom(value, secretArg) {
+      let currentConf = conf;
+      if (secretArg && secretArg[configurationSymbol]) {
+        currentConf = secretArg[configurationSymbol];
+      }
+      try {
+        validSeriesOrThrow(currentConf, types, value);
+      } catch (error) {
+        return currentConf.onInvalid(error);
+      }
 
-  return validator;
-};
+      return currentConf.onValid(value);
+    }
+    validatorFrom[validatorSymbol] = true;
+    validatorFrom.displayName = `${validatorFrom.name}(${[...arguments].map(stringify)})`;
+    return validatorFrom;
+  };
+}
 
 const config = ({
   collectAllErrors = false,
@@ -298,10 +301,9 @@ const config = ({
 
 const logErrorsAndReturnFalse = (error) => {
   if (error instanceof AggregateError) {
-    console.group(error.name + ':');
+    console.group(error.name + ":");
     error.errors.forEach(logErrorsAndReturnFalse);
-    console.groupEnd(error.name + ':');
-
+    console.groupEnd(error.name + ":");
   } else {
     console.error((error && error.message) || error);
   }
