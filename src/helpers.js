@@ -134,7 +134,7 @@ export const notIsRegExp = (value) => !isRegExp(value);
 // export const isError = (e) => e && e.stack && e.message;
 // export const isError = (e) => e instanceof Error
 const isObjectOrArray = (obj) =>
-  obj && obj.constructor !== Date && (Array.isArray(obj) || typeof obj === "object");
+  obj && obj.constructor !== Date && typeof obj === "object";
 
 export const deepClone = (obj) => {
   if (!isObjectOrArray(obj)) return obj;

@@ -454,6 +454,11 @@ describe("mustBe", () => {
       expect(obj.a.b).not.toBe(newObject.a.b);
       expect(newObject).not.toBe(obj);
     });
+    test('should inherit conf', () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      expect(isValid(NumberOrZero)(null)).toBe(false)
+
+    });
   });
   describe("mustBe().transform()", () => {
     test("should apply transform always", () => {
