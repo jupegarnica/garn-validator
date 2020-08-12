@@ -13,12 +13,12 @@ Ultra fast runtime type validator without dependencies.
 - It's totally **composable**
 - **Fast** and **without dependencies**
 - **Six behaviors**:
-  - `isValidOrThrow` returns true or fails (default export)
-  - `isValid` returns true or false
+  - `isValidOrThrow` returns `true` or fails (default export)
+  - `isValid` returns `true` or `false`
   - `hasErrors` returns null or Array of errors
-  - `isValidOrLog` returns true or false and log error
-  - `isValidOrLogAll` returns true or false and log all errors
-  - `isValidOrThrowAll` returns true or throws AggregateError
+  - `isValidOrLog` returns `true` or `false` and log error
+  - `isValidOrLogAll` returns `true` or `false` and log all errors
+  - `isValidOrThrowAll` returns `true` or throws AggregateError
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all modern browsers
 - Works in all frontend frameworks: **React, Angular, Vue,** etc...
@@ -34,7 +34,7 @@ const isValidPassword = is(
   /[a-z]/,
   /[A-Z]/,
   /[0-9]/,
-  /[-_/!·$%&/()]/
+  /[-_/!¡?¿$%&/()]/
 );
 
 isValidPassword("12345Aa?"); // true
@@ -83,13 +83,12 @@ isValidUser({
     - [Check against enums (OR operator)](#check-against-enums-or-operator)
     - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
     - [Check object against an schema](#check-object-against-an-schema)
-    - [Composable](#composable)
-    - [Behaviors](#behaviors)
+  - [Behaviors](#behaviors)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
     - [Constructors](#constructors)
-    - [Proxy detection](#proxy-detection)
+      - [Proxy detection](#proxy-detection)
     - [RegExp](#regexp)
     - [Custom function](#custom-function)
     - [Enums](#enums)
@@ -183,6 +182,8 @@ is(String)(2); // it throws
 is(Array)([1, 2]); // true
 is(Object)([1, 2]); // it throws
 ```
+Learn more in depth at [Constructors](#constructors)
+
 
 ### Check against primitive
 
@@ -190,6 +191,8 @@ is(Object)([1, 2]); // it throws
 is("a")("a"); // true
 is(true)(false); // it throws
 ```
+Learn more in depth at [Primitives](#primitives)
+
 
 ### Check string against regex
 
@@ -197,6 +200,8 @@ is(true)(false); // it throws
 is(/a*/)("a"); // true
 is(/a/)("b"); // it throws
 ```
+Learn more in depth at [RegExp](#regexp)
+
 
 ### Check against custom function
 
@@ -206,6 +211,7 @@ is((value) => value > 0)(-1); // wil throw
 is(Number.isNaN)(NaN); // true
 is(Number.isInteger)(1.1); // wil throw
 ```
+Learn more in depth at [Custom function](#custom-function)
 
 ### Check against enums (OR operator)
 
@@ -215,6 +221,7 @@ is(["a", "b"])("c"); // it throws
 is([Number, String])("18"); // true
 is([null, undefined, false, 0, ""])(18); // it throws
 ```
+Learn more in depth at [Enums](#enums)
 
 ### Check multiple validations (AND operator)
 
@@ -225,6 +232,8 @@ is(
   (v) => v < 50
 )(100); // it throws
 ```
+Learn more in depth at [Validations in serie (AND operator)](#validations-in-serie-and-operator)
+
 
 ### Check object against an schema
 
@@ -239,8 +248,10 @@ is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 // Optional keys
 is({ x$: String })({}); // true
 ```
+Learn more in depth at [Schema](#schema)
 
-### Behaviors
+
+## Behaviors
 
 There are six behaviors that can be divided in two categories:
 
@@ -292,6 +303,12 @@ isValidOrThrowAll(/[a-z]/, Number)("G"); // throw AggregateError a key errors wi
 ```
 
 Learn more at [Errors](#errors)
+
+<!-- TODO
+
+## Utils
+ -->
+
 
 # In depth
 
@@ -347,11 +364,13 @@ let honda = new Car("honda");
 is(Car)(honda); // throws.  Car is detected as custom validator function
 ```
 
-All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constants.js#L8) are supported
+All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constructors.js#L47) are supported
 
-### Proxy detection
+#### Proxy detection
 
-In order to Detect an Object (or Array) intercepted by a Proxy we intercept the creation of Proxies to know these object are Proxies.
+> NOT YET WORKING IN DENO
+
+In order to detect any Object (or Array) is a Proxy we intercept the creation of Proxies.
 
 To have that functionality you must `import "garn-validator/src/proxyDetection.js"` before any creation of Proxies you need to detect;
 
@@ -415,7 +434,7 @@ is(() => false) (10); // throws TypeValidationError
 is(() => 0) (10); // throws TypeValidationError
 
 is(() => {
-  throw new RangeError('ups);
+  throw new RangeError('ups');
 } ) (10); // throws RangeError
 
 is( () => {
@@ -685,7 +704,7 @@ try {
   isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
 } catch (error) {
   error instanceof TypeValidationError; // true
-  error.message; // on path /a value null do not match constructor Number
+  error.message; // At path /a null do not match constructor Number
 }
 ```
 
@@ -704,8 +723,8 @@ try {
   console.log(error.errors);
   /*
     [
-      TypeValidationError: on path /a value null do not match constructor Number ,
-      TypeValidationError: on path /b value null do not match constructor String ,
+      TypeValidationError: At path /a null do not match constructor Number ,
+      TypeValidationError: At path /b null do not match constructor String ,
     ]
   */
 }
@@ -719,7 +738,7 @@ try {
 } catch (error) {
   console.log(error);
   /*
-    TypeValidationError: on path /a value null do not match constructor Number ,
+    TypeValidationError: At path /a null do not match constructor Number ,
   */
   error instanceof TypeValidationError; // true
   error instanceof SchemaValidationError; // false
@@ -845,8 +864,8 @@ hasErrors(/[a-z]/, Number)("G");
 hasErrors({ a: Number, b: String })({ a: null, b: null });
 /*
 [
-  TypeValidationError: on path /a value null do not match constructor Number,
-  TypeValidationError: on path /b value null do not match constructor String
+  TypeValidationError: At path /a null do not match constructor Number,
+  TypeValidationError: At path /b null do not match constructor String
 ]
 */
 ```
@@ -880,7 +899,7 @@ try {
   path: [ 'a' ],
 
   // the error message
-  message: 'on path /a value null do not match constructor Number',
+  message: 'At path /a null do not match constructor Number',
 
    // the error constructor
   '$Error': [class TypeValidationError extends TypeError],
@@ -913,14 +932,14 @@ When used inside another kind of behavior, it will inherit the behavior from whe
 ```js
 const isNotBig = isValidOrLog((v) => v < 100);
 // its normal behavior
-isNotBig(200); // false, logs 'value 200 do not match validator (v) => v < 100'
+isNotBig(200); // false, logs '200 do not match validator (v) => v < 100'
 
 isValid(isNotBig)(200); // false , and won't log
 isValidOrThrow(isNotBig)(200); // fails , and won't log
 hasErrors(isNotBig)(200); // array,  won't log
 /*
 [
-  new TypeValidationError('value 200 do not match validator (v) => v < 100')
+  new TypeValidationError('200 do not match validator (v) => v < 100')
 ]
  */
 ```
@@ -937,8 +956,8 @@ const isBigNumber = hasErrors(
 // its normal behavior
 isBigNumber("a12");
 /* [
-  new TypeValidationError("value "a12" do not match validator (num) => num == Number(num)"),
-  new TypeValidationError("value "a12" do not match validator num => num > 1000"),
+  new TypeValidationError(""a12" do not match validator (num) => num == Number(num)"),
+  new TypeValidationError(""a12" do not match validator num => num > 1000"),
 ];
  */
 

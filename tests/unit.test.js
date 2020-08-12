@@ -8,9 +8,10 @@ import {
   isClass,
   whatTypeIs,
 } from "../src/helpers.js";
-import { constructors } from "../src/constructors.js";
+import "garn-validator/src/proxyDetection.js";
+import { constructors } from "./data.js";
 import { isValid } from "garn-validator";
-import {  numbers, strings, notConstructors } from "./data.js";
+import { numbers, strings, notConstructors } from "./data.js";
 
 class MyClass {}
 const noop = () => {};
@@ -90,19 +91,14 @@ describe("checkConstructor", () => {
 describe("isPrimitive", () => {
   test.each([
     [null, true],
-    // undefined : typeof instance === "undefined"
     [undefined, true],
-    // Boolean : typeof instance === "boolean"
     [false, true],
     [true, true],
-    // Symbol : typeof instance === "symbol"
     [Symbol(), true],
-    // BigInt : typeof instance === "bigint"
     [1n, true],
     [BigInt("12"), true],
     [BigInt(12), true],
 
-    // Object : typeof instance === "object"
     [{}, false],
     [/regex/, false],
     [() => {}, false],
@@ -117,9 +113,9 @@ describe("isPrimitive", () => {
   ])("should recognize %p as %p", (val, expected) => {
     expect(isPrimitive(val)).toBe(expected);
   });
-  // test.each(constructors)("should recognize  %f", (val) => {
-  //   expect(isPrimitive(val)).toBe(false);
-  // });
+  test.each(constructors)("should recognize  %f", (val) => {
+    expect(isPrimitive(val)).toBe(false);
+  });
   test.each(numbers)("should recognize number %f", (val) => {
     expect(isPrimitive(val)).toBe(true);
   });
@@ -142,7 +138,7 @@ describe("isConstructor", () => {
     [class MyClass {}, true],
     [Promise, true],
     [Date, true],
-    // [Proxy, true],
+    [Proxy, true],
     [Function, true],
     [null, false],
     [undefined, false],
@@ -160,10 +156,9 @@ describe("isConstructor", () => {
   ])("isConstructor(%s) === %p", (value, expected) => {
     expect(isConstructor(value)).toBe(expected);
   });
-  // TODO PROXY detection failing in deno
-  // test.each(constructors)("isConstructor(%s) is constructor", (input) => {
-  //   expect(isConstructor(input)).toBe(true);
-  // });
+  test.each(constructors)("isConstructor(%s) is constructor", async (input) => {
+    expect(isConstructor(input)).toBe(true);
+  });
   test.each(notConstructors)(
     "isConstructor(%s) not is constructor",
     (input) => {
@@ -245,6 +240,7 @@ describe("stringify", () => {
     [Infinity, "Infinity"],
     [-Infinity, "-Infinity"],
     [{}, "{}"],
+    [1n, "1n"],
     [undefined, undefined], // doesn't stringify. Normal behavior of JSON.stringify
     ["string", '"string"'], // normal behavior,  in order to parse it back
   ])(" %p should be %p", (input, expected) => {
@@ -264,31 +260,14 @@ describe("stringify", () => {
       `{"b":2,"c":3,"o":{"a":1,"circular":"[circular reference] -> o"},"repeated":"[circular reference] -> o","all":"[circular reference] -> rootObject"}`
     );
   });
-  test.skip("should parse functions to strings", () => {
-    // TODO fix for deno tests
-    expect(stringify((x) => x * 2)).toBe(`x=>x*2`);
-  });
-  // TODO fix for deno tests
-
-  test.skip("should parse functions to strings", () => {
-    const obj = {
-      x: 1,
-      f: (x) => x * 2,
-      constructor: Number,
-      classical: function classical(arg) {
-        return arg;
-      },
-      myClass: class MyClass {},
-    };
-    expect(stringify(obj)).toBe(
-      `{"x":1,"f":x=>x*2,"constructor":Number,"classical":function classical(arg){return arg},"myClass":MyClass}`
-    );
+  test("should parse functions to strings", () => {
+    expect(stringify((x) => x * 2)).toMatch(/(\(?x\)?\s*=>\s*x\s*\*\s*2)/);
   });
 });
 describe("whatTypeIs", () => {
-  // test.each(constructors)("whatTypeIs(%s) is constructor", (input) => {
-  //   expect(whatTypeIs(input)).toBe("constructor");
-  // });
+  test.each(constructors)("whatTypeIs(%s) is constructor", (input) => {
+    expect(whatTypeIs(input)).toBe("constructor");
+  });
   const VALIDATOR = () => {};
   test.each([
     [{}, "schema"],
@@ -298,9 +277,9 @@ describe("whatTypeIs", () => {
     [undefined, "primitive"],
     ["undefined", "primitive"],
     [() => {}, "validator"],
-    [VALIDATOR, 'validator'],
-    [isValid(Number), 'main-validator'],
-    [class Car{}, "constructor"],
+    [VALIDATOR, "validator"],
+    [isValid(Number), "main-validator"],
+    [class Car {}, "constructor"],
 
     [async () => {}, "invalid"], // noy yet supported
     [function* () {}, "invalid"], // noy yet supported

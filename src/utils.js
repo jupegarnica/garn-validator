@@ -48,18 +48,17 @@ export const min = ge;
 export const max = le;
 
 // TODO STRINGS
-// export const match = null;
-// export const contains = null;
-// export const startWith = null;
-// export const endsWith = null;
-// export const isLowercase = null;
-// export const isUppercase = null;
+export const contains = (query) => new RegExp(query);
+export const startsWith = (query) => (value) => value.search(query) === 0;
+
+export const endsWith = (query) => (value) =>
+  value.search(query) === value.length - query.length;
+export const Lowercase = /^(([a-z\W\d]))+$/;
+export const Uppercase = /^(([A-Z\W\d]))+$/;
 
 // TODO REGEX
-// export const insensitiveCase = null;
+export const insensitiveCase = (str) => new RegExp(str, "i");
 // export const insensitiveAccents = null;
-
-
 
 // not
 

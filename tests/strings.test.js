@@ -23,7 +23,7 @@ describe("check strings", () => {
     }).toThrow();
   });
   let [, ...strs] = strings;
-  test.each(strs)("value %s should be 'str'", (input) => {
+  test.each(strs)("%s should be 'str'", (input) => {
     expect(() => {
       isValidOrThrow("str")(input.replace('"', ""));
     }).not.toThrow();

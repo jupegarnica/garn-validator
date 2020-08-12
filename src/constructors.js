@@ -5,6 +5,45 @@ export const AsyncFunction = Object.getPrototypeOf(async function () {})
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
 .constructor;
 
+
+
+const descriptor = (data) => ({
+  value: data,
+  writable: false,
+  enumerable: false,
+  configurable: false,
+});
+export class TypeValidationError extends TypeError {
+  constructor(msg, data) {
+    super(msg);
+    this.name = "TypeValidationError";
+    Object.defineProperty(this, "raw", descriptor(data));
+  }
+}
+export class EnumValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors, msg);
+    this.name = "EnumValidationError";
+    Object.defineProperty(this, "raw", descriptor(data));
+  }
+}
+export class SchemaValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors, msg);
+    this.name = "SchemaValidationError";
+    Object.defineProperty(this, "raw", descriptor(data));
+  }
+}
+export class SerieValidationError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors, msg);
+    this.name = "SerieValidationError";
+    Object.defineProperty(this, "raw", descriptor(data));
+  }
+}
+
+
+
 export const constructors = new Proxy([
   Proxy, // intercepted to return the ProxyIntercepted
   Object,

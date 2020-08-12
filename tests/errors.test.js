@@ -113,7 +113,7 @@ describe("check errors", () => {
   test("Should throw meaningfully message", () => {
     expect(() => {
       isValidOrThrow(1)(33);
-    }).toThrow("value 33 do not match primitive 1");
+    }).toThrow("33 do not match primitive 1");
   });
   test("should throw a custom type of error", () => {
     expect(() => {
@@ -157,12 +157,12 @@ describe("check errors", () => {
   test("should format the schema", () => {
     expect(() => {
       isValidOrThrow({ a: Number })(33);
-    }).toThrow('value 33 do not match schema {"a":Number}');
+    }).toThrow('33 do not match schema {"a":Number}');
   });
   test("should format the value", () => {
     expect(() => {
       isValidOrThrow({ a: Number })({ b: 33 });
-    }).toThrow("on path /a value undefined do not match constructor Number");
+    }).toThrow("At path /a undefined do not match constructor Number");
   });
 });
 
@@ -170,7 +170,7 @@ describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
       isValidOrThrow(Number, String)(2);
-    }).toThrow("value 2 do not match constructor String");
+    }).toThrow("2 do not match constructor String");
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {

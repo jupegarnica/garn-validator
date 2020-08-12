@@ -93,11 +93,14 @@ const parser = () => {
     if (Number.isNaN(value)) {
       return addStripMark(value);
     }
-    if (value === Infinity || value == -Infinity) {
+    if (value === Infinity || value === -Infinity) {
       return addStripMark(value);
     }
     if (typeof value === "function" && value[validatorSymbol]) {
-      return addStripMark(value.name);
+      return addStripMark(value.displayName || value.name);
+    }
+    if (typeof value === "bigint") {
+      return addStripMark(Number(value) + 'n');
     }
     if (typeof value === "function" && isConstructor(value)) {
       return addStripMark(value.name);

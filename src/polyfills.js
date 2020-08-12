@@ -11,7 +11,6 @@ if (typeof globalThis === "undefined") {
 }
 
 // Custom AggregateError polyfill
-// TODO test it
 if (typeof AggregateError === "undefined") {
   class AggregateError extends Error {
     constructor(errors = [], message) {

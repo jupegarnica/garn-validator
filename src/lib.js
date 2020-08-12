@@ -13,53 +13,28 @@ import {
   configurationSymbol,
 } from "./helpers.js";
 
-export { AsyncFunction, GeneratorFunction } from "./constructors.js";
+import {
+  TypeValidationError,
+  SerieValidationError,
+  EnumValidationError,
+  SchemaValidationError,
+} from "./constructors.js";
+
+const onValidDefault = () => true;
+const onInvalidDefault = (error) => {
+  throw error;
+};
 
 const formatErrorMessage = (data) => {
   const { type, value, path, kind } = data;
+  let _value = stringify(value);
+  let _type = stringify(type);
+  let _kind = kind || whatTypeIs(type);
+  let _path = path.length ? `At path /${path.join("/")} ` : "";
+  let _typeString = kind === "serie" ? _type.replace(/[\[\]]/g, "") : _type;
 
-  let typeString = stringify(type);
-  typeString =
-    kind === "serie" ? typeString.replace(/[\[\]]/g, "") : typeString;
-  return `${path.length ? `on path /${path.join("/")} ` : ""}value ${stringify(
-    value
-  )} do not match ${kind || whatTypeIs(type)} ${typeString}`;
+  return `${_path}${_value} do not match ${_kind} ${_typeString}`;
 };
-
-const descriptor = (data) => ({
-  value: data,
-  writable: false,
-  enumerable: false,
-  configurable: false,
-});
-export class TypeValidationError extends TypeError {
-  constructor(msg, data) {
-    super(msg);
-    this.name = "TypeValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class EnumValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "EnumValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class SchemaValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "SchemaValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
-export class SerieValidationError extends AggregateError {
-  constructor(errors, msg, data) {
-    super(errors, msg);
-    this.name = "SerieValidationError";
-    Object.defineProperty(this, "raw", descriptor(data));
-  }
-}
 
 const createError = (data) => {
   data.$Error = data.$Error || TypeValidationError;
@@ -106,11 +81,6 @@ const reThrowError = (error, data) => {
 const truthyOrThrow = (input, data) => {
   if (input) return input;
   throwError(data);
-};
-
-const onValidDefault = () => true;
-const onInvalidDefault = (error) => {
-  throw error;
 };
 
 const validSchemaOrThrow = (data) => {
@@ -210,7 +180,7 @@ const validSchemaOrThrow = (data) => {
 
 const validMainValidatorOrThrow = (data) => {
   const { type: fn, value } = data;
-  console.log('validMainValidatorOrThrow');
+  // console.log("validMainValidatorOrThrow");
   try {
     let newConf = {
       ...data.conf,
@@ -321,8 +291,8 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-const createValidator = (types, conf) => {
-  function validator(value, secretArg) {
+function createValidator (types, conf) {
+  function validatorFrom(value, secretArg) {
     let currentConf = conf;
     if (secretArg && secretArg[configurationSymbol]) {
       currentConf = secretArg[configurationSymbol];
@@ -339,11 +309,14 @@ const createValidator = (types, conf) => {
 
     return currentConf.transform(currentConf.onValid(valueTransformed));
   }
-  validator[validatorSymbol] = true;
-  validator.or = createOr(types, conf);
-  validator.transform = createTransform(types, conf);
+  validatorFrom[validatorSymbol] = true;
+  validatorFrom.displayName = `${validatorFrom.name}(${[...arguments].map(
+    stringify
+  )})`;
+  validatorFrom.or = createOr(types, conf);
+  validatorFrom.transform = createTransform(types, conf);
 
-  return validator;
+  return validatorFrom;
 };
 
 const createOr = (types, conf) => (defaultValue) =>
@@ -364,9 +337,10 @@ const createTransform = (types, conf) => (transformer) =>
   });
 
 const run = (conf) => (...types) => {
-  let validator = createValidator(types, conf);
+  let validatorFrom = createValidator(types, conf);
 
-  return validator;
+
+  return validatorFrom;
 };
 
 const config = ({
@@ -378,8 +352,13 @@ const config = ({
 }) => run({ collectAllErrors, onValid, onInvalid, transform, applyOr });
 
 const logErrorsAndReturnFalse = (error) => {
-  const errors = flatAggregateError(error);
-  errors.forEach((e) => console.error((e && e.message) || e));
+  if (error instanceof AggregateError) {
+    console.group(error.name + ":");
+    error.errors.forEach(logErrorsAndReturnFalse);
+    console.groupEnd(error.name + ":");
+  } else {
+    console.error((error && error.message) || error);
+  }
   return false;
 };
 
