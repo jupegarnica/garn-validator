@@ -354,14 +354,31 @@ describe("isValidOrLogAll", () => {
 });
 
 describe("mustBe", () => {
-  test("should return the value", () => {
-    expect(mustBe(Number)(2)).toBe(2);
-    expect(mustBe(String)("3")).toBe("3");
-  });
-  test("should throw", () => {
-    expect(() => {
-      mustBe(Number)("");
-    }).toThrow();
+  describe('mustBe without .or', () => {
+    test("should return the value", () => {
+      expect(mustBe(Number)(2)).toBe(2);
+      expect(mustBe(String)("3")).toBe("3");
+    });
+    test("should throw", () => {
+      expect(() => {
+        mustBe(Number)("");
+      }).toThrow();
+    });
+    test('should inherit behavior', () => {
+      const isNumeric = mustBe(Numeric);
+      expect(isValid(isNumeric)(null)).toBe(false)
+
+    });
+    test('should inherit behavior', () => {
+      const isNumeric = mustBe(Numeric);
+      expect(isValid(isNumeric)('1')).toBe(true)
+
+    });
+    test('should inherit nested', () => {
+      const isNumeric = mustBe(Numeric);
+      expect(isValid({a:isNumeric})({a:null})).toBe(false)
+
+    });
   });
   describe("mustBe().or()", () => {
     test("should return default value", () => {
@@ -445,7 +462,7 @@ describe("mustBe", () => {
       expect(obj.a).not.toBe(newObject.a);
       expect(newObject).not.toBe(obj);
     });
-    test.skip("should not modify original object", () => {
+    test("should not modify original object", () => {
       let obj = {
         a: {b: null},
       };
@@ -454,7 +471,7 @@ describe("mustBe", () => {
       expect(obj.a.b).not.toBe(newObject.a.b);
       expect(newObject).not.toBe(obj);
     });
-    test('should inherit conf', () => {
+    test('should inherit behavior', () => {
       const NumberOrZero = mustBe(Number).or(0);
       expect(isValid(NumberOrZero)(null)).toBe(false)
 
