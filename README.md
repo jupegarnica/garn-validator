@@ -6,10 +6,11 @@
 - Easy to use and learn but **powerful**
 - It's totally **composable**
 - **Fast** and **without dependencies**
-- **Six behaviors**:
+- **Seven behaviors**:
   - `isValidOrThrow` returns `true` or fails (default export)
   - `isValid` returns `true` or `false`
   - `hasErrors` returns null or Array of errors
+  - `mustBe` returns the value evaluated or it throws
   - `isValidOrLog` returns `true` or `false` and log error
   - `isValidOrLogAll` returns `true` or `false` and log all errors
   - `isValidOrThrowAll` returns `true` or throws AggregateError
@@ -85,6 +86,10 @@ isValidUser({
     - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
     - [Check object against an schema](#check-object-against-an-schema)
   - [Behaviors](#behaviors)
+    - [isValid](#isvalid)
+    - [isValidOrLog and isValidOrLogAll](#isvalidorlog-and-isvalidorlogall)
+    - [hasErrors](#haserrors)
+    - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -99,12 +104,11 @@ isValidUser({
       - [Custom validation used in schemas](#custom-validation-used-in-schemas)
     - [Validations in serie (AND operator)](#validations-in-serie-and-operator)
   - [Errors](#errors)
-    - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
     - [AggregateError](#aggregateerror)
       - [SchemaValidationError](#schemavalidationerror)
       - [EnumValidationError](#enumvalidationerror)
       - [SerieValidationError](#serievalidationerror)
-      - [hasErrors](#haserrors)
+      - [hasErrors](#haserrors-1)
     - [Raw Error data](#raw-error-data)
     - [Composition in depth](#composition-in-depth)
   - [Especial cases](#especial-cases)
@@ -254,20 +258,26 @@ Learn more in depth at [Schema](#schema)
 
 ## Behaviors
 
-There are six behaviors that can be divided in two categories:
+All behaviors run the same algorithm but differs in what returns and how behaves.
 
-- It stops in first Error (quickest):
+There are seven behaviors that can be divided in two categories:
 
-  - `isValidOrThrow` (returns true of throw the first error found)
-  - `isValid` (returns true or false, never throws)
-  - `isValidOrLog` (returns true or false and log first error, never throws)
+- It stops in first error (bail):
+  - `isValidOrThrow` returns `true` or it throws (default export)
+  - `isValid` returns `true` or `false`
+  - `isValidOrLog` returns `true` or `false` and log error, never throws
 
 - It collects all Errors:
-  - `hasErrors` (return null or array of errors, never throws)
-  - `isValidOrLogAll` (returns true or false and log all errors, never throws)
-  - `isValidOrThrowAll` (returns true or throw )
+  - `hasErrors` returns null or Array of errors, never throws
+  - `mustBe` returns the value evaluated or it throws
+  - `isValidOrLogAll` returns `true` or `false` and log all errors, never throws
+  - `isValidOrThrowAll` returns `true` or throws AggregateError
 
-The default export is `isValidOrThrow`
+
+
+### isValid
+
+`isValid` returns `true` or `false` never throws, so if it fails for any reason you should know it won't tell you anything but false.
 
 ```js
 import { isValid } from "garn-validator";
@@ -277,6 +287,12 @@ isValid(/[a-z]/)("g"); // returns true
 isValid(/[a-z]/)("G"); // returns false, doesn't throws
 ```
 
+### isValidOrLog and isValidOrLogAll
+
+`isValidOrLog` is the same as `isValid` but log first error found and stops validating.
+
+`isValidOrLogAll` returns `true` or `false` and log all errors, never throws
+
 ```js
 import { isValidOrLog } from "garn-validator";
 
@@ -284,6 +300,12 @@ import { isValidOrLog } from "garn-validator";
 isValidOrLog(/[a-z]/)("g"); // do nothing (but also returns true)
 isValidOrLog(/[a-z]/)("G"); // logs error and return false
 ```
+
+### hasErrors
+
+`hasErrors` returns null or Array with all errors found, never throws.
+
+It's very useful to show the user all errors that need to be fixed.
 
 ```js
 import { hasErrors } from "garn-validator";
@@ -294,13 +316,55 @@ hasErrors(/[a-z]/)("g"); // null
 hasErrors(/[a-z]/, Number)("G"); // [TypeValidationError, TypeValidationError]
 ```
 
-```js
-import { isValidOrThrowAll } from "garn-validator";
 
-// return null or array or errors
-// checks until the end
-isValidOrThrowAll(/[a-z]/)("g"); // true
-isValidOrThrowAll(/[a-z]/, Number)("G"); // throw AggregateError a key errors with  [TypeValidationError, TypeValidationError]
+### isValidOrThrow vs isValidOrThrowAll
+
+`isValidOrThrow` returns `true` or it throws the first error found.
+
+```js
+try {
+  isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
+} catch (error) {
+  error instanceof TypeValidationError; // true
+  error.message; // At path /a null do not match constructor Number
+}
+```
+
+`isValidOrThrowAll` returns `true` or it throws an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
+
+```js
+try {
+  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: null });
+} catch (error) {
+  error instanceof AggregateError; // true
+  error instanceof SchemaValidationError; // true
+  console.log(error);
+  /*
+    SchemaValidationError: value {"a":null,"b":null} do not match schema {"a":Number,"b":String}
+  */
+  console.log(error.errors);
+  /*
+    [
+      TypeValidationError: At path /a null do not match constructor Number ,
+      TypeValidationError: At path /b null do not match constructor String ,
+    ]
+  */
+}
+```
+
+But if it finds only one error, it will throw `TypeValidationError`, no AggregateError
+
+```js
+try {
+  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: "str" });
+} catch (error) {
+  console.log(error);
+  /*
+    TypeValidationError: At path /a null do not match constructor Number ,
+  */
+  error instanceof TypeValidationError; // true
+  error instanceof SchemaValidationError; // false
+}
 ```
 
 Learn more at [Errors](#errors)
@@ -696,55 +760,6 @@ try {
 }
 ```
 
-### isValidOrThrow vs isValidOrThrowAll
-
-`isValidOrThrow` will always throw the first `TypeValidationError` it finds.
-
-```js
-try {
-  isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
-} catch (error) {
-  error instanceof TypeValidationError; // true
-  error.message; // At path /a null do not match constructor Number
-}
-```
-
-`isValidOrThrowAll` will throw an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
-
-```js
-try {
-  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: null });
-} catch (error) {
-  error instanceof AggregateError; // true
-  error instanceof SchemaValidationError; // true
-  console.log(error);
-  /*
-    SchemaValidationError: value {"a":null,"b":null} do not match schema {"a":Number,"b":String}
-  */
-  console.log(error.errors);
-  /*
-    [
-      TypeValidationError: At path /a null do not match constructor Number ,
-      TypeValidationError: At path /b null do not match constructor String ,
-    ]
-  */
-}
-```
-
-But if it finds only one error, it will throw `TypeValidationError`, no AggregateError
-
-```js
-try {
-  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: "str" });
-} catch (error) {
-  console.log(error);
-  /*
-    TypeValidationError: At path /a null do not match constructor Number ,
-  */
-  error instanceof TypeValidationError; // true
-  error instanceof SchemaValidationError; // false
-}
-```
 
 ### AggregateError
 
