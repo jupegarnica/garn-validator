@@ -114,7 +114,11 @@ const validSchemaOrThrow = (data) => {
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
-  const clonedObject = deepClone(object);
+  const mustUpdateRef = behavior.name === 'mustBe'
+  let clonedObject = object;
+  if (mustUpdateRef) {
+    clonedObject = deepClone(object)
+  }
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
@@ -127,7 +131,7 @@ const validSchemaOrThrow = (data) => {
         keyName,
         path: [...path, keyName],
       });
-      updateRef(clonedObject, keyName, newValue);
+      mustUpdateRef && updateRef(clonedObject, keyName, newValue);
     } catch (error) {
       if (!behavior.collectAllErrors) {
         throw error;
@@ -153,7 +157,7 @@ const validSchemaOrThrow = (data) => {
           keyName: keyNameStripped,
           path: [...path, keyNameStripped],
         });
-        updateRef(clonedObject, keyNameStripped, newValue);
+        mustUpdateRef && updateRef(clonedObject, keyNameStripped, newValue);
       }
     } catch (error) {
       if (!behavior.collectAllErrors) {
@@ -184,7 +188,7 @@ const validSchemaOrThrow = (data) => {
           keyName,
           path: [...path, keyName],
         });
-        updateRef(clonedObject, keyName, newValue);
+        mustUpdateRef && updateRef(clonedObject, keyName, newValue);
       } catch (error) {
         if (!behavior.collectAllErrors) {
           throw error;
