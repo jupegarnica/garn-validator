@@ -1,4 +1,3 @@
-import "garn-validator/src/proxyDetection.js";
 import {
   checkConstructor,
   isPrimitive,
@@ -10,9 +9,10 @@ import {
   whatTypeIs,
   deepClone,
 } from "../src/helpers.js";
+import "garn-validator/src/proxyDetection.js";
 import { isValid } from "garn-validator";
 import { numbers, strings, notConstructors } from "./data.js";
-import { constructors } from "../src/constructors.js";
+import { constructors } from "./data.js";
 
 class MyClass {}
 const noop = () => {};

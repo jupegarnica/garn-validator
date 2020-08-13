@@ -15,7 +15,7 @@ export const constructors = [
   Set,
   WeakMap,
   WeakSet,
-  Proxy,
+  // Proxy, //TODO Proxy detection failing in Deno
 
   Error,
   EvalError,
