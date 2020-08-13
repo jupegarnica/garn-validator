@@ -4,9 +4,11 @@ Ultra fast runtime type validator without dependencies.
 
 [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 
-![Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Tests%20CI/badge.svg)
-
 [![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
+
+![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)
+
+![Node Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Node%20Tests%20CI/badge.svg?branch=master)
 
 - Supports checking primitives or objects with **schemas**
 - Easy to use and learn but **powerful**
