@@ -26,6 +26,17 @@ const onInvalidDefault = (error) => {
   throw error;
 };
 
+const logErrorsAndReturnFalse = (error) => {
+  if (error instanceof AggregateError) {
+    console.group(error.name + ":");
+    error.errors.forEach(logErrorsAndReturnFalse);
+    console.groupEnd(error.name + ":");
+  } else {
+    console.error((error && error.message) || error);
+  }
+  return false;
+};
+
 const formatErrorMessage = (data) => {
   const { type, value, path, kind } = data;
   let _value = stringify(value);
@@ -305,14 +316,18 @@ function createValidator(types, conf) {
       }
       return currentConf.onInvalid(error, valueTransformed);
     }
-
-    return currentConf.transform(currentConf.onValid(valueTransformed));
+    if (currentConf.applyTransformation) {
+      return currentConf.applyTransformation(valueTransformed);
+    }
+    return currentConf.onValid(valueTransformed);
   }
   validator[validatorSymbol] = true;
   validator.applyDefault = !!conf.applyDefault;
   validator.displayName = `validatorFrom(${[...arguments].map(stringify)})`;
-  validator.or = createOr(types, conf);
-  validator.transform = createTransform(types, conf);
+
+  if (conf.onValid.name === 'returnValue') {
+    validator.or = createOr(types, conf);
+  }
 
   return validator;
 }
@@ -320,8 +335,8 @@ function createValidator(types, conf) {
 const createOr = (types, conf) => (defaultValue) =>
   createValidator(types, {
     ...conf,
-    name: "validateOr",
-    onValid: (value) => value,
+    // name: "validateOr",
+    // onValid: (value) => value,
     applyDefault: (error, value) => {
       if (defaultValue instanceof Function) return defaultValue(value, error);
       return defaultValue;
@@ -331,8 +346,10 @@ const createOr = (types, conf) => (defaultValue) =>
 const createTransform = (types, conf) => (transformer) =>
   createValidator(types, {
     ...conf,
-    transform: transformer,
+    applyTransformation: transformer,
   });
+
+const returnValue = (value) => value;
 
 const run = (conf) => (...types) => createValidator(types, conf);
 
@@ -340,20 +357,20 @@ const config = ({
   collectAllErrors = false,
   onValid = onValidDefault,
   onInvalid = onInvalidDefault,
-  transform = (v) => v,
+  applyTransformation = false,
   applyDefault = false,
-}) => run({ collectAllErrors, onValid, onInvalid, transform, applyDefault });
+}) =>
+  run({
+    collectAllErrors,
+    onValid,
+    onInvalid,
+    applyTransformation,
+    applyDefault,
+  });
 
-const logErrorsAndReturnFalse = (error) => {
-  if (error instanceof AggregateError) {
-    console.group(error.name + ":");
-    error.errors.forEach(logErrorsAndReturnFalse);
-    console.groupEnd(error.name + ":");
-  } else {
-    console.error((error && error.message) || error);
-  }
-  return false;
-};
+export const mustBe = config({
+  onValid: returnValue,
+});
 
 export const isValid = config({
   onInvalid: () => false,
@@ -394,9 +411,5 @@ export const isValidOrThrowAll = config({
 export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
 export const isValidOrThrow = config({});
-
-export const mustBe = config({
-  onValid: (value) => value,
-});
 
 export default isValidOrThrow;
