@@ -22,11 +22,11 @@ export const between = (min, max) => and(ge(min), le(max));
 export const Integer = and(Number, Number.isInteger);
 export const Numeric = and(
   [Number, String, BigInt],
-  (num) => num == Number(num)
+  (num) => num == Number(num),
 );
 export const hasDecimals = and(
   Numeric,
-  (num) => num != Number.parseInt(String(num))
+  (num) => num != Number.parseInt(String(num)),
 );
 
 export const Odd = (num) => Math.abs(Number(num) % 2) === 1;
@@ -40,7 +40,7 @@ export const Negative = and(Numeric, lt(0));
 export const SafeInteger = Number.isSafeInteger;
 export const SafeNumber = and(
   Numeric,
-  between(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  between(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
 );
 
 export const min = ge;
@@ -49,8 +49,8 @@ export const max = le;
 export const contains = (query) => new RegExp(query);
 export const startsWith = (query) => (value) => value.search(query) === 0;
 
-export const endsWith = (query) => (value) =>
-  value.search(query) === value.length - query.length;
+export const endsWith = (query) =>
+  (value) => value.search(query) === value.length - query.length;
 export const Lowercase = /^(([a-z\W\d]))+$/;
 export const Uppercase = /^(([A-Z\W\d]))+$/;
 

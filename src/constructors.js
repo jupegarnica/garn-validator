@@ -1,11 +1,7 @@
-
-
 export const AsyncFunction = Object.getPrototypeOf(async function () {})
-.constructor;
+  .constructor;
 export const GeneratorFunction = Object.getPrototypeOf(function* () {})
-.constructor;
-
-
+  .constructor;
 
 const descriptor = (data) => ({
   value: data,
@@ -41,8 +37,6 @@ export class SerieValidationError extends AggregateError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
-
-
 
 export const constructors = new Proxy([
   Proxy, // intercepted to return the ProxyIntercepted
@@ -90,11 +84,13 @@ export const constructors = new Proxy([
   AsyncFunction,
   // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
   // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
-], {get(target, key) {
-  if(key == 0) {
-    //  if the proxy is intercepted it will return ProxyIntercepted
-    return Proxy;
-    // return typeof __ProxyIntercepted === 'function' ? __ProxyIntercepted : Proxy;
-  }
-  return target[key]
-}});
+], {
+  get(target, key) {
+    if (key == 0) {
+      //  if the proxy is intercepted it will return ProxyIntercepted
+      return Proxy;
+      // return typeof __ProxyIntercepted === 'function' ? __ProxyIntercepted : Proxy;
+    }
+    return target[key];
+  },
+});

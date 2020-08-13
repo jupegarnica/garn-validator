@@ -172,7 +172,7 @@ const validSchemaOrThrow = (data) => {
     .filter((key) => !requiredKeys.includes(key))
     .filter(
       (key) =>
-        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key)
+        !optionalKeys.map((k) => k.replace(optionalRegex, "")).includes(key),
     );
   for (const regexpString of regexKeys) {
     let keys = untestedKeys.filter((keyName) =>
@@ -244,7 +244,7 @@ const validPrimitiveOrThrow = (data) =>
 const validRegExpOrThrow = (data) =>
   truthyOrThrow(
     data.value.constructor === String && checkRegExp(data.type, data.value),
-    data
+    data,
   );
 
 const validSeriesOrThrow = (behavior, types, value) => {
@@ -309,7 +309,7 @@ const isValidTypeOrThrow = (data) => {
       return validMainValidatorOrThrow(data);
     case "invalid":
       throw new SyntaxError(
-        `checking with validator ${stringify(data.type)} not supported`
+        `checking with validator ${stringify(data.type)} not supported`,
       );
   }
 };
@@ -340,17 +340,19 @@ function createValidator(types, behavior) {
   return validator;
 }
 
-const applyDefault = (defaultValue) => (error, value) => {
-  if (defaultValue instanceof Function) return defaultValue(value, error);
-  return defaultValue;
-};
+const applyDefault = (defaultValue) =>
+  (error, value) => {
+    if (defaultValue instanceof Function) return defaultValue(value, error);
+    return defaultValue;
+  };
 
-const createOr = (types, behavior) => (defaultValue) =>
-  createValidator(types, {
-    ...behavior,
-    onInvalid: applyDefault(defaultValue),
-    name: "applyDefault",
-  });
+const createOr = (types, behavior) =>
+  (defaultValue) =>
+    createValidator(types, {
+      ...behavior,
+      onInvalid: applyDefault(defaultValue),
+      name: "applyDefault",
+    });
 
 const returnValue = (value) => value;
 
@@ -381,7 +383,6 @@ export const mustBe = config({
 export const isValid = config({
   onInvalid: () => false,
   name: "isValid",
-
   // collectAllErrors: false, // default
 });
 

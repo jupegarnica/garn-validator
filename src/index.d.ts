@@ -26,11 +26,11 @@ export function isValidOrLogAll(type: any): (value: any) => boolean;
 export function hasErrors(type: any): (value: any) => null | any[];
 
 export function isValidOrThrowAll(
-  type: any
+  type: any,
 ): (value: any) => true | never;
 
 export function isValidOrThrow(
-  type: any
+  type: any,
 ): (value: any) => true | never;
 
 export default isValidOrThrow;

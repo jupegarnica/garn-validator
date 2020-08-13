@@ -8,7 +8,7 @@
 if (typeof Proxy === "function" && typeof __isProxy !== "function") {
   const proxies = new WeakSet();
   const __Proxy = Proxy;
-  function ProxyIntercepted(target, handler ={} ) {
+  function ProxyIntercepted(target, handler = {}) {
     // console.log(typeof target);
     // console.count('proxy');
     let proxy = new __Proxy(target, handler);
