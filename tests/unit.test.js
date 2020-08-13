@@ -12,7 +12,7 @@ import {
 } from "../src/helpers.js";
 import { isValid } from "garn-validator";
 import { numbers, strings, notConstructors } from "./data.js";
-import { constructors } from "./data.js";
+import { constructors } from "../src/constructors.js";
 
 class MyClass {}
 const noop = () => {};
