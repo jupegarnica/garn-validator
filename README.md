@@ -18,12 +18,10 @@
 - Works in all modern browsers
 - Works in all frontend frameworks: **React, Angular, Vue,** etc...
 
-
 [![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 [![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
 [![Node Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Node%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Node+Tests+CI%22)
 [![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Deno+Tests+CI%22)
-
 
 <h2>Example</h2>
 
@@ -86,8 +84,8 @@ isValidUser({
     - [Check multiple validations (AND operator)](#check-multiple-validations-and-operator)
     - [Check object against an schema](#check-object-against-an-schema)
   - [Behaviors](#behaviors)
-    - [isValid](#isvalid)
-    - [isValidOrLog and isValidOrLogAll](#isvalidorlog-and-isvalidorlogall)
+    - [mustBe](#mustbe)
+    - [isValid, isValidOrLog and isValidOrLogAll](#isvalid-isvalidorlog-and-isvalidorlogall)
     - [hasErrors](#haserrors)
     - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
 - [In depth](#in-depth)
@@ -187,8 +185,8 @@ is(String)(2); // it throws
 is(Array)([1, 2]); // true
 is(Object)([1, 2]); // it throws
 ```
-Learn more in depth at [Constructors](#constructors)
 
+Learn more in depth at [Constructors](#constructors)
 
 ### Check against primitive
 
@@ -196,8 +194,8 @@ Learn more in depth at [Constructors](#constructors)
 is("a")("a"); // true
 is(true)(false); // it throws
 ```
-Learn more in depth at [Primitives](#primitives)
 
+Learn more in depth at [Primitives](#primitives)
 
 ### Check string against regex
 
@@ -205,8 +203,8 @@ Learn more in depth at [Primitives](#primitives)
 is(/a*/)("a"); // true
 is(/a/)("b"); // it throws
 ```
-Learn more in depth at [RegExp](#regexp)
 
+Learn more in depth at [RegExp](#regexp)
 
 ### Check against custom function
 
@@ -216,6 +214,7 @@ is((value) => value > 0)(-1); // wil throw
 is(Number.isNaN)(NaN); // true
 is(Number.isInteger)(1.1); // wil throw
 ```
+
 Learn more in depth at [Custom function](#custom-function)
 
 ### Check against enums (OR operator)
@@ -226,6 +225,7 @@ is(["a", "b"])("c"); // it throws
 is([Number, String])("18"); // true
 is([null, undefined, false, 0, ""])(18); // it throws
 ```
+
 Learn more in depth at [Enums](#enums)
 
 ### Check multiple validations (AND operator)
@@ -237,8 +237,8 @@ is(
   (v) => v < 50
 )(100); // it throws
 ```
-Learn more in depth at [Validations in serie (AND operator)](#validations-in-serie-and-operator)
 
+Learn more in depth at [Validations in serie (AND operator)](#validations-in-serie-and-operator)
 
 ### Check object against an schema
 
@@ -253,8 +253,8 @@ is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 // Optional keys
 is({ x$: String })({}); // true
 ```
-Learn more in depth at [Schema](#schema)
 
+Learn more in depth at [Schema](#schema)
 
 ## Behaviors
 
@@ -263,6 +263,7 @@ All behaviors run the same algorithm but differs in what returns and how behaves
 There are seven behaviors that can be divided in two categories:
 
 - It stops in first error (bail):
+
   - `isValidOrThrow` returns `true` or it throws (default export)
   - `isValid` returns `true` or `false`
   - `isValidOrLog` returns `true` or `false` and log error, never throws
@@ -273,9 +274,75 @@ There are seven behaviors that can be divided in two categories:
   - `isValidOrLogAll` returns `true` or `false` and log all errors, never throws
   - `isValidOrThrowAll` returns `true` or throws AggregateError
 
+### mustBe
+
+`mustBe` returns the value evaluated or it throws. Same as isValidOrThrow but returns the value itself.
+
+```js
+let input = "Garn";
+let userName = mustBe(String)(input); //  return 'Garn'
+```
+
+```js
+let input = "Garn";
+let userName;
+let isValidName = mustBe(String, (val) => val.length > 4);
+try {
+  userName = isValidName(input); //  it throws
+} catch (err) {
+  userName = "anonymous";
+}
+```
+
+`mustBe` may have attached an .or() clause to apply a default value.
+
+```js
+let input = "Garn";
+let isValidName = mustBe(String, (val) => val.length > 4).or("anonymous");
+let userName = isValidName(input); //  returns 'anonymous'
+```
+
+The .or() clause can be call with anything or a function.
+
+```js
+let input = "42";
+let asNumber = mustBe(Number).or((value) => Number(value));
+let number = asNumber(input); //  returns 42
+```
+
+If you need to apply a function as default, you can use a function the returns a function.
+
+```js
+let input = "i am not a function";
+let noop = () => {};
+let mustBeFunction = mustBe(Function).or(() => noop);
+let fn = mustBeFunction(input); //  returns () => {}
+```
+
+It can work nested in a schema
+
+```js
+let input = { name: "Garn" };
+let isValidName = mustBe(String, (val) => val.length > 4).or("anonymous");
+
+let user = mustBe({name: isValidName })(input);  // { name:'anonymous' }
+```
+
+If the .or() fails the whole validation will fail
+
+```js
+let input = "not a valid number";
+let transformToNumberIfPosible = maybeNumber => {
+  let number = Number(maybeNumber);
+  if (number == maybeNumber) return number;
+  else throw new TypeError('not valid number')
+}
+let asNumber = mustBe(Number).or(transformToNumberIfPosible);
+let number = asNumber(input); //  it throws TypeError: not valid number
+```
 
 
-### isValid
+### isValid, isValidOrLog and isValidOrLogAll
 
 `isValid` returns `true` or `false` never throws, so if it fails for any reason you should know it won't tell you anything but false.
 
@@ -286,8 +353,6 @@ import { isValid } from "garn-validator";
 isValid(/[a-z]/)("g"); // returns true
 isValid(/[a-z]/)("G"); // returns false, doesn't throws
 ```
-
-### isValidOrLog and isValidOrLogAll
 
 `isValidOrLog` is the same as `isValid` but log first error found and stops validating.
 
@@ -315,7 +380,6 @@ import { hasErrors } from "garn-validator";
 hasErrors(/[a-z]/)("g"); // null
 hasErrors(/[a-z]/, Number)("G"); // [TypeValidationError, TypeValidationError]
 ```
-
 
 ### isValidOrThrow vs isValidOrThrowAll
 
@@ -373,7 +437,6 @@ Learn more at [Errors](#errors)
 
 ## Utils
  -->
-
 
 # In depth
 
@@ -495,16 +558,16 @@ If it returns a falsy value, the default error will be thrown: TypeValidationErr
 If it throws an error, that error will be thrown.
 
 ```js
-is(() => false) (10); // throws TypeValidationError
-is(() => 0) (10); // throws TypeValidationError
+is(() => false)(10); // throws TypeValidationError
+is(() => 0)(10); // throws TypeValidationError
 
 is(() => {
-  throw new RangeError('ups');
-} ) (10); // throws RangeError
+  throw new RangeError("ups");
+})(10); // throws RangeError
 
-is( () => {
-  throw 'ups';
-} ) (10); // throws 'ups'
+is(() => {
+  throw "ups";
+})(10); // throws 'ups'
 ```
 
 ### Enums
@@ -759,7 +822,6 @@ try {
   error instanceof TypeError; // false
 }
 ```
-
 
 ### AggregateError
 

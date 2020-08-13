@@ -354,7 +354,7 @@ describe("isValidOrLogAll", () => {
 });
 
 describe("mustBe", () => {
-  describe('mustBe without .or', () => {
+  describe("mustBe without .or()", () => {
     test("should return the value", () => {
       expect(mustBe(Number)(2)).toBe(2);
       expect(mustBe(String)("3")).toBe("3");
@@ -364,20 +364,17 @@ describe("mustBe", () => {
         mustBe(Number)("");
       }).toThrow();
     });
-    test('should inherit behavior', () => {
+    test("should inherit behavior", () => {
       const isNumeric = mustBe(Numeric);
-      expect(isValid(isNumeric)(null)).toBe(false)
-
+      expect(isValid(isNumeric)(null)).toBe(false);
     });
-    test('should inherit behavior', () => {
+    test("should inherit behavior", () => {
       const isNumeric = mustBe(Numeric);
-      expect(isValid(isNumeric)('1')).toBe(true)
-
+      expect(isValid(isNumeric)("1")).toBe(true);
     });
-    test('should inherit nested', () => {
+    test("should inherit nested", () => {
       const isNumeric = mustBe(Numeric);
-      expect(isValid({a:isNumeric})({a:null})).toBe(false)
-
+      expect(isValid({ a: isNumeric })({ a: null })).toBe(false);
     });
   });
   describe("mustBe().or()", () => {
@@ -390,6 +387,14 @@ describe("mustBe", () => {
     test("should apply transformer if fails", () => {
       expect(mustBe(Number).or((val) => Number(val))("2")).toBe(2);
     });
+    test("should return a function", () => {
+      let input = "i am not a function";
+      let noop = () => {};
+      let mustBeFunction = mustBe(Function).or(() => noop);
+
+      expect(mustBeFunction(input).name).toBe("noop");
+    });
+
     test("should fail if OR fails", () => {
       const NumberOrZero = mustBe(Number).or(() => {
         throw new Error("ups");
@@ -464,22 +469,20 @@ describe("mustBe", () => {
     });
     test("should not modify original object", () => {
       let obj = {
-        a: {b: null},
+        a: { b: null },
       };
       const NumberOrZero = mustBe(Number).or(0);
-      let newObject = mustBe({ a: {b:NumberOrZero} })(obj);
+      let newObject = mustBe({ a: { b: NumberOrZero } })(obj);
       expect(obj.a.b).not.toBe(newObject.a.b);
       expect(newObject).not.toBe(obj);
     });
-    test('should inherit behavior', () => {
+    test("should inherit behavior", () => {
       const NumberOrZero = mustBe(Number).or(0);
-      expect(isValid(NumberOrZero)(null)).toBe(false)
-
+      expect(isValid(NumberOrZero)(null)).toBe(false);
     });
-    test('should inherit behavior nested', () => {
+    test("should inherit behavior nested", () => {
       const NumberOrZero = mustBe(Number).or(0);
-      expect(isValid({a:NumberOrZero})({a:null})).toBe(false)
-
+      expect(isValid({ a: NumberOrZero })({ a: null })).toBe(false);
     });
   });
   describe.skip("mustBe().transform()", () => {
@@ -500,10 +503,11 @@ describe("mustBe", () => {
           .transform((val) => Number(val) * 2)("2")
       ).toBe(4);
     });
-    test('should apply transformation in composition', () => {
-      const asNumeric = mustBe(Numeric).or(0).transform(num => 'holaaa ' + num);
-      expect(mustBe(asNumeric)('42')).toBe(42)
-
+    test("should apply transformation in composition", () => {
+      const asNumeric = mustBe(Numeric)
+        .or(0)
+        .transform((num) => "holaaa " + num);
+      expect(mustBe(asNumeric)("42")).toBe(42);
     });
   });
 });
