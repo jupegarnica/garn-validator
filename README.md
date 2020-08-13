@@ -1,6 +1,6 @@
-<h1>garn-validator</h1>
+<h1>garn-validator:  <strong>Create validations with ease</strong> </h1>
 
-**Type validations creator with ease**
+<h2>Features</h2>
 
 - Supports checking primitives or objects with **schemas**
 - Easy to use and learn but **powerful**
