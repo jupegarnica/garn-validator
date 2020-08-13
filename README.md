@@ -11,12 +11,6 @@ Ultra fast runtime type validator without dependencies.
 [![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Deno+Tests+CI%22)
 
 
-
-
-
-
-
-
 - Supports checking primitives or objects with **schemas**
 - Easy to use and learn but **powerful**
 - It's totally **composable**
