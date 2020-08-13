@@ -28,7 +28,7 @@ const onInvalidDefault = (error) => {
 
 const logErrorsAndReturnFalse = (error) => {
   if (error instanceof AggregateError) {
-    console.group(error.name + ":");
+    console.group(error.name + ":", error.message);
     error.errors.forEach(logErrorsAndReturnFalse);
     console.groupEnd(error.name + ":");
   } else {
@@ -327,7 +327,7 @@ function createValidator(types, behavior) {
     return currentBehavior.onValid(newValue);
   }
   validator[validatorSymbol] = true;
-  validator.displayName = `${behavior.name}(${[...arguments].map(stringify)})`;
+  validator.displayName = `${behavior.name}(${types.map(stringify)})`;
   if (behavior.name === "mustBe") {
     validator.or = createOr(types, behavior);
   }
@@ -349,12 +349,7 @@ const createOr = (types, behavior) => (defaultValue) =>
     name: "applyDefault",
   });
 
-// const createTransform = (types, behavior) => (transformer) =>
-//   createValidator(types, {
-//     ...behavior,
-//     name: "applyTransformation",
-//     applyTransformation: transformer,
-//   });
+
 
 const returnValue = (value) => value;
 
@@ -366,7 +361,7 @@ const config = ({
   onInvalid = onInvalidDefault,
   applyTransformation = false,
   applyDefault = false,
-  name = "validatorFrom",
+  name = "isValidOrThrow",
 }) =>
   run({
     collectAllErrors,
@@ -384,11 +379,14 @@ export const mustBe = config({
 
 export const isValid = config({
   onInvalid: () => false,
+  name: "isValid",
+
   // collectAllErrors: false, // default
 });
 
 export const isValidOrLog = config({
   onInvalid: logErrorsAndReturnFalse,
+  name: 'isValidOrLog',
   // collectAllErrors: false, // default
 });
 
@@ -404,6 +402,7 @@ const flatAggregateError = (error) => {
 export const hasErrors = config({
   onInvalid: (error) => flatAggregateError(error),
   onValid: () => null,
+  name: 'hasErrors',
 
   collectAllErrors: true,
 });
@@ -411,12 +410,16 @@ export const hasErrors = config({
 export const isValidOrLogAll = config({
   onInvalid: logErrorsAndReturnFalse,
   // onValid: () => true, // default
+  name: 'isValidOrLogAll',
+
   collectAllErrors: true,
 });
 export const isValidOrLogAllErrors = isValidOrLogAll;
 
 export const isValidOrThrowAll = config({
   collectAllErrors: true,
+  name: 'isValidOrThrowAll',
+
 });
 export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
