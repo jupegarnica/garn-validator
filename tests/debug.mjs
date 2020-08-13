@@ -17,7 +17,7 @@ const isString = hasErrors(String);
 
 // console.log(NumberOrZero(null));
 // console.log(mustBe(NumberOrZero)(null));
-console.log(mustBe({a:NumberOrZero, b:isString})({a:null}));
+console.log(mustBe({a:NumberOrZero, b:isString})({a:null}).map(e=>e.message));
 
 
 // try {

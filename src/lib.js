@@ -210,12 +210,12 @@ const validMainValidatorOrThrow = (data) => {
     if (data.behavior.name === "mustBe" && fn.applyDefault) {
       return fn(value);
     } else {
-      let overrideBehaviour = {
+      let overrideBehavior = {
         ...data.behavior,
         onValid: onValidDefault,
         onInvalid: onInvalidDefault,
       };
-      return fn(value, { [configurationSymbol]: overrideBehaviour });
+      return fn(value, { [configurationSymbol]: overrideBehavior });
     }
   } catch (error) {
     if (error.raw) {
