@@ -207,15 +207,15 @@ const validSchemaOrThrow = (data) => {
 const validMainValidatorOrThrow = (data) => {
   const { type: fn, value } = data;
   try {
-    if (fn.applyDefault) {
+    if (data.behavior.name === "mustBe" && fn.applyDefault) {
       return fn(value);
     } else {
-      let newConf = {
+      let overrideBehaviour = {
         ...data.behavior,
         onValid: onValidDefault,
         onInvalid: onInvalidDefault,
       };
-      return fn(value, { [configurationSymbol]: newConf });
+      return fn(value, { [configurationSymbol]: overrideBehaviour });
     }
   } catch (error) {
     if (error.raw) {

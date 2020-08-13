@@ -476,6 +476,11 @@ describe("mustBe", () => {
       expect(isValid(NumberOrZero)(null)).toBe(false)
 
     });
+    test('should inherit behavior nested', () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      expect(isValid({a:NumberOrZero})({a:null})).toBe(false)
+
+    });
   });
   describe.skip("mustBe().transform()", () => {
     test("should apply transformation", () => {
