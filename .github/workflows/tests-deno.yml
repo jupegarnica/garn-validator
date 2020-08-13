@@ -1,4 +1,4 @@
-name: Tests CI
+name: Deno Tests CI
 
 on:
   push:
@@ -10,28 +10,6 @@ on:
       - 'tests/*'
 
 jobs:
-  test-node:
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [ 10.x, 12.x,14.x]
-
-    steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: build and test
-      run: |
-        npm i
-        npm run build
-        npm run test:prod
-        npm run test:prod:dom
-      env:
-        CI: true
   test-deno:
     runs-on: ubuntu-latest
     strategy:
