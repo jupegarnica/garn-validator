@@ -95,7 +95,7 @@ const truthyOrThrow = (input, data) => {
   throwError(data);
 };
 
-const applyDefault = (ref, key, value) => {
+const updateRef = (ref, key, value) => {
   try {
     ref[key] = value;
   } catch {
@@ -104,7 +104,13 @@ const applyDefault = (ref, key, value) => {
 };
 
 const validSchemaOrThrow = (data) => {
-  const { conf, type: schema, value: object, root = object, path = [] } = data;
+  const {
+    behavior,
+    type: schema,
+    value: object,
+    root = object,
+    path = [],
+  } = data;
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
@@ -114,16 +120,16 @@ const validSchemaOrThrow = (data) => {
   for (const keyName of requiredKeys) {
     try {
       let newValue = isValidTypeOrThrow({
-        conf,
+        behavior,
         type: schema[keyName],
         value: clonedObject[keyName],
         root,
         keyName,
         path: [...path, keyName],
       });
-      applyDefault(clonedObject, keyName, newValue);
+      updateRef(clonedObject, keyName, newValue);
     } catch (error) {
-      if (!conf.collectAllErrors) {
+      if (!behavior.collectAllErrors) {
         throw error;
       }
       requiredErrors.push(error);
@@ -140,17 +146,17 @@ const validSchemaOrThrow = (data) => {
       if (!isNullish(value)) {
         let type = schema[keyName];
         let newValue = isValidTypeOrThrow({
-          conf,
+          behavior,
           type,
           value,
           root,
           keyName: keyNameStripped,
           path: [...path, keyNameStripped],
         });
-        applyDefault(clonedObject, keyNameStripped, newValue);
+        updateRef(clonedObject, keyNameStripped, newValue);
       }
     } catch (error) {
-      if (!conf.collectAllErrors) {
+      if (!behavior.collectAllErrors) {
         throw error;
       }
       optionalError.push(error);
@@ -171,16 +177,16 @@ const validSchemaOrThrow = (data) => {
     for (const keyName of keys) {
       try {
         let newValue = isValidTypeOrThrow({
-          conf,
+          behavior,
           type: schema[regexpString],
           value: clonedObject[keyName],
           root,
           keyName,
           path: [...path, keyName],
         });
-        applyDefault(clonedObject, keyName, newValue);
+        updateRef(clonedObject, keyName, newValue);
       } catch (error) {
-        if (!conf.collectAllErrors) {
+        if (!behavior.collectAllErrors) {
           throw error;
         }
         regexErrors.push(error);
@@ -205,7 +211,7 @@ const validMainValidatorOrThrow = (data) => {
       return fn(value);
     } else {
       let newConf = {
-        ...data.conf,
+        ...data.behavior,
         onValid: onValidDefault,
         onInvalid: onInvalidDefault,
       };
@@ -234,15 +240,15 @@ const validRegExpOrThrow = (data) =>
     data
   );
 
-const validSeriesOrThrow = (conf, types, value) => {
+const validSeriesOrThrow = (behavior, types, value) => {
   const errors = [];
   let valueTransformed = value;
   for (const type of types) {
     try {
-      valueTransformed = isValidTypeOrThrow({ conf, type, value });
+      valueTransformed = isValidTypeOrThrow({ behavior, type, value });
     } catch (error) {
       errors.push(error);
-      if (!conf.collectAllErrors) break;
+      if (!behavior.collectAllErrors) break;
     }
   }
   if (errors.length > 0) {
@@ -256,11 +262,11 @@ const validSeriesOrThrow = (conf, types, value) => {
   return valueTransformed;
 };
 const validEnumOrThrow = (data) => {
-  const { conf, type: types, value, root, keyName, path } = data;
+  const { behavior, type: types, value, root, keyName, path } = data;
   const errors = [];
   for (const type of types) {
     try {
-      return isValidTypeOrThrow({ conf, type, value, root, keyName, path });
+      return isValidTypeOrThrow({ behavior, type, value, root, keyName, path });
     } catch (error) {
       errors.push(error);
     }
@@ -301,57 +307,54 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-function createValidator(types, conf) {
+function createValidator(types, behavior) {
   function validator(value, secretArg) {
-    let currentConf = conf;
+    let currentBehavior = behavior;
     if (secretArg && secretArg[configurationSymbol]) {
-      currentConf = secretArg[configurationSymbol];
+      currentBehavior = secretArg[configurationSymbol];
     }
-    let valueTransformed = value;
+    let newValue = value;
     try {
-      valueTransformed = validSeriesOrThrow(currentConf, types, value);
+      newValue = validSeriesOrThrow(currentBehavior, types, value);
     } catch (error) {
-      if (currentConf.applyDefault) {
-        return currentConf.applyDefault(error, valueTransformed);
-      }
-      return currentConf.onInvalid(error, valueTransformed);
+      return currentBehavior.onInvalid(error, newValue);
     }
-    if (currentConf.applyTransformation) {
-      return currentConf.applyTransformation(valueTransformed);
-    }
-    return currentConf.onValid(valueTransformed);
+
+    return currentBehavior.onValid(newValue);
   }
   validator[validatorSymbol] = true;
-  validator.applyDefault = !!conf.applyDefault;
-  validator.displayName = `validatorFrom(${[...arguments].map(stringify)})`;
-
-  if (conf.onValid.name === 'returnValue') {
-    validator.or = createOr(types, conf);
+  validator.displayName = `${behavior.name}(${[...arguments].map(stringify)})`;
+  if (behavior.name === "mustBe") {
+    validator.or = createOr(types, behavior);
   }
-
+  if (behavior.name === "applyDefault") {
+    validator.applyDefault = true;
+  }
   return validator;
 }
 
-const createOr = (types, conf) => (defaultValue) =>
+const applyDefault = (defaultValue) => (error, value) => {
+  if (defaultValue instanceof Function) return defaultValue(value, error);
+  return defaultValue;
+};
+
+const createOr = (types, behavior) => (defaultValue) =>
   createValidator(types, {
-    ...conf,
-    // name: "validateOr",
-    // onValid: (value) => value,
-    applyDefault: (error, value) => {
-      if (defaultValue instanceof Function) return defaultValue(value, error);
-      return defaultValue;
-    },
+    ...behavior,
+    onInvalid: applyDefault(defaultValue),
+    name: "applyDefault",
   });
 
-const createTransform = (types, conf) => (transformer) =>
-  createValidator(types, {
-    ...conf,
-    applyTransformation: transformer,
-  });
+// const createTransform = (types, behavior) => (transformer) =>
+//   createValidator(types, {
+//     ...behavior,
+//     name: "applyTransformation",
+//     applyTransformation: transformer,
+//   });
 
 const returnValue = (value) => value;
 
-const run = (conf) => (...types) => createValidator(types, conf);
+const run = (behavior) => (...types) => createValidator(types, behavior);
 
 const config = ({
   collectAllErrors = false,
@@ -359,6 +362,7 @@ const config = ({
   onInvalid = onInvalidDefault,
   applyTransformation = false,
   applyDefault = false,
+  name = "validatorFrom",
 }) =>
   run({
     collectAllErrors,
@@ -366,10 +370,12 @@ const config = ({
     onInvalid,
     applyTransformation,
     applyDefault,
+    name,
   });
 
 export const mustBe = config({
   onValid: returnValue,
+  name: "mustBe",
 });
 
 export const isValid = config({

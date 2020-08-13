@@ -460,37 +460,28 @@ describe("mustBe", () => {
 
     });
   });
-  describe("mustBe().transform()", () => {
-    test("should apply transform always", () => {
+  describe.skip("mustBe().transform()", () => {
+    test("should apply transformation", () => {
       expect(mustBe(Numeric).transform((val) => Number(val) * 2)("2")).toBe(4);
     });
-    test.skip("should apply transform twice", () => {
-      expect(
-        mustBe(Number)
-          .transform((val) => val + 2)
-          .transform((val) => val + 7)(0)
-      ).toBe(4);
-    });
-    test("should apply OR first and later transform", () => {
+    test("should apply OR first and later transformation", () => {
       expect(
         mustBe(Numeric)
           .or(1)
-          .transform((val) => Number(val) * 2)(null)
-      ).toBe(2);
+          .transform((val) => Number(val) + 7)(null)
+      ).toBe(8);
     });
-    test("should apply OR first and later transform", () => {
-      expect(
-        mustBe(Numeric)
-          .or(1)
-          .transform((val) => Number(val) * 2)(null)
-      ).toBe(2);
-    });
-    test("should apply transform even if not OR is applied", () => {
+    test("should apply transformation even if not OR is applied", () => {
       expect(
         mustBe(Numeric)
           .or(1)
           .transform((val) => Number(val) * 2)("2")
       ).toBe(4);
+    });
+    test('should apply transformation in composition', () => {
+      const asNumeric = mustBe(Numeric).or(0).transform(num => 'holaaa ' + num);
+      expect(mustBe(asNumeric)('42')).toBe(42)
+
     });
   });
 });

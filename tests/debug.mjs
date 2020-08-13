@@ -13,7 +13,7 @@ import {
 } from "garn-validator";
 
 try {
-  const NumericOrZero = mustBe(Number).or( v => v + 2).or( v => v + 3)
+  const NumericOrZero = mustBe(Number).or( v => v + 2)//.or( v => v + 3)
   const res = mustBe({ a: NumericOrZero, [/b/]: NumericOrZero, c$:NumericOrZero })({ a: '1', b: null });
   console.log('res', res);
 } catch (error) {

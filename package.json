@@ -26,7 +26,6 @@
     "test:raw:deno:ts": "deno run --importmap=import_map.json --unstable tests/deno.raw.ts",
     "test:coverage": "jest tests --coverage --watch",
     "test:heap": "jest tests --logHeapUsage",
-
     "prerelease": "npm run predeploy",
     "release": "npm version patch",
     "postrelease": "git push origin master --tags",
