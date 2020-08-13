@@ -114,10 +114,10 @@ const validSchemaOrThrow = (data) => {
   if (!(object instanceof Object || typeof object === "string")) {
     return throwError(data);
   }
-  const mustUpdateRef = behavior.name === 'mustBe'
+  const mustUpdateRef = behavior.name === "mustBe";
   let clonedObject = object;
   if (mustUpdateRef) {
-    clonedObject = deepClone(object)
+    clonedObject = deepClone(object);
   }
   let requiredErrors = [];
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
@@ -211,7 +211,10 @@ const validSchemaOrThrow = (data) => {
 const validMainValidatorOrThrow = (data) => {
   const { type: fn, value } = data;
   try {
-    if (data.behavior.name === "mustBe" && fn.applyDefault) {
+    if (
+      fn.applyDefault &&
+      (data.behavior.name === "mustBe" || data.behavior.name === "applyDefault")
+    ) {
       return fn(value);
     } else {
       let overrideBehavior = {
@@ -329,7 +332,7 @@ function createValidator(types, behavior) {
   validator[validatorSymbol] = true;
   validator.displayName = `${behavior.name}(${types.map(stringify)})`;
   if (behavior.name === "mustBe") {
-    validator.or = createOr(types, behavior);
+    validator.or = createOr(types, { ...behavior });
   }
   if (behavior.name === "applyDefault") {
     validator.applyDefault = true;
@@ -348,8 +351,6 @@ const createOr = (types, behavior) => (defaultValue) =>
     onInvalid: applyDefault(defaultValue),
     name: "applyDefault",
   });
-
-
 
 const returnValue = (value) => value;
 
@@ -386,7 +387,7 @@ export const isValid = config({
 
 export const isValidOrLog = config({
   onInvalid: logErrorsAndReturnFalse,
-  name: 'isValidOrLog',
+  name: "isValidOrLog",
   // collectAllErrors: false, // default
 });
 
@@ -402,7 +403,7 @@ const flatAggregateError = (error) => {
 export const hasErrors = config({
   onInvalid: (error) => flatAggregateError(error),
   onValid: () => null,
-  name: 'hasErrors',
+  name: "hasErrors",
 
   collectAllErrors: true,
 });
@@ -410,7 +411,7 @@ export const hasErrors = config({
 export const isValidOrLogAll = config({
   onInvalid: logErrorsAndReturnFalse,
   // onValid: () => true, // default
-  name: 'isValidOrLogAll',
+  name: "isValidOrLogAll",
 
   collectAllErrors: true,
 });
@@ -418,8 +419,7 @@ export const isValidOrLogAllErrors = isValidOrLogAll;
 
 export const isValidOrThrowAll = config({
   collectAllErrors: true,
-  name: 'isValidOrThrowAll',
-
+  name: "isValidOrThrowAll",
 });
 export const isValidOrThrowAllErrors = isValidOrThrowAll;
 

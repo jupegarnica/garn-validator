@@ -12,20 +12,12 @@ import {
   mustBe,
 } from "garn-validator";
 
-// const  isString= isValidOrLog(String);
-// const  isNumeric= hasErrors(Number);
-// const  asNumeric= mustBe(Number).or(0);
-// const NumberOrZero = isValid(isString);
+const isString = isValidOrLog(String);
+const asNumber = mustBe(Number).or(0)
+;
+
 try {
-  let input = "not a valid number";
-  let transformToNumberIfPosible = (maybeNumber) => {
-    let number = Number(maybeNumber);
-    if (number == maybeNumber) return number;
-    else throw new TypeError("not valid number");
-  };
-  let asNumber = mustBe(Number).or(transformToNumberIfPosible);
-  let number = asNumber(input);
-  console.log(number);
-} catch (err) {
-  console.log(err);
+  console.log(mustBe(asNumber).or(3)(2));
+} catch (error) {
+  console.log(error.message);
 }

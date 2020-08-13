@@ -484,6 +484,11 @@ describe("mustBe", () => {
       const NumberOrZero = mustBe(Number).or(0);
       expect(isValid({ a: NumberOrZero })({ a: null })).toBe(false);
     });
+    test("should not inherit onValidDefault", () => {
+      const asNumber = mustBe(Number).or(0);
+
+      expect(mustBe(asNumber).or(3)(2)).toBe(2);
+    });
   });
   describe.skip("mustBe().transform()", () => {
     test("should apply transformation", () => {
