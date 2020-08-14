@@ -1,8 +1,8 @@
 import {
-  isValidOrThrow,
+  mustBe,
   arrayOf,
   objectOf,
-  isValidOrThrowAll,
+  mustBeOrThrowAll,
   hasErrors,
   not,
   or,
@@ -28,52 +28,52 @@ import {
 describe("utils", () => {
   test("ArrayOf", () => {
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1, 2]);
+      mustBe(arrayOf(Number))([1, 2]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1, 2, "3"]);
+      mustBe(arrayOf(Number))([1, 2, "3"]);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf(Number))(["1", 2, 3]);
+      mustBe(arrayOf(Number))(["1", 2, 3]);
     }).toThrow();
   });
   test("objectOf", () => {
     expect(() => {
-      isValidOrThrow(objectOf(Number))({ a: 1 });
+      mustBe(objectOf(Number))({ a: 1 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(objectOf(Number))({ a: 1, b: "b" });
+      mustBe(objectOf(Number))({ a: 1, b: "b" });
     }).toThrow();
   });
 
   describe("not()", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(not(Number))(null);
-        isValidOrThrow(not(Number))("2");
-        isValidOrThrow(not(Number))(1n);
-        isValidOrThrow(not(Number))({});
-        isValidOrThrow(not(Number))([]);
+        mustBe(not(Number))(null);
+        mustBe(not(Number))("2");
+        mustBe(not(Number))(1n);
+        mustBe(not(Number))({});
+        mustBe(not(Number))([]);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(not(Number))(2);
+        mustBe(not(Number))(2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(not(Number))(2e2);
+        mustBe(not(Number))(2e2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(not(Number))(0o11);
+        mustBe(not(Number))(0o11);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(not(Number))(0xff);
+        mustBe(not(Number))(0xff);
       }).toThrow();
     });
 
     test("should work in series", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           not(
             (v) => v > 0,
             (v) => v < 10
@@ -83,7 +83,7 @@ describe("utils", () => {
     });
     test("should throw in series", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           not(
             (v) => v > 0,
             (v) => v < 10
@@ -93,31 +93,31 @@ describe("utils", () => {
     });
     test("should work in enum", () => {
       expect(() => {
-        isValidOrThrow(not([String, Number]))(null);
-        isValidOrThrow(not([String, Number]))([]);
+        mustBe(not([String, Number]))(null);
+        mustBe(not([String, Number]))([]);
       }).not.toThrow();
     });
     test("should throw in enum", () => {
       expect(() => {
-        isValidOrThrow(not([String, Number]))(2);
+        mustBe(not([String, Number]))(2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(not([String, Number]))("null");
+        mustBe(not([String, Number]))("null");
       }).toThrow();
     });
     test("should work in schema", () => {
       expect(() => {
-        isValidOrThrow(not({ a: Number }))({ a: "a" });
+        mustBe(not({ a: Number }))({ a: "a" });
       }).not.toThrow();
     });
     test("should throw in schema", () => {
       expect(() => {
-        isValidOrThrow(not({ a: Number }))({ a: 1 });
+        mustBe(not({ a: Number }))({ a: 1 });
       }).toThrow();
     });
     test("should work a doble negation", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           not(
             not(
               (v) => v > 0,
@@ -129,7 +129,7 @@ describe("utils", () => {
     });
     test("should throw a doble negation", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           not(
             not(
               (v) => v > 0,
@@ -144,19 +144,19 @@ describe("utils", () => {
   describe("or()", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(or(Number, String))(2);
+        mustBe(or(Number, String))(2);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(or(Number, String))(null);
+        mustBe(or(Number, String))(null);
       }).toThrow();
     });
   });
   describe("and()", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           and(
             (v) => v > 0,
             (v) => v < 10
@@ -166,7 +166,7 @@ describe("utils", () => {
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(
+        mustBe(
           and(
             (v) => v > 0,
             (v) => v < 10
@@ -178,345 +178,345 @@ describe("utils", () => {
   describe("Integer", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Integer)(2);
+        mustBe(Integer)(2);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Integer)(2.2);
+        mustBe(Integer)(2.2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Integer)("2");
+        mustBe(Integer)("2");
       }).toThrow();
     });
   });
   describe("Numeric", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Numeric)(2);
+        mustBe(Numeric)(2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)("2");
-        isValidOrThrow(Numeric)("2e10");
-        isValidOrThrow(Numeric)("0b111");
+        mustBe(Numeric)("2");
+        mustBe(Numeric)("2e10");
+        mustBe(Numeric)("0b111");
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)(2n);
+        mustBe(Numeric)(2n);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)(Infinity);
-        isValidOrThrow(Numeric)("Infinity");
+        mustBe(Numeric)(Infinity);
+        mustBe(Numeric)("Infinity");
       }).not.toThrow();
     });
 
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Numeric)(NaN);
+        mustBe(Numeric)(NaN);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)(null);
+        mustBe(Numeric)(null);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)("infinity");
+        mustBe(Numeric)("infinity");
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Numeric)("x2e1");
+        mustBe(Numeric)("x2e1");
       }).toThrow();
     });
   });
   describe("hasDecimals", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(hasDecimals)(2.2);
+        mustBe(hasDecimals)(2.2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(hasDecimals)(2.2);
+        mustBe(hasDecimals)(2.2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(hasDecimals)("2.2");
+        mustBe(hasDecimals)("2.2");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(hasDecimals)(2);
+        mustBe(hasDecimals)(2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(hasDecimals)("2");
+        mustBe(hasDecimals)("2");
       }).toThrow();
     });
   });
   describe("Finite", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Finite)(3);
+        mustBe(Finite)(3);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Finite)(-3);
+        mustBe(Finite)(-3);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Finite)(-3n);
+        mustBe(Finite)(-3n);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Finite)("12");
+        mustBe(Finite)("12");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Finite)(Infinity);
+        mustBe(Finite)(Infinity);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Finite)(-Infinity);
+        mustBe(Finite)(-Infinity);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Finite)(null);
+        mustBe(Finite)(null);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Finite)(NaN);
+        mustBe(Finite)(NaN);
       }).toThrow();
     });
   });
   describe("Odd", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Odd)(3);
+        mustBe(Odd)(3);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Odd)(-3);
+        mustBe(Odd)(-3);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Odd)(-3n);
+        mustBe(Odd)(-3n);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Odd)(3.1);
+        mustBe(Odd)(3.1);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Odd)(-2);
+        mustBe(Odd)(-2);
       }).toThrow();
     });
   });
   describe("Even", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Even)(2);
+        mustBe(Even)(2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Even)(0);
-        isValidOrThrow(Even)(-2);
+        mustBe(Even)(0);
+        mustBe(Even)(-2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Even)(-4n);
+        mustBe(Even)(-4n);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Even)(2.1);
+        mustBe(Even)(2.1);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Even)(-0.0001);
+        mustBe(Even)(-0.0001);
       }).toThrow();
     });
   });
   describe("Positive", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Positive)(2);
+        mustBe(Positive)(2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Positive)(+0.0000000000001);
-        isValidOrThrow(Positive)(Infinity);
+        mustBe(Positive)(+0.0000000000001);
+        mustBe(Positive)(Infinity);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Positive)(4n);
+        mustBe(Positive)(4n);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Positive)(-2);
+        mustBe(Positive)(-2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Positive)(0);
+        mustBe(Positive)(0);
       }).toThrow();
     });
   });
   describe("Negative", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Negative)(-2);
+        mustBe(Negative)(-2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Negative)(-0.0000000000001);
-        isValidOrThrow(Negative)(-Infinity);
+        mustBe(Negative)(-0.0000000000001);
+        mustBe(Negative)(-Infinity);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(Negative)(-4n);
-        isValidOrThrow(Negative)("-2");
+        mustBe(Negative)(-4n);
+        mustBe(Negative)("-2");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Negative)(2);
+        mustBe(Negative)(2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Negative)(null);
+        mustBe(Negative)(null);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(Negative)(0);
+        mustBe(Negative)(0);
       }).toThrow();
     });
   });
   describe("SafeInteger", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(SafeInteger)(-2);
+        mustBe(SafeInteger)(-2);
       }).not.toThrow();
 
       expect(() => {
-        isValidOrThrow(SafeInteger)(Number.MAX_SAFE_INTEGER);
+        mustBe(SafeInteger)(Number.MAX_SAFE_INTEGER);
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(SafeInteger)(-Infinity);
+        mustBe(SafeInteger)(-Infinity);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)(null);
+        mustBe(SafeInteger)(null);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)(Infinity);
+        mustBe(SafeInteger)(Infinity);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)("-2");
+        mustBe(SafeInteger)("-2");
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)(0.2);
+        mustBe(SafeInteger)(0.2);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)(-0.0000000000001);
+        mustBe(SafeInteger)(-0.0000000000001);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeInteger)(Number.MAX_SAFE_INTEGER + 1);
+        mustBe(SafeInteger)(Number.MAX_SAFE_INTEGER + 1);
       }).toThrow();
     });
   });
   describe("SafeNumber", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(SafeNumber)(-2);
+        mustBe(SafeNumber)(-2);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(-2.000123);
+        mustBe(SafeNumber)(-2.000123);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER);
+        mustBe(SafeNumber)(Number.MAX_SAFE_INTEGER);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(Number.MIN_SAFE_INTEGER);
+        mustBe(SafeNumber)(Number.MIN_SAFE_INTEGER);
       }).not.toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)("-2");
+        mustBe(SafeNumber)("-2");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(SafeNumber)(-Infinity);
+        mustBe(SafeNumber)(-Infinity);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(null);
+        mustBe(SafeNumber)(null);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(Infinity);
+        mustBe(SafeNumber)(Infinity);
       }).toThrow();
 
       expect(() => {
-        isValidOrThrow(SafeNumber)(Number.MIN_SAFE_INTEGER - 1);
+        mustBe(SafeNumber)(Number.MIN_SAFE_INTEGER - 1);
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(
+        mustBe(SafeNumber)(
           999999999999999999999999999999999999999999999999
         );
       }).toThrow();
       expect(() => {
-        isValidOrThrow(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
+        mustBe(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
       }).toThrow();
     });
   });
   describe("contains()", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(contains("ipsum"))("lorem ipsum hello");
+        mustBe(contains("ipsum"))("lorem ipsum hello");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(contains("hi"))("lorem ipsum hello");
+        mustBe(contains("hi"))("lorem ipsum hello");
       }).toThrow();
     });
   });
   describe("insensitiveCase()", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(insensitiveCase("IPSUM"))("lorem ipsum hello");
+        mustBe(insensitiveCase("IPSUM"))("lorem ipsum hello");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(insensitiveCase("HI"))("lorem ipsum hello");
+        mustBe(insensitiveCase("HI"))("lorem ipsum hello");
       }).toThrow();
     });
   });
   describe("Lowercase", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Lowercase)("lorem ipsum hello 33 & $  ?");
+        mustBe(Lowercase)("lorem ipsum hello 33 & $  ?");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Lowercase)("Lorem ipsum hello 33 & $  ?");
+        mustBe(Lowercase)("Lorem ipsum hello 33 & $  ?");
       }).toThrow();
     });
   });
   describe("Uppercase", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(Uppercase)("LOREM IPSUM HELLO 33 & $  ?");
+        mustBe(Uppercase)("LOREM IPSUM HELLO 33 & $  ?");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(Uppercase)("Lorem ipsum hello 33 & $  ?");
+        mustBe(Uppercase)("Lorem ipsum hello 33 & $  ?");
       }).toThrow();
     });
   });
   describe("startsWith", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(startsWith("LOREM"))("LOREM IPSUM HELLO 33 & $  ?");
+        mustBe(startsWith("LOREM"))("LOREM IPSUM HELLO 33 & $  ?");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(startsWith("lorem"))("Lorem ipsum hello 33 & $  ?");
+        mustBe(startsWith("lorem"))("Lorem ipsum hello 33 & $  ?");
       }).toThrow();
     });
   });
   describe("endsWith", () => {
     test("should work", () => {
       expect(() => {
-        isValidOrThrow(endsWith("HELLO"))("LOREM IPSUM HELLO");
+        mustBe(endsWith("HELLO"))("LOREM IPSUM HELLO");
       }).not.toThrow();
     });
     // TODO: MAKE IT WORK WITH REGEX
     test.skip("should work with regex", () => {
       expect(() => {
-        isValidOrThrow(endsWith(/HELLO/))("LOREM IPSUM HELLO");
+        mustBe(endsWith(/HELLO/))("LOREM IPSUM HELLO");
       }).not.toThrow();
     });
     test("should throw", () => {
       expect(() => {
-        isValidOrThrow(endsWith("HELLO"))("Lorem ipsum hello 33");
+        mustBe(endsWith("HELLO"))("Lorem ipsum hello 33");
       }).toThrow();
     });
   });

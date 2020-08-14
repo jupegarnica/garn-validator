@@ -1,4 +1,4 @@
-import isValidOrThrow from "garn-validator";
+import mustBe from "garn-validator";
 import { numbers } from "./data.js";
 
 
@@ -7,7 +7,7 @@ describe("check numbers", () => {
     'number %f must be Number',
     (input) => {
       expect(() => {
-        isValidOrThrow(Number)(input);
+        mustBe(Number)(input);
       }).not.toThrow();
     }
   );
@@ -15,51 +15,51 @@ describe("check numbers", () => {
     'number %f is not Boolean',
     (input) => {
       expect(() => {
-        isValidOrThrow(Boolean)(input);
+        mustBe(Boolean)(input);
       }).toThrow();
     }
   );
   test('BigInts against constructor', () => {
     expect(() => {
-      isValidOrThrow(Number)(1n);
+      mustBe(Number)(1n);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(BigInt)(1n);
+      mustBe(BigInt)(1n);
     }).not.toThrow();
 
   });
   test('BigInts against primitive', () => {
     expect(() => {
-      isValidOrThrow(1)(1n);
+      mustBe(1)(1n);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(1n)(1n);
+      mustBe(1n)(1n);
     }).not.toThrow();
 
   });
   test('BigInts against custom validator', () => {
     expect(() => {
-      isValidOrThrow((val) => val > 0)(33n);
+      mustBe((val) => val > 0)(33n);
     }).not.toThrow();
 
     expect(() => {
-      isValidOrThrow((val) => val < 0)(33n);
+      mustBe((val) => val < 0)(33n);
     }).toThrow();
     expect(() => {
-      isValidOrThrow((val) => val === 33)(33n);
+      mustBe((val) => val === 33)(33n);
     }).toThrow();
     expect(() => {
-      isValidOrThrow((val) => val == 33)(33n);
+      mustBe((val) => val == 33)(33n);
     }).not.toThrow();
 
   });
   test("check with custom validator", () => {
     expect(() => {
-      isValidOrThrow((val) => val > 0)(33);
+      mustBe((val) => val > 0)(33);
     }).not.toThrow();
 
     expect(() => {
-      isValidOrThrow((val) => val < 0)(33);
+      mustBe((val) => val < 0)(33);
     }).toThrow();
   });
 });

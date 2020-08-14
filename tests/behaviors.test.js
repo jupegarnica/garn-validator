@@ -1,6 +1,6 @@
 import {
   isValid,
-  isValidOrThrowAll,
+  mustBeOrThrowAll,
   isValidOrLogAll,
   hasErrors,
   AsyncFunction,
@@ -273,20 +273,20 @@ describe("hasErrors", () => {
   });
 });
 
-describe("isValidOrThrowAll ", () => {
+describe("mustBeOrThrowAll ", () => {
   jest.spyOn(globalThis.console, "error");
   jest.spyOn(globalThis.console, "group");
   jest.spyOn(globalThis.console, "groupEnd");
 
   test("should throw AggregateError with all errors", () => {
     try {
-      isValidOrThrowAll(Number, String)(true);
+      mustBeOrThrowAll(Number, String)(true);
       throw "ups";
     } catch (error) {
       expect(error).toBeInstanceOf(AggregateError);
     }
     try {
-      isValidOrThrowAll(Number, String)(true);
+      mustBeOrThrowAll(Number, String)(true);
 
       throw "ups";
     } catch (error) {
@@ -295,7 +295,7 @@ describe("isValidOrThrowAll ", () => {
   });
   test("should throw 2 errors", () => {
     try {
-      isValidOrThrowAll(Number, Boolean, String)(true);
+      mustBeOrThrowAll(Number, Boolean, String)(true);
     } catch (error) {
       expect(error.errors.length).toBe(2);
     }

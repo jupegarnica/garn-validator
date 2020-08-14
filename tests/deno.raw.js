@@ -1,5 +1,5 @@
-import { isValidOrThrow } from "garn-validator";
-// import isValidOrThrow from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
+import { mustBe } from "garn-validator";
+// import mustBe from "https://raw.githubusercontent.com/jupegarnica/garn-validator/master/src/index.js";
 
 const schema = {
   name: /^[a-z]{3,}$/,
@@ -29,4 +29,4 @@ const obj = {
     },
   },
 };
-isValidOrThrow(schema)(obj);
+mustBe(schema)(obj);

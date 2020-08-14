@@ -1,8 +1,8 @@
 import {
-  isValidOrThrow,
+  mustBe,
   hasErrors,
   isValidOrLogAll,
-  isValidOrThrowAll,
+  mustBeOrThrowAll,
   SchemaValidationError,
   EnumValidationError,
   SerieValidationError,
@@ -14,7 +14,7 @@ describe("AggregateError", () => {
     "if schema fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAll({ a: Number, b: String })({});
+        mustBeOrThrowAll({ a: Number, b: String })({});
       }).toThrow(ErrorType);
     }
   );
@@ -22,7 +22,7 @@ describe("AggregateError", () => {
     "if enums fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAll([Number, String])(true);
+        mustBeOrThrowAll([Number, String])(true);
       }).toThrow(ErrorType);
     }
   );
@@ -30,20 +30,20 @@ describe("AggregateError", () => {
     "if Series fails with more than 2 errors should throw %p",
     (ErrorType) => {
       expect(() => {
-        isValidOrThrowAll(Number, String)(true);
+        mustBeOrThrowAll(Number, String)(true);
       }).toThrow(ErrorType);
     }
   );
   test("checking schema should throw SchemaValidationError or TypeValidationError", () => {
     try {
-      isValidOrThrowAll({ a: 1, b: 2 })({});
+      mustBeOrThrowAll({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
       expect(error.errors.length).toBe(2);
     }
     try {
-      isValidOrThrow({ a: 1, b: 2 })({});
+      mustBe({ a: 1, b: 2 })({});
     } catch (error) {
       expect(error instanceof SchemaValidationError).toBe(false);
       expect(error instanceof TypeValidationError).toBe(true);
@@ -51,7 +51,7 @@ describe("AggregateError", () => {
 
     // only 1 key fails
     try {
-      isValidOrThrowAll({ a: 1 })({});
+      mustBeOrThrowAll({ a: 1 })({});
     } catch (error) {
       expect(error instanceof TypeValidationError).toBe(true);
       expect(error instanceof SchemaValidationError).toBe(false);
@@ -59,14 +59,14 @@ describe("AggregateError", () => {
   });
   test("checking enum should throw EnumValidationError or TypeValidationError", () => {
     try {
-      isValidOrThrow([Boolean, String])(1);
+      mustBe([Boolean, String])(1);
     } catch (error) {
       expect(error instanceof EnumValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
-      isValidOrThrow([Boolean])(1);
+      mustBe([Boolean])(1);
     } catch (error) {
       expect(error instanceof EnumValidationError).toBe(false);
       expect(error instanceof TypeValidationError).toBe(true);
@@ -74,14 +74,14 @@ describe("AggregateError", () => {
   });
   test("checking series should throw SerieValidationError or TypeValidationError ", () => {
     try {
-      isValidOrThrowAll(Boolean, String)(1);
+      mustBeOrThrowAll(Boolean, String)(1);
     } catch (error) {
       expect(error instanceof SerieValidationError).toBe(true);
       expect(error instanceof AggregateError).toBe(true);
     }
 
     try {
-      isValidOrThrowAll(Boolean)(1);
+      mustBeOrThrowAll(Boolean)(1);
     } catch (error) {
       expect(error instanceof SerieValidationError).toBe(false);
       expect(error instanceof TypeValidationError).toBe(true);
@@ -89,7 +89,7 @@ describe("AggregateError", () => {
   });
   test("should message enum", () => {
     try {
-      isValidOrThrow([
+      mustBe([
         () => {
           throw "ups";
         },
@@ -107,31 +107,31 @@ describe("AggregateError", () => {
 describe("check errors", () => {
   test("by default throws TypeValidationError", () => {
     expect(() => {
-      isValidOrThrow(Boolean)(33);
+      mustBe(Boolean)(33);
     }).toThrow(TypeValidationError);
   });
   test("Should throw meaningfully message", () => {
     expect(() => {
-      isValidOrThrow(1)(33);
+      mustBe(1)(33);
     }).toThrow("33 do not match primitive 1");
   });
   test("should throw a custom type of error", () => {
     expect(() => {
-      isValidOrThrow((v) => {
+      mustBe((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
     }).toThrow(RangeError);
   });
   test("should throw a custom type of error", () => {
     expect(() => {
-      isValidOrThrow((v) => {
+      mustBe((v) => {
         if (v > 10) throw new RangeError("ups");
       })(33);
     }).toThrow("ups");
   });
   test("should throw anything", () => {
     try {
-      isValidOrThrow((v) => {
+      mustBe((v) => {
         if (v > 10) throw "ups";
       })(33);
     } catch (error) {
@@ -140,7 +140,7 @@ describe("check errors", () => {
   });
   test("should throw anything", () => {
     try {
-      isValidOrThrowAll(
+      mustBeOrThrowAll(
         () => {
           throw 1;
         },
@@ -156,12 +156,12 @@ describe("check errors", () => {
   });
   test("should format the schema", () => {
     expect(() => {
-      isValidOrThrow({ a: Number })(33);
+      mustBe({ a: Number })(33);
     }).toThrow('33 do not match schema {"a":Number}');
   });
   test("should format the value", () => {
     expect(() => {
-      isValidOrThrow({ a: Number })({ b: 33 });
+      mustBe({ a: Number })({ b: 33 });
     }).toThrow("At path /a undefined do not match constructor Number");
   });
 });
@@ -169,12 +169,12 @@ describe("check errors", () => {
 describe("check errors in serie", () => {
   test("should throw the error message related to the check failed", () => {
     expect(() => {
-      isValidOrThrow(Number, String)(2);
+      mustBe(Number, String)(2);
     }).toThrow("2 do not match constructor String");
   });
   test("should throw the error message related to the check failed", () => {
     expect(() => {
-      isValidOrThrow(() => {
+      mustBe(() => {
         throw new Error();
       }, String)(2);
     }).toThrow(Error);
@@ -182,7 +182,7 @@ describe("check errors in serie", () => {
   test("should check only until the first check fails", () => {
     jest.spyOn(globalThis.console, "log");
     try {
-      isValidOrThrow(
+      mustBe(
         () => {
           throw new Error();
         },
@@ -196,7 +196,7 @@ describe("check errors in serie", () => {
 describe("check with invalid validator", () => {
   test("should detect async functions", () => {
     try {
-      isValidOrThrow(async () => false)(1);
+      mustBe(async () => false)(1);
       throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);
@@ -204,7 +204,7 @@ describe("check with invalid validator", () => {
   });
   test("should detect generators", () => {
     try {
-      isValidOrThrow(function* () {})(1);
+      mustBe(function* () {})(1);
       throw "mec";
     } catch (error) {
       expect(error).toBeInstanceOf(SyntaxError);

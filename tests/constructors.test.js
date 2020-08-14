@@ -1,4 +1,4 @@
-import isValidOrThrow, {
+import mustBe, {
   AsyncFunction,
   GeneratorFunction,
 } from "garn-validator";
@@ -35,9 +35,9 @@ describe("check with constructors", () => {
     [Set, new Set()],
     [Symbol, Symbol("my symbol")],
     [MyClass, new MyClass()],
-  ])("should work isValidOrThrow(%p)(%p)", (constructor, value) => {
+  ])("should work mustBe(%p)(%p)", (constructor, value) => {
     expect(() => {
-      isValidOrThrow(constructor)(value);
+      mustBe(constructor)(value);
     }).not.toThrow();
   });
   test.each([
@@ -60,9 +60,9 @@ describe("check with constructors", () => {
     [Set, new WeakSet()],
     [URL, "https://developer.mozilla.org"],
     [String, new URL("https://developer.mozilla.org")],
-  ])("should throw isValidOrThrow(%p)(%p)", (constructor, value) => {
+  ])("should throw mustBe(%p)(%p)", (constructor, value) => {
     expect(() => {
-      isValidOrThrow(constructor)(value);
+      mustBe(constructor)(value);
     }).toThrow();
   });
 });

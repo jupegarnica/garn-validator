@@ -1,52 +1,52 @@
-import isValidOrThrow from "garn-validator";
+import mustBe from "garn-validator";
 import { strings } from "./data.js";
 
 
 describe("check strings", () => {
   test.each(strings)("%s should be String", (input) => {
     expect(() => {
-      isValidOrThrow(String)(input);
+      mustBe(String)(input);
     }).not.toThrow();
   });
   test('works with regex', () => {
     expect(() => {
-      isValidOrThrow(/./)(true);
+      mustBe(/./)(true);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(/./)('true');
+      mustBe(/./)('true');
     }).not.toThrow();
 
   });
   test.each(strings)("%s should not be Number", (input) => {
     expect(() => {
-      isValidOrThrow(Number)(input);
+      mustBe(Number)(input);
     }).toThrow();
   });
   let [, ...strs] = strings;
   test.each(strs)("%s should be 'str'", (input) => {
     expect(() => {
-      isValidOrThrow("str")(input.replace('"', ""));
+      mustBe("str")(input.replace('"', ""));
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow("a")(input);
+      mustBe("a")(input);
     }).toThrow();
   });
   test.each(strs)("should match regex '/^str/' value %s  ", (input) => {
     expect(() => {
-      isValidOrThrow(/^str/)(input);
+      mustBe(/^str/)(input);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(/string/)(input);
+      mustBe(/string/)(input);
     }).toThrow();
   });
 
 
   test.each(strs)("custom validator value %s ", (input) => {
     expect(() => {
-      isValidOrThrow(v => v.length === 3 ||  v.length === 4)(input);
+      mustBe(v => v.length === 3 ||  v.length === 4)(input);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(v => v === '')(input);
+      mustBe(v => v === '')(input);
     }).toThrow();
 
   });

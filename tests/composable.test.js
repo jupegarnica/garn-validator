@@ -1,6 +1,6 @@
-import isValidOrThrow, {
+import mustBe, {
   TypeValidationError,
-  isValidOrThrowAll,
+  mustBeOrThrowAll,
   SerieValidationError,
   hasErrors,
   isValidOrLog,
@@ -11,13 +11,13 @@ import isValidOrThrow, {
 describe("composable", () => {
   describe("basics", () => {
     test("should work", () => {
-      expect(isValidOrThrow(isValidOrThrow(Number))(1)).toBe(true);
+      expect(mustBe(mustBe(Number))(1)).toBe(true);
     });
     test("should fail", () => {
-      let validator = isValidOrThrow(Number);
+      let validator = mustBe(Number);
 
       try {
-        isValidOrThrow(validator)("2");
+        mustBe(validator)("2");
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(TypeValidationError);
@@ -25,10 +25,10 @@ describe("composable", () => {
       }
     });
     test("should fail with AggregateError collecting all errors", () => {
-      let validator = isValidOrThrow(Number, String);
+      let validator = mustBe(Number, String);
 
       try {
-        isValidOrThrowAll(validator)(null);
+        mustBeOrThrowAll(validator)(null);
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(SerieValidationError);
@@ -37,10 +37,10 @@ describe("composable", () => {
       }
     });
     test("should fail with TypeValidationError collecting one error", () => {
-      let validator = isValidOrThrowAll(Number, String);
+      let validator = mustBeOrThrowAll(Number, String);
 
       try {
-        isValidOrThrow(validator)(null);
+        mustBe(validator)(null);
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(TypeValidationError);
@@ -51,7 +51,7 @@ describe("composable", () => {
     });
   });
   describe("composable errors", () => {
-    let validator = isValidOrThrow(Number, String);
+    let validator = mustBe(Number, String);
     test("the validator should throw the path error depending of it relative value", () => {
       try {
         validator(null);
@@ -61,12 +61,12 @@ describe("composable", () => {
       }
     });
     test("should not rewrite user custom errors", () => {
-      let validator = isValidOrThrow(Number, (num) => {
+      let validator = mustBe(Number, (num) => {
         if (num > 0) throw new RangeError("ups");
       });
 
       try {
-        isValidOrThrow({ a: validator })({ a: 1 });
+        mustBe({ a: validator })({ a: 1 });
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(RangeError);
@@ -74,12 +74,12 @@ describe("composable", () => {
       }
     });
     test("should not rewrite user custom errors inside aggregateError", () => {
-      let validator = isValidOrThrow(Number, (num) => {
+      let validator = mustBe(Number, (num) => {
         if (num > 0) throw new RangeError("ups");
       }, null);
 
       try {
-        isValidOrThrowAll({ a: validator })({ a: 1 });
+        mustBeOrThrowAll({ a: validator })({ a: 1 });
         throw "mec";
       } catch (error) {
 
@@ -89,7 +89,7 @@ describe("composable", () => {
     });
     test("should rewrite errors injecting the new nested path", () => {
       try {
-        isValidOrThrow({ a: validator })({ a: null });
+        mustBe({ a: validator })({ a: null });
         throw "mec";
       } catch (error) {
         expect(error.raw.path).toEqual(["a"]);
@@ -97,7 +97,7 @@ describe("composable", () => {
     });
     test("should rewrite no matter how deep is the validation", () => {
       try {
-        isValidOrThrow({ a: { b: { c: { d: validator } } } })({
+        mustBe({ a: { b: { c: { d: validator } } } })({
           a: { b: { c: { d: null } } },
         });
         throw "mec";
@@ -117,10 +117,10 @@ describe("composable", () => {
       }
     });
     test("should work rewrite path checking schemas inside schemas", () => {
-      let isValidPerson = isValidOrThrow({ age: Number });
+      let isValidPerson = mustBe({ age: Number });
 
       try {
-        isValidOrThrow({
+        mustBe({
           user: isValidPerson,
         })({
           user: {
@@ -132,7 +132,7 @@ describe("composable", () => {
       }
     });
     test("should work in circular objects", () => {
-      let isValidPerson = isValidOrThrow({ age: Number });
+      let isValidPerson = mustBe({ age: Number });
       let obj = {
         user: {
           age: "33",
@@ -151,9 +151,9 @@ describe("composable", () => {
       }
     });
     test("should rewrite path of EnumValidationError", () => {
-      let isValidPerson = isValidOrThrow({ age: [20, 30] });
+      let isValidPerson = mustBe({ age: [20, 30] });
       try {
-        isValidOrThrowAll({
+        mustBeOrThrowAll({
           friend: isValidPerson,
         })({ friend: { age: 100 } });
       } catch (error) {
@@ -161,11 +161,11 @@ describe("composable", () => {
       }
     });
     test("should rewrite path of SchemaValidationError", () => {
-      let isValidPerson = isValidOrThrow({
+      let isValidPerson = mustBe({
         tel: { num: Number, prefix: String },
       });
       try {
-        isValidOrThrowAll({
+        mustBeOrThrowAll({
           friend: isValidPerson,
         })({ friend: { tel: { num: "19872", prefix: 19 } } });
       } catch (error) {
@@ -173,9 +173,9 @@ describe("composable", () => {
       }
     });
     test("should rewrite path of SerieValidationError", () => {
-      let isValidPerson = isValidOrThrow(Number, String);
+      let isValidPerson = mustBe(Number, String);
       try {
-        isValidOrThrowAll({
+        mustBeOrThrowAll({
           friend: isValidPerson,
         })({ friend: null });
       } catch (error) {
@@ -183,17 +183,17 @@ describe("composable", () => {
       }
     });
     test("should rewrite path even is nested", () => {
-      let isInteger = isValidOrThrow(Number, Number.isInteger);
-      let isValidTelephone = isValidOrThrow({ num: isInteger });
+      let isInteger = mustBe(Number, Number.isInteger);
+      let isValidTelephone = mustBe({ num: isInteger });
       let isValidCountry = isValid(String, /^[A-Z]{3,}$/u);
 
-      let isValidPerson = isValidOrThrow({
+      let isValidPerson = mustBe({
         tel: isValidTelephone,
         country: isValidCountry,
       });
 
       try {
-        isValidOrThrowAll({
+        mustBeOrThrowAll({
           friend: isValidPerson,
         })({ friend: { tel: { num: "19872" }, country: "ESP" } });
       } catch (error) {
@@ -207,7 +207,7 @@ describe("composable", () => {
       let validator = hasErrors(Number, String);
 
       try {
-        isValidOrThrow(validator)(null);
+        mustBe(validator)(null);
         throw "mec";
       } catch (error) {
         expect(error).toBeInstanceOf(TypeValidationError);
@@ -225,10 +225,10 @@ describe("composable", () => {
     });
     describe("should work not matter what", () => {
       let isInteger = isValid(Number, Number.isInteger);
-      let isValidTelephone = isValidOrThrowAll({ num: isInteger });
+      let isValidTelephone = mustBeOrThrowAll({ num: isInteger });
       let isValidCountry = hasErrors(String, /^[A-Z]{3,}$/u);
 
-      let isValidPerson = isValidOrThrow({
+      let isValidPerson = mustBe({
         tel: isValidTelephone,
         country: isValidCountry,
       });
@@ -259,7 +259,7 @@ describe("composable", () => {
 
   describe("usage", () => {
     test("simple", () => {
-      const isValidNumber = isValidOrThrow(Number);
+      const isValidNumber = mustBe(Number);
       expect(() => {
         isValidNumber(2);
       }).not.toThrow();
@@ -270,7 +270,7 @@ describe("composable", () => {
     });
     test("multiple", () => {
       expect(() => {
-        const isGood = isValidOrThrow(
+        const isGood = mustBe(
           Number,
           (v) => v < 1990,
           (v) => v > 1980,
@@ -286,7 +286,7 @@ describe("composable", () => {
       }).toThrow();
     });
     test("with schema", () => {
-      const validUser = isValidOrThrow({
+      const validUser = mustBe({
         name: String,
         age: (v) => v > 18,
         password: String,
@@ -307,21 +307,21 @@ describe("composable", () => {
       }).toThrow();
     });
     test("with complex schema", () => {
-      const isValidPassword = isValidOrThrow(
+      const isValidPassword = mustBe(
         String,
         /[a-z]/,
         /[A-Z]/,
         /[0-9]/,
         /[-_/!"·$%&/()]/
       );
-      const isValidName = isValidOrThrow(String, (name) => name.length >= 3);
-      const isValidAge = isValidOrThrow(
+      const isValidName = mustBe(String, (name) => name.length >= 3);
+      const isValidAge = mustBe(
         Number,
         (age) => age > 18,
         (age) => age < 40
       );
 
-      const validUser = isValidOrThrow({
+      const validUser = mustBe({
         name: isValidName,
         age: isValidAge,
         password: isValidPassword,
@@ -342,14 +342,14 @@ describe("composable", () => {
       }).toThrow();
     });
     test("nested", () => {
-      const validUser = isValidOrThrow({
-        name: isValidOrThrow(String, (name) => name.length >= 3),
-        age: isValidOrThrow(
+      const validUser = mustBe({
+        name: mustBe(String, (name) => name.length >= 3),
+        age: mustBe(
           Number,
           (age) => age > 18,
           (age) => age < 40
         ),
-        password: isValidOrThrow(
+        password: mustBe(
           String,
           /[a-z]/,
           /[A-Z]/,

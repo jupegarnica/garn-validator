@@ -1,23 +1,23 @@
-import isValidOrThrow, { isValid, objectOf, arrayOf } from "garn-validator";
+import mustBe, { isValid, objectOf, arrayOf } from "garn-validator";
 
 
 describe("check schema", () => {
   test("check with constructor", () => {
     expect(() => {
-      isValidOrThrow({ a: Number })({
+      mustBe({ a: Number })({
         a: 1,
         b: 2,
       }); // not throw, all ok
     }).not.toThrow();
 
     expect(() => {
-      isValidOrThrow({ a: Number, c: Number })({
+      mustBe({ a: Number, c: Number })({
         a: 1,
         b: 2,
       });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: Number, c: undefined })({
+      mustBe({ a: Number, c: undefined })({
         a: 1,
         b: 2,
       });
@@ -25,22 +25,22 @@ describe("check schema", () => {
   });
   test("keys on the schema are required", () => {
     expect(() => {
-      isValidOrThrow({ a: 1 })({ a: 1, b: 2 });
+      mustBe({ a: 1 })({ a: 1, b: 2 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ c: 1 })({ a: 1, b: 2 });
+      mustBe({ c: 1 })({ a: 1, b: 2 });
     }).toThrow();
   });
 
   test("check with primitives", () => {
     expect(() => {
-      isValidOrThrow({ a: 2 })({
+      mustBe({ a: 2 })({
         a: 1,
         b: 2,
       });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: 1 })({
+      mustBe({ a: 1 })({
         a: 1,
         b: 2,
       });
@@ -48,13 +48,13 @@ describe("check schema", () => {
   });
   test("check with custom function", () => {
     expect(() => {
-      isValidOrThrow({ a: (val) => val < 0 })({
+      mustBe({ a: (val) => val < 0 })({
         a: 1,
         b: 2,
       });
     }).toThrow();
     expect(() => {
-      isValidOrThrow({ a: (val) => val > 0 })({
+      mustBe({ a: (val) => val > 0 })({
         a: 1,
         b: 2,
       });
@@ -63,11 +63,11 @@ describe("check schema", () => {
   test("check with custom function", () => {
     let obj = { x: "x", y: "x" };
     expect(() => {
-      isValidOrThrow({ x: (val, rootObject) => rootObject.y === val })(obj);
+      mustBe({ x: (val, rootObject) => rootObject.y === val })(obj);
     }).not.toThrow();
 
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         max: (val, rootObject) => val > rootObject.min,
         min: (val, rootObject) => val < rootObject.max,
       })({
@@ -76,7 +76,7 @@ describe("check schema", () => {
       });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         max: (val, rootObject) => val > rootObject.min,
         min: (val, rootObject) => val < rootObject.max,
       })({
@@ -86,7 +86,7 @@ describe("check schema", () => {
     }).toThrow();
 
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
@@ -94,7 +94,7 @@ describe("check schema", () => {
       });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         "/./": (val, _, keyName) => keyName === val,
       })({
         x: "x",
@@ -104,32 +104,32 @@ describe("check schema", () => {
   });
   test("match key with regex", () => {
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number })({
+      mustBe({ [/[a-z]/]: Number })({
         a: 1,
         b: 2,
       });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: 0 })({
+      mustBe({ [/[a-z]/]: 0 })({
         a: 1,
         b: 2,
       });
     }).toThrow();
     expect(() => {
       // only throws if the key is matched
-      isValidOrThrow({ [/[A-Z]/]: Number })({
+      mustBe({ [/[A-Z]/]: Number })({
         a: 1,
         b: 2,
       });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number, a: 1 })({
+      mustBe({ [/[a-z]/]: Number, a: 1 })({
         a: 1,
         b: 2,
       }); // not throw, all lowercase keys are numbers
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({ [/[a-z]/]: Number, a: 2 })({
+      mustBe({ [/[a-z]/]: Number, a: 2 })({
         a: 1,
         b: 2,
       }); // will throw (a is not 2)
@@ -176,12 +176,12 @@ describe("check objects recursively", () => {
   };
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(schema)(obj); // not throw, all ok
+      mustBe(schema)(obj); // not throw, all ok
     }).not.toThrow();
   });
   test("should throw", () => {
     expect(() => {
-      isValidOrThrow({ ...schema, a: String })(obj);
+      mustBe({ ...schema, a: String })(obj);
     }).toThrow();
   });
 });
@@ -236,7 +236,7 @@ describe("optional keys", () => {
 describe("special cases", () => {
   test("required keys are more important than optional", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         a: String,
         a$: Number,
       })({
@@ -246,7 +246,7 @@ describe("special cases", () => {
   });
   test("required regExp keys do not check optional or required", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         a: String,
         a$: Number,
         [/a/]: Boolean,
@@ -255,7 +255,7 @@ describe("special cases", () => {
       });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         a: String,
         a$: Number,
         [/a/]: Boolean,
@@ -269,18 +269,18 @@ describe("special cases", () => {
 describe('check Array against an schema', () => {
   test("should check an Array as an object", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         0: Number,
         1: Number,
       })([1, 2]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         "/d/": Number,
       })([1, 2]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         0: String,
       })([1, 2]);
     }).toThrow();
@@ -289,20 +289,20 @@ describe('check Array against an schema', () => {
 describe("check String against an schema", () => {
   test("should check an string as an object", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         0: /[lL]/,
         1: (char) => char === "o",
       })("Lorem");
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         0: /[lL]/,
         1: (char) => char === "o",
         2: "R",
       })("Lorem");
     }).toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         99: "a",
       })("Lorem");
     }).toThrow();
@@ -314,12 +314,12 @@ describe("check a function against an schema", () => {
   test("should check an function as an object", () => {
     let fn = function () {};
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         toString: Function,
       })(fn);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         toString: Boolean,
       })(fn);
     }).toThrow();
@@ -330,22 +330,22 @@ describe("check a function against an schema", () => {
 describe("arrayOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1, 2, 3]);
+      mustBe(arrayOf(Number))([1, 2, 3]);
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, 3]);
+      mustBe(arrayOf((n) => n > 0))([1, 2, 3]);
     }).not.toThrow();
   });
   test("should throw", () => {
     expect(() => {
-      isValidOrThrow(arrayOf(Number))([1, 2, "3"]);
+      mustBe(arrayOf(Number))([1, 2, "3"]);
     }).toThrow();
     expect(() => {
-      isValidOrThrow(arrayOf((n) => n > 0))([1, 2, -3]);
+      mustBe(arrayOf((n) => n > 0))([1, 2, -3]);
     }).toThrow();
 
     expect(() => {
-      isValidOrThrow(arrayOf(Number))({ 0: 1, 1: 2 });
+      mustBe(arrayOf(Number))({ 0: 1, 1: 2 });
     }).toThrow();
   });
 });
@@ -353,18 +353,18 @@ describe("arrayOf", () => {
 describe("objectOf", () => {
   test("should work", () => {
     expect(() => {
-      isValidOrThrow(objectOf(Number))({ a: 1, b: 2 });
+      mustBe(objectOf(Number))({ a: 1, b: 2 });
     }).not.toThrow();
     expect(() => {
-      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: 2 });
+      mustBe(objectOf((n) => n > 0))({ a: 1, b: 2 });
     }).not.toThrow();
   });
   test("should throw", () => {
     expect(() => {
-      isValidOrThrow(objectOf(Number))({ a: 1, b: "2" });
+      mustBe(objectOf(Number))({ a: 1, b: "2" });
     }).toThrow();
     expect(() => {
-      isValidOrThrow(objectOf((n) => n > 0))({ a: 1, b: -2 });
+      mustBe(objectOf((n) => n > 0))({ a: 1, b: -2 });
     }).toThrow();
   });
 });
@@ -379,7 +379,7 @@ describe("should check instances", () => {
   }
   test("should work", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         date: Date,
         name: String,
         valid: Boolean,
@@ -388,14 +388,14 @@ describe("should check instances", () => {
   });
   test("should throw", () => {
     expect(() => {
-      isValidOrThrow({
+      mustBe({
         date: Date,
         name: String,
         valid: Number,
       })(new MyClass());
     }).toThrow();
     expect(() => {
-      isValidOrThrow(Object, {
+      mustBe(Object, {
         date: Date,
         name: String,
         valid: Boolean,

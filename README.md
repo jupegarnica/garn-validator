@@ -6,14 +6,13 @@
 - Easy to use and learn but **powerful**
 - It's totally **composable**
 - **Fast** and **without dependencies**
-- **Seven behaviors**:
-  - `isValidOrThrow` returns `true` or fails (default export)
-  - `isValid` returns `true` or `false`
-  - `hasErrors` returns null or Array of errors
-  - `mustBe` returns the value evaluated or it throws
-  - `isValidOrLog` returns `true` or `false` and log error
-  - `isValidOrLogAll` returns `true` or `false` and log all errors
-  - `isValidOrThrowAll` returns `true` or throws AggregateError
+- **Six behaviors**:
+  - `mustBe` returns the value evaluated or it throws. (default export)
+  - `isValid` returns `true` or `false`,  never throws
+  - `isValidOrLog` returns `true` or `false` and log error, never throws
+  - `hasErrors` returns null or Array of errors, never throws
+  - `mustBeOrThrowAll` returns the value evaluated or throws AggregateError
+  - `isValidOrLogAll` returns `true` or `false` and log all errors, never throws
 - Works with ESModules or CommonJS from **Node** 10.x or **Deno**
 - Works in all modern browsers
 - Works in all frontend frameworks: **React, Angular, Vue,** etc...
@@ -26,9 +25,9 @@
 <h2>Example</h2>
 
 ```js
-import is from "garn-validator";
+import mustBe from "garn-validator";
 
-const isValidPassword = is(
+const isValidPassword = mustBe(
   String,
   (str) => str.length >= 8,
   /[a-z]/,
@@ -37,13 +36,13 @@ const isValidPassword = is(
   /[-_/!¡?¿$%&/()]/
 );
 
-isValidPassword("12345Aa?"); // true
+isValidPassword("12345Aa?"); // returns "12345Aa?"
 
-const isValidName = is(String, (name) => name.length >= 3);
+const isValidName = mustBe(String, (name) => name.length >= 3);
 
 isValidName("qw"); // fails
 
-const isValidAge = is(
+const isValidAge = mustBe(
   Number,
   (age) => age > 18,
   (age) => age < 40
@@ -53,7 +52,7 @@ isValidAge(15); // fails
 
 // composition
 
-const isValidUser = is({
+const isValidUser = mustBe({
   name: isValidName,
   age: isValidAge,
   password: isValidPassword,
@@ -87,7 +86,7 @@ isValidUser({
     - [mustBe](#mustbe)
     - [isValid, isValidOrLog and isValidOrLogAll](#isvalid-isvalidorlog-and-isvalidorlogall)
     - [hasErrors](#haserrors)
-    - [isValidOrThrow vs isValidOrThrowAll](#isvalidorthrow-vs-isvalidorthrowall)
+    - [mustBe vs mustBeOrThrowAll](#mustbe-vs-mustbeorthrowall)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -126,18 +125,18 @@ npm install garn-validator
 ### Import with ES Modules
 
 ```js
-// default export is isValidOrThrow
-import isValidOrThrow from "garn-validator";
-// or use named exports
-import { isValidOrThrow } from "garn-validator";
+// default export is mustBe
+import mustBe from "garn-validator";
+// or use named export
+import { mustBe } from "garn-validator";
 ```
 
 ### Require with CommonJs
 
 ```js
-const { isValidOrThrow } = require("garn-validator/commonjs");
+const { mustBe } = require("garn-validator/commonjs");
 // or use de default export
-const isValidOrThrow = require("garn-validator/commonjs").default;
+const mustBe = require("garn-validator/commonjs").default;
 ```
 
 ## Deno
@@ -148,7 +147,7 @@ Import from deno third party modules: [deno.land/x/garn_validator](https://deno.
 
 ```ts
 // mod.ts
-import is from "https://deno.land/x/garn_validator/src/index.js";
+import mustBe from "https://deno.land/x/garn_validator/src/index.js";
 ```
 
 To have type definitions you can do:
@@ -159,7 +158,7 @@ import * as garnValidator from "https://deno.land/x/garn_validator/src/index.js"
 import * as ValidatorTypes from "https://deno.land/x/garn_validator/src/index.d.ts";
 garnValidator as typeof ValidatorTypes;
 
-const { isValidOrThrow } = garnValidator;
+const { mustBe } = garnValidator;
 
 ```
 
@@ -169,21 +168,21 @@ const { isValidOrThrow } = garnValidator;
 ## Basic Usage
 
 ```js
-import is from "garn-validator"; // default export is isValidOrThrow
+import mustBe from "garn-validator"; // default export is mustBe
 
-const isValidUser = is({ name: String, age: Number });
+const isValidUser = mustBe({ name: String, age: Number });
 
-isValidUser({ name: "garn", age: 38 }); // true
+isValidUser({ name: "garn", age: 38 }); // returns { name: "garn", age: 38 }
 isValidUser({ name: "garn", age: "38" }); // it throws
 ```
 
 ### Check against constructor
 
 ```js
-is(Number)(2); // true
-is(String)(2); // it throws
-is(Array)([1, 2]); // true
-is(Object)([1, 2]); // it throws
+mustBe(Number)(2); // returns 2
+mustBe(String)(2); // it throws
+mustBe(Array)([1, 2]); // returns [1, 2]
+mustBe(Object)([1, 2]); // it throws
 ```
 
 Learn more in depth at [Constructors](#constructors)
@@ -191,8 +190,8 @@ Learn more in depth at [Constructors](#constructors)
 ### Check against primitive
 
 ```js
-is("a")("a"); // true
-is(true)(false); // it throws
+mustBe("a")("a"); // returns "a"
+mustBe(true)(false); // it throws
 ```
 
 Learn more in depth at [Primitives](#primitives)
@@ -200,8 +199,8 @@ Learn more in depth at [Primitives](#primitives)
 ### Check string against regex
 
 ```js
-is(/a*/)("a"); // true
-is(/a/)("b"); // it throws
+mustBe(/a*/)("a"); // returns "a"
+mustBe(/a/)("b"); // it throws
 ```
 
 Learn more in depth at [RegExp](#regexp)
@@ -209,10 +208,10 @@ Learn more in depth at [RegExp](#regexp)
 ### Check against custom function
 
 ```js
-is((value) => value > 0)(33); // true
-is((value) => value > 0)(-1); // wil throw
-is(Number.isNaN)(NaN); // true
-is(Number.isInteger)(1.1); // wil throw
+mustBe((value) => value > 0)(33); // returns 33
+mustBe((value) => value > 0)(-1); // wil throw
+mustBe(Number.isNaN)(NaN); // returns NaN
+mustBe(Number.isInteger)(1.1); // wil throw
 ```
 
 Learn more in depth at [Custom function](#custom-function)
@@ -220,10 +219,10 @@ Learn more in depth at [Custom function](#custom-function)
 ### Check against enums (OR operator)
 
 ```js
-is(["a", "b"])("a"); // true
-is(["a", "b"])("c"); // it throws
-is([Number, String])("18"); // true
-is([null, undefined, false, 0, ""])(18); // it throws
+mustBe(["a", "b"])("a"); // returns "a"
+mustBe(["a", "b"])("c"); // it throws
+mustBe([Number, String])("18"); // returns "18"
+mustBe([null, undefined, false, 0, ""])(18); // it throws
 ```
 
 Learn more in depth at [Enums](#enums)
@@ -231,8 +230,8 @@ Learn more in depth at [Enums](#enums)
 ### Check multiple validations (AND operator)
 
 ```js
-is(Array, (array) => array.length === 2)([1, 2]); // true
-is(
+mustBe(Array, (array) => array.length === 2)([1, 2]); // returns [1, 2]
+mustBe(
   (v) => v > 0,
   (v) => v < 50
 )(100); // it throws
@@ -245,13 +244,13 @@ Learn more in depth at [Validations in serie (AND operator)](#validations-in-ser
 ```js
 const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
-is(schema)(obj); // true
+mustBe(schema)(obj); // returns obj
 
-is({ a: 1 })({ a: 1, b: 2 }); // true, a must be 1
-is({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
+mustBe({ a: 1 })({ a: 1, b: 2 }); // returns { a: 1, b: 2 }, a must be 1
+mustBe({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 
 // Optional keys
-is({ x$: String })({}); // true
+mustBe({ x$: String })({}); // returns {}
 ```
 
 Learn more in depth at [Schema](#schema)
@@ -260,23 +259,22 @@ Learn more in depth at [Schema](#schema)
 
 All behaviors run the same algorithm but differs in what returns and how behaves.
 
-There are seven behaviors that can be divided in two categories:
+There are six behaviors that can be divided in two categories:
 
 - It stops in first error (bail):
 
-  - `isValidOrThrow` returns `true` or it throws (default export)
-  - `isValid` returns `true` or `false`
+  - `mustBe` returns the value evaluated or it throws. (default export)
+  - `isValid` returns `true` or `false`,  never throws
   - `isValidOrLog` returns `true` or `false` and log error, never throws
-  - `mustBe` returns the value evaluated or it throws
 
 - It collects all Errors:
   - `hasErrors` returns null or Array of errors, never throws
+  - `mustBeOrThrowAll` returns the value evaluated or throws AggregateError
   - `isValidOrLogAll` returns `true` or `false` and log all errors, never throws
-  - `isValidOrThrowAll` returns `true` or throws AggregateError
 
 ### mustBe
 
-`mustBe` returns the value evaluated or it throws. Same as isValidOrThrow but returns the value itself.
+`mustBe` returns the value evaluated or it throws. Same as mustBe but returns the value itself.
 
 ```js
 let input = "Garn";
@@ -381,24 +379,24 @@ hasErrors(/[a-z]/)("g"); // null
 hasErrors(/[a-z]/, Number)("G"); // [TypeValidationError, TypeValidationError]
 ```
 
-### isValidOrThrow vs isValidOrThrowAll
+### mustBe vs mustBeOrThrowAll
 
-`isValidOrThrow` returns `true` or it throws the first error found.
+`mustBe` returns `true` or it throws the first error found.
 
 ```js
 try {
-  isValidOrThrow({ a: Number, b: String })({ a: null, b: null });
+  mustBe({ a: Number, b: String })({ a: null, b: null });
 } catch (error) {
   error instanceof TypeValidationError; // true
   error.message; // At path /a null do not match constructor Number
 }
 ```
 
-`isValidOrThrowAll` returns `true` or it throws an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
+`mustBeOrThrowAll` returns `true` or it throws an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
 
 ```js
 try {
-  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: null });
+  mustBeOrThrowAll({ a: Number, b: String })({ a: null, b: null });
 } catch (error) {
   error instanceof AggregateError; // true
   error instanceof SchemaValidationError; // true
@@ -420,7 +418,7 @@ But if it finds only one error, it will throw `TypeValidationError`, no Aggregat
 
 ```js
 try {
-  isValidOrThrowAll({ a: Number, b: String })({ a: null, b: "str" });
+  mustBeOrThrowAll({ a: Number, b: String })({ a: null, b: "str" });
 } catch (error) {
   console.log(error);
   /*
@@ -451,18 +449,18 @@ Checking a primitive is a === comparison
 Anything that is not and object in JS is a primitive: `Number`, `String`, `undefined`, `null` and `Symbol`
 
 ```js
-is(1)(1); // true  1 === 1
+mustBe(1)(1); // returns 1 --> 1 === 1
 
-is("1")(1); // throws  '1' !== 1
+mustBe("1")(1); // throws,  '1' !== 1
 
-is(1n)(1); // throws  1n !== 1
+mustBe(1n)(1); // throws,  1n !== 1
 
-is(undefined)(null); // throws  undefined !== null
+mustBe(undefined)(null); // throws,  undefined !== null
 
 // keep in mind than a symbol is only equal to itself
 let s = Symbol();
-is(s)(s); // true
-is(s)(Symbol()); // throws
+mustBe(s)(s); // returns s
+mustBe(s)(Symbol()); // throws
 ```
 
 ### Constructors
@@ -470,8 +468,8 @@ is(s)(Symbol()); // throws
 Checking against a constructor means to know if the value evaluated has been created from that constructor
 
 ```js
-is(Number)(2); // (2).constructor === Number  --> true
-is(Symbol)(Symbol()); // true
+mustBe(Number)(2); // (2).constructor === Number  --> true
+mustBe(Symbol)(Symbol()); // ok
 ```
 
 A valid constructor is a `class` or any built-in constructor.
@@ -479,7 +477,7 @@ A valid constructor is a `class` or any built-in constructor.
 ```js
 class Car {}
 let honda = new Car();
-is(Car)(honda); // honda.constructor === Car  --> true
+mustBe(Car)(honda); // honda.constructor === Car  --> true
 ```
 
 > **You can't use a normal function used as constructor from the old JS times.**
@@ -489,7 +487,7 @@ function Car(name) {
   this.name = name;
 }
 let honda = new Car("honda");
-is(Car)(honda); // throws.  Car is detected as custom validator function
+mustBe(Car)(honda); // throws.  Car is detected as custom validator function
 ```
 
 All [built in Constructors](https://github.com/jupegarnica/garn-validator/blob/master/src/constructors.js#L47) are supported
@@ -510,7 +508,7 @@ const proxy = new Proxy(target, {
   get: () => 33,
 });
 
-isValidOrThrow(Proxy)(proxy); // true
+mustBe(Proxy)(proxy); // returns proxy
 ```
 
 without running garn-validator/src/proxyDetection.js
@@ -522,7 +520,7 @@ const proxy = new Proxy(target, {
   get: () => 33,
 });
 
-isValidOrThrow(Proxy)(proxy); // fails
+mustBe(Proxy)(proxy); // fails
 ```
 
 ### RegExp
@@ -530,11 +528,11 @@ isValidOrThrow(Proxy)(proxy); // fails
 The perfect validator to check strings. It does what you expect:
 
 ```js
-let isLowerCased = is(/^[a-z]+$/);
+let isLowerCased = mustBe(/^[a-z]+$/);
 
 isLowerCased("honda"); // /^[a-z]+$/.test('honda') --> true
 // or building a regexp with the constructor RexExp;
-is(new RegExp(/^[a-z]+$/))("honda"); //  true
+mustBe(new RegExp(/^[a-z]+$/))("honda"); //  true
 ```
 
 ### Custom function
@@ -544,11 +542,11 @@ Any function that is not a constructor is treated as custom validator.
 It must return any truthy value in order to pass the validation.
 
 ```js
-is((val) => val >= 0)(10); // true
-is((val) => val >= 0)(-10); // throws
+mustBe((val) => val >= 0)(10); // returns 10
+mustBe((val) => val >= 0)(-10); // throws
 
-is(() => "I am truthy")(10); // true
-is(() => [])(10); // true
+mustBe(() => "I am truthy")(10); // returns 10
+mustBe(() => [])(10); // returns 10
 ```
 
 To fail a validation may return a falsy value or throw an error.
@@ -558,14 +556,14 @@ If it returns a falsy value, the default error will be thrown: TypeValidationErr
 If it throws an error, that error will be thrown.
 
 ```js
-is(() => false)(10); // throws TypeValidationError
-is(() => 0)(10); // throws TypeValidationError
+mustBe(() => false)(10); // throws TypeValidationError
+mustBe(() => 0)(10); // throws TypeValidationError
 
-is(() => {
+mustBe(() => {
   throw new RangeError("ups");
 })(10); // throws RangeError
 
-is(() => {
+mustBe(() => {
   throw "ups";
 })(10); // throws 'ups'
 ```
@@ -576,8 +574,8 @@ Enums works as OR operator. Must be an array which represent all options.
 
 ```js
 let cities = ["valencia", "new york", "salzburg"];
-is(cities)("valencia"); // true
-is(cities)("madrid"); // throws
+mustBe(cities)("valencia"); // returns "valencia"
+mustBe(cities)("madrid"); // throws
 ```
 
 But it's much more powerful than checking against primitives. It can contain any type of validator.
@@ -586,16 +584,16 @@ It checks every item until one passes.
 
 ```js
 let isNumberOrBigInt = [Number, BigInt]; // must be Number or BigInt
-is(isNumberOrBigInt)(1n); // true
-is(isNumberOrBigInt)(1); // true
+mustBe(isNumberOrBigInt)(1n); // returns 1n
+mustBe(isNumberOrBigInt)(1); // returns 1
 
 let isFalsy = [0, "", null, undefined, false];
-is(isFalsy)(""); // true
+mustBe(isFalsy)(""); // returns ""
 
 let isNumberAlike = [Number, (val) => val === Number(val)];
-is(isNumberAlike)(1n); // true
-is(isNumberAlike)(1); // true
-is(isNumberAlike)("1"); // true
+mustBe(isNumberAlike)(1n); // returns 1n
+mustBe(isNumberAlike)(1); // returns 1
+mustBe(isNumberAlike)("1"); // returns "1"
 ```
 
 ### Schema
@@ -624,13 +622,13 @@ let obj = {
     email: "email@example.com",
   },
 };
-is(schema)(obj); // true
+mustBe(schema)(obj); // returns obj
 ```
 
 > **Only the keys in the schema will be checked. Any key not present in the schema won't be checked**
 
 ```js
-is({})({ a: 1 }); // true , a is not in the schema
+mustBe({})({ a: 1 }); // returns { a: 1 } , a is not in the schema
 ```
 
 #### Optional Keys
@@ -638,18 +636,18 @@ is({})({ a: 1 }); // true , a is not in the schema
 And optional key must be `undefined` , `null`, or pass the validation
 
 ```js
-is({ x$: Number })({ x: 1 }); // true, x is present and is Number
-is({ x$: String })({ x: 1 }); // it throws, x is present but is not String
+mustBe({ x$: Number })({ x: 1 }); // returns { x: 1 }, x is present and is Number
+mustBe({ x$: String })({ x: 1 }); // it throws, x is present but is not String
 
-is({ x$: String })({}); // true, x is undefined
-is({ x$: String })({ x: undefined }); // true, x is undefined
-is({ x$: String })({ x: null }); // true, x is null
+mustBe({ x$: String })({}); // returns {}, x is undefined
+mustBe({ x$: String })({ x: undefined }); // returns { x: undefined }, x is undefined
+mustBe({ x$: String })({ x: null }); // returns { x: null }, x is null
 ```
 
 You can use `key$` or `'key?'`. It would be nicer to have `key?` without quotes but is not valid JS
 
 ```js
-is({ "x?": String })({}); // true
+mustBe({ "x?": String })({}); // returns {}
 ```
 
 #### Regexp keys
@@ -657,15 +655,15 @@ is({ "x?": String })({}); // true
 You can validate multiple keys at once using a regexp key
 
 ```js
-is({
+mustBe({
   [/./]: String,
 })({
   a: "a",
   b: "b",
-}); // true
+}); // ok
 
 // or write it as plain string
-is({
+mustBe({
   "/./": String,
 })({
   a: "a",
@@ -673,27 +671,27 @@ is({
 }); // throws
 
 // only checks the keys that matches regex
-is({
+mustBe({
   [/^[a-z]+$/]: Number,
 })({
   x: 1,
   y: 2,
   z: 3,
   CONSTANT: "foo", // not checked
-}); // true, all lowercased keys are numbers
+}); // ok, all lowercased keys are numbers
 ```
 
 > **The required keys and optional won't be check against a regexp key**
 
 ```js
-is({
+mustBe({
   [/./]: Number,
   x: String, //  this required key has priority against regex key
 })({
   x: "x", // not checked as Number, checked as String
-}); // true,  x is String
+}); // ok,  x is String
 
-is({
+mustBe({
   [/./]: Number,
   x: String,
 })({
@@ -701,7 +699,7 @@ is({
   y: "y", // checked as Number, fails
 }); // throw
 
-is({
+mustBe({
   [/./]: Number,
   $x: String,
   y: String,
@@ -715,7 +713,7 @@ is({
 This feature is perfect to note that any key not specified in schema is not allowed
 
 ```js
-is({
+mustBe({
   x: String,
   [/./]: () => false,
 })({
@@ -734,15 +732,15 @@ When using a custom validator inside an schema will be run with 3 arguments: `(v
 
 ```js
 //  against root obj
-is({
+mustBe({
   max: (val, root, keyName) => val > root.min,
   min: (val, root, keyName) => val < root.max,
 })({
   max: 1,
   min: -1,
-}); // true
+}); // ok
 
-is({
+mustBe({
   max: (val, root, keyName) => val > root.min,
   min: (val, root, keyName) => val < root.max,
 })({
@@ -751,7 +749,7 @@ is({
 }); // it throws
 
 // all key must be at least 3 characters
-is({
+mustBe({
   [/./]: (val, root, keyName) => keyName.length > 3,
 })({
   max: 1, // key too short
@@ -766,17 +764,17 @@ The validator constructor can receive as many validations as needed.
 All will be checked until one fails
 
 ```js
-const isArrayOfLength2 = is(Array, (array) => array.length === 2);
-isArrayOfLength2([1, 2]); // true
+const isArrayOfLength2 = mustBe(Array, (array) => array.length === 2);
+isArrayOfLength2([1, 2]); // returns [1, 2]
 
-is(
+mustBe(
   (v) => v > 0,
   (v) => v < 50 // will fail
 )(100); // it throws
 ```
 
 ```js
-const isValidPassword = is(
+const isValidPassword = mustBe(
   String, // must be an String
   (str) => str.length >= 8, // and its length must be at least 8
   /[a-z]/, // and must have at least one lowercase
@@ -785,8 +783,8 @@ const isValidPassword = is(
   /[-_/!·$%&/()]/ // and must have at least one especial character
 );
 
-isValidPassword("12345wW-"); // true
-isValidPassword("12345ww-"); // fails
+isValidPassword("12345wW-"); // returns "12345wW-"
+isValidPassword("12345"); // fails
 ```
 
 ## Errors
@@ -796,17 +794,17 @@ If a validation fails it will throw `new TypeValidationError(meaningfulMessage)`
 If it throws an error from a custom validator, that error will be thrown.
 
 ```js
-import { isValidOrThrow, TypeValidationError } from "garn-validator";
+import { mustBe, TypeValidationError } from "garn-validator";
 
 try {
-  isValidOrThrow(Boolean)(33);
+  mustBe(Boolean)(33);
 } catch (error) {
   error instanceof TypeValidationError; // true
   error instanceof TypeError; // true
 }
 
 try {
-  isValidOrThrow(() => {
+  mustBe(() => {
     throw "ups";
   })(33);
 } catch (error) {
@@ -814,7 +812,7 @@ try {
 }
 
 try {
-  isValidOrThrow(() => {
+  mustBe(() => {
     throw new RangeError("out of range");
   })(33);
 } catch (error) {
@@ -835,7 +833,7 @@ All of them inherits from `AggregateError` and has a property errors with an arr
 
 ```js
 try {
-  isValidOrThrowAll(Number, String)(null);
+  mustBeOrThrowAll(Number, String)(null);
 } catch (error) {
   error instanceof AggregateError; // true
   console.log(error.errors);
@@ -850,18 +848,18 @@ try {
 
 #### SchemaValidationError
 
-If using isValidOrThrowAll more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
+If using mustBeOrThrowAll more than one key fails checking an Schema , it will throw a SchemaValidationError with all Errors aggregated in error.errors.
 
 If only one key fail it will throw only that Error (not an AggregateError)
 
 SchemaValidationError inherits from AggregateError,
 
-> But if using `isValidOrThrow` only the first Error will be thrown.
+> But if using `mustBe` only the first Error will be thrown.
 
 ```js
 // more than 2 keys fails
 try {
-  isValidOrThrowAll({ a: 1, b: 2 })({});
+  mustBeOrThrowAll({ a: 1, b: 2 })({});
 } catch (error) {
   console.log(error instanceof SchemaValidationError); // true
   console.log(error instanceof AggregateError); // true
@@ -870,7 +868,7 @@ try {
 
 // only 1 key fails
 try {
-  isValidOrThrowAll({ a: 1 })({});
+  mustBeOrThrowAll({ a: 1 })({});
 } catch (error) {
   console.log(error instanceof TypeError); // true
   console.log(error instanceof SchemaValidationError); // false
@@ -887,14 +885,14 @@ EnumValidationError inherits from AggregateError.
 
 ```js
 try {
-  isValidOrThrow([Boolean, String])(1);
+  mustBe([Boolean, String])(1);
 } catch (error) {
   console.log(error instanceof EnumValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
-  isValidOrThrow([Boolean])(1);
+  mustBe([Boolean])(1);
 } catch (error) {
   console.log(error instanceof EnumValidationError); // false
   console.log(error instanceof TypeError); // true
@@ -903,7 +901,7 @@ try {
 
 #### SerieValidationError
 
-If using isValidOrThrowAll fails all validations of a serie , it will throw a SerieValidationError with all Errors aggregated in error.errors
+If using mustBeOrThrowAll fails all validations of a serie , it will throw a SerieValidationError with all Errors aggregated in error.errors
 
 But if the length of the enum is 1. it will throw only this error.
 
@@ -911,14 +909,14 @@ SerieValidationError inherits from AggregateError.
 
 ```js
 try {
-  isValidOrThrowAll(Boolean, String)(1);
+  mustBeOrThrowAll(Boolean, String)(1);
 } catch (error) {
   console.log(error instanceof SerieValidationError); // true
   console.log(error instanceof AggregateError); // true
 }
 
 try {
-  isValidOrThrowAll(Boolean)(1);
+  mustBeOrThrowAll(Boolean)(1);
 } catch (error) {
   console.log(error instanceof SerieValidationError); // false
   console.log(error instanceof TypeError); // true
@@ -954,7 +952,7 @@ All errors the library throws has the raw data collected in a property called `r
 
 ```js
 try {
-  isValidOrThrow({ a: Number })({ a: null });
+  mustBe({ a: Number })({ a: null });
 } catch (error) {
   console.log(error.raw);
 }
@@ -997,12 +995,12 @@ try {
 You can create your own validators and use them as custom validation creating new ones.
 
 ```js
-const isPositive = isValidOrThrow((v) => v > 0);
-const isNotBig = isValidOrThrow((v) => v < 100);
-const isNumber = isValidOrThrow([Number, String], (num) => num == Number(num));
+const isPositive = mustBe((v) => v > 0);
+const isNotBig = mustBe((v) => v < 100);
+const isNumber = mustBe([Number, String], (num) => num == Number(num));
 
-isValidOrThrow(isNumber, isPositive, isNotBig)("10"); // true
-isValidOrThrow(isNumber, isPositive, isNotBig)(200); // it throws
+mustBe(isNumber, isPositive, isNotBig)("10"); // returns "10"
+mustBe(isNumber, isPositive, isNotBig)(200); // it throws
 ```
 
 When used inside another kind of behavior, it will inherit the behavior from where it has been used.
@@ -1013,7 +1011,7 @@ const isNotBig = isValidOrLog((v) => v < 100);
 isNotBig(200); // false, logs '200 do not match validator (v) => v < 100'
 
 isValid(isNotBig)(200); // false , and won't log
-isValidOrThrow(isNotBig)(200); // fails , and won't log
+mustBe(isNotBig)(200); // fails , and won't log
 hasErrors(isNotBig)(200); // array,  won't log
 /*
 [
@@ -1052,13 +1050,13 @@ isValidOrLog(isBigNumber)("a12"); // false, and log only one error value "a10" d
 > Note: Async functions and generators are not normal function, so it will fail against Function constructor
 
 ```js
-import is, { AsyncFunction, GeneratorFunction } from "garn-validator";
+import mustBe, { AsyncFunction, GeneratorFunction } from "garn-validator";
 
-is(AsyncFunction)(async () => {}); // true
-is(GeneratorFunction)(function* () {}); // true
+mustBe(AsyncFunction)(async () => {}); // ok
+mustBe(GeneratorFunction)(function* () {}); // ok
 
-is(Function)(function* () {}); // throws
-is(Function)(async function () {}); // throws
+mustBe(Function)(function* () {}); // throws
+mustBe(Function)(async function () {}); // throws
 ```
 
 ### arrayOf
@@ -1066,10 +1064,10 @@ is(Function)(async function () {}); // throws
 As we use the array `[]` as enum, if you need to check the items of an array, you should treat it as an object and check against an schema.
 
 ```js
-import is from "garn-validator";
+import mustBe from "garn-validator";
 
-is(Array, { [/\d/]: Number })([1, 2, 3]); // true
-is(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
+mustBe(Array, { [/\d/]: Number })([1, 2, 3]); // returns [1, 2, 3]
+mustBe(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
 ```
 
 In order to not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
@@ -1077,10 +1075,10 @@ In order to not be so ugly you can import `arrayOf` from garn-validator as a sho
 `export const arrayOf = type => isValid(Array, {[/^\d$/]: type})`
 
 ```js
-import is, { arrayOf } from "garn-validator";
+import mustBe, { arrayOf } from "garn-validator";
 
-is(arrayOf(Number))([1, 2, 3]); // true
-is(arrayOf(Number))([1, 2, "3"]); // throws
+mustBe(arrayOf(Number))([1, 2, 3]); // returns [1, 2, 3]
+mustBe(arrayOf(Number))([1, 2, "3"]); // throws
 ```
 
 ### objectOf
@@ -1090,10 +1088,10 @@ You can import `objectOf` from garn-validator as a shortcut to:
 `export const objectOf = type => isValid(Object, {[/./]: type})`
 
 ```js
-import is, { objectOf } from "garn-validator";
+import mustBe, { objectOf } from "garn-validator";
 
-is(objectOf(Number))({ a: 1, b: 2 }); // true
-is(objectOf(Number))({ a: 1, b: "2" }); // throws
+mustBe(objectOf(Number))({ a: 1, b: 2 }); // returns { a: 1, b: 2 }
+mustBe(objectOf(Number))({ a: 1, b: "2" }); // throws
 ```
 
 # Roadmap

@@ -21,7 +21,7 @@ import {
   SchemaValidationError,
 } from "./constructors.js";
 
-const onValidDefault = () => true;
+const onValidDefault = (val) => val;
 const onInvalidDefault = (error) => {
   throw error;
 };
@@ -123,7 +123,7 @@ const validSchemaOrThrow = (data) => {
   const requiredKeys = Object.keys(schema).filter(isRequiredKey);
   for (const keyName of requiredKeys) {
     try {
-      let newValue = isValidTypeOrThrow({
+      let newValue = validTypeOrThrow({
         behavior,
         type: schema[keyName],
         value: clonedObject[keyName],
@@ -149,7 +149,7 @@ const validSchemaOrThrow = (data) => {
       let value = clonedObject[keyNameStripped];
       if (!isNullish(value)) {
         let type = schema[keyName];
-        let newValue = isValidTypeOrThrow({
+        let newValue = validTypeOrThrow({
           behavior,
           type,
           value,
@@ -180,7 +180,7 @@ const validSchemaOrThrow = (data) => {
     );
     for (const keyName of keys) {
       try {
-        let newValue = isValidTypeOrThrow({
+        let newValue = validTypeOrThrow({
           behavior,
           type: schema[regexpString],
           value: clonedObject[keyName],
@@ -219,7 +219,7 @@ const validMainValidatorOrThrow = (data) => {
     } else {
       let overrideBehavior = {
         ...data.behavior,
-        onValid: val => val,
+        onValid: onValidDefault,
         onInvalid: onInvalidDefault,
       };
       return fn(value, { [configurationSymbol]: overrideBehavior });
@@ -253,7 +253,7 @@ const validSeriesOrThrow = (behavior, types, value) => {
   for (const type of types) {
     value !== valueTransformed;
     try {
-      valueTransformed = isValidTypeOrThrow({
+      valueTransformed = validTypeOrThrow({
         behavior,
         type,
         value: valueTransformed,
@@ -278,7 +278,7 @@ const validEnumOrThrow = (data) => {
   const errors = [];
   for (const type of types) {
     try {
-      return isValidTypeOrThrow({ behavior, type, value, root, keyName, path });
+      return validTypeOrThrow({ behavior, type, value, root, keyName, path });
     } catch (error) {
       errors.push(error);
     }
@@ -290,7 +290,7 @@ const validEnumOrThrow = (data) => {
   });
 };
 
-const isValidTypeOrThrow = (data) => {
+const validTypeOrThrow = (data) => {
   switch (whatTypeIs(data.type)) {
     case "regex":
       validRegExpOrThrow(data);
@@ -355,8 +355,6 @@ const createOr = (types, behavior) => (defaultValue) =>
     name: "applyDefault",
   });
 
-const returnValue = (value) => value;
-
 const run = (behavior) => (...types) => createValidator(types, behavior);
 
 const config = ({
@@ -365,7 +363,7 @@ const config = ({
   onInvalid = onInvalidDefault,
   applyTransformation = false,
   applyDefault = false,
-  name = "isValidOrThrow",
+  name = "mustBe",
 }) =>
   run({
     collectAllErrors,
@@ -377,19 +375,22 @@ const config = ({
   });
 
 export const mustBe = config({
-  onValid: returnValue,
+  // onValid: onValidDefault, // default
+  // onInvalid: onInvalidDefault, // default
   // collectAllErrors: false, // default
   name: "mustBe",
 });
 
 export const isValid = config({
   onInvalid: () => false,
+  onValid: () => true,
   name: "isValid",
   // collectAllErrors: false, // default
 });
 
 export const isValidOrLog = config({
   onInvalid: logErrorsAndReturnFalse,
+  onValid: () => true,
   name: "isValidOrLog",
   // collectAllErrors: false, // default
 });
@@ -413,17 +414,16 @@ export const hasErrors = config({
 
 export const isValidOrLogAll = config({
   onInvalid: logErrorsAndReturnFalse,
-  // onValid: () => true, // default
+  onValid: () => true,
   name: "isValidOrLogAll",
 
   collectAllErrors: true,
 });
 
-export const isValidOrThrowAll = config({
+export const mustBeOrThrowAll = config({
   collectAllErrors: true,
-  name: "isValidOrThrowAll",
+  name: "mustBeOrThrowAll",
 });
 
-export const isValidOrThrow = config({});
 
 export default mustBe;

@@ -1,4 +1,4 @@
-import isValidOrThrow, {
+import mustBe, {
   AsyncFunction,
   GeneratorFunction,
 } from "garn-validator";
@@ -31,9 +31,9 @@ describe("Proxy detection", () => {
 
     [Object, new Proxy({}, {})],
     [Array, new Proxy([], {})],
-  ])("should work isValidOrThrow(%p)(%p)", (constructor, value) => {
+  ])("should work mustBe(%p)(%p)", (constructor, value) => {
     expect(() => {
-      isValidOrThrow(constructor)(value);
+      mustBe(constructor)(value);
     }).not.toThrow();
   });
   test.each([
@@ -42,9 +42,9 @@ describe("Proxy detection", () => {
     [Proxy, {}],
     [Proxy, []],
     [Proxy, null],
-  ])("should throw isValidOrThrow(%p)(%p)", (constructor, value) => {
+  ])("should throw mustBe(%p)(%p)", (constructor, value) => {
     expect(() => {
-      isValidOrThrow(constructor)(value);
+      mustBe(constructor)(value);
     }).toThrow();
   });
 });

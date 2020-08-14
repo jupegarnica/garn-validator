@@ -2,8 +2,8 @@ const validator = require('garn-validator');
 
 describe('Should work using require commonjs',()=> {
   test('default export works', () => {
-    const isValidOrThrow = validator.default;
-    isValidOrThrow(Number)(2);
+    const mustBe = validator.default;
+    mustBe(Number)(2);
 
   });
   test('named exports should work', () => {
