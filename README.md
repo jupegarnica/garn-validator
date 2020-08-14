@@ -286,7 +286,7 @@ There are six behaviors that can be divided in two categories:
 
 ### mustBe
 
-`mustBe` returns the value evaluated or it throws. Same as mustBe but returns the value itself.
+`mustBe` returns the value evaluated or it throws.
 
 ```js
 let input = "Garn";
