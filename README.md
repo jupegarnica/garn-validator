@@ -989,7 +989,7 @@ try {
   '$Error': [class TypeValidationError extends TypeError],
 
   // the behavior applied
-  conf: {
+  behavior: {
     collectAllErrors: false,
     onValid: [Function: onValidDefault],
     onInvalid: [Function: onInvalidDefault]
