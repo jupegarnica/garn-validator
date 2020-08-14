@@ -1,8 +1,7 @@
 import {
   hasErrors,
-  isValidOrThrow,
+  mustBe,
   isValid,
-  isValidOrThrowAll,
   isValidOrLog,
   isValidOrLogAll,
   TypeValidationError,

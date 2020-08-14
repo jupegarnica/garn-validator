@@ -1,4 +1,4 @@
-const { isValidOrThrow } = require('garn-validator/commonjs');
+const { mustBe } = require('garn-validator/commonjs');
 
 const schema = {
   name: /^[a-z]{3,}$/,
@@ -28,4 +28,4 @@ const obj = {
     },
   },
 };
-isValidOrThrow(schema)(obj);
+mustBe(schema)(obj);

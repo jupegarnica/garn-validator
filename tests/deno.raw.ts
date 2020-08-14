@@ -1,12 +1,12 @@
-import { isValidOrThrow } from "garn-validator";
-// import { isValidOrThrow } from "https://deno.land/x/garn_validator/src/index.js";
+import { mustBe } from "garn-validator";
+// import { mustBe } from "https://deno.land/x/garn_validator/src/index.js";
 
 
-// import IsValidOrThrow from "garn-validator/src/index.d.ts";
+// import mustBe from "garn-validator/src/index.d.ts";
 
-// isValidOrThrow as typeof IsValidOrThrow;
+// mustBe as typeof mustBe;
 
-// let n : string= isValidOrThrow(Number)(2);
+// let n : string= mustBe(Number)(2);
 
 // console.log(n);
 
@@ -38,4 +38,4 @@ const obj = {
     },
   },
 };
-isValidOrThrow(schema)(obj);
+mustBe(schema)(obj);

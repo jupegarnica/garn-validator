@@ -1,4 +1,4 @@
-import { isValidOrThrow } from "garn-validator";
+import { mustBe } from "garn-validator";
 
 const schema = {
   name: /^[a-z]{3,}$/,
@@ -28,4 +28,4 @@ const obj = {
     },
   },
 };
-isValidOrThrow(schema)(obj);
+mustBe(schema)(obj);
