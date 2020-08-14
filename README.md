@@ -267,10 +267,10 @@ There are seven behaviors that can be divided in two categories:
   - `isValidOrThrow` returns `true` or it throws (default export)
   - `isValid` returns `true` or `false`
   - `isValidOrLog` returns `true` or `false` and log error, never throws
+  - `mustBe` returns the value evaluated or it throws
 
 - It collects all Errors:
   - `hasErrors` returns null or Array of errors, never throws
-  - `mustBe` returns the value evaluated or it throws
   - `isValidOrLogAll` returns `true` or `false` and log all errors, never throws
   - `isValidOrThrowAll` returns `true` or throws AggregateError
 
@@ -294,7 +294,7 @@ try {
 }
 ```
 
-`mustBe` may have attached an .or() clause to apply a default value.
+`mustBe` may have attached an .or() to apply a default value if the validation fail.
 
 ```js
 let input = "Garn";
@@ -302,11 +302,11 @@ let isValidName = mustBe(String, (val) => val.length > 4).or("anonymous");
 let userName = isValidName(input); //  returns 'anonymous'
 ```
 
-The .or() clause can be call with anything or a function.
+The .or() can receive a function to apply a transformation to the original value.
 
 ```js
 let input = "42";
-let asNumber = mustBe(Number).or((value) => Number(value));
+let asNumber = mustBe(Number).or((value /* "42" */) => Number(value));
 let number = asNumber(input); //  returns 42
 ```
 
