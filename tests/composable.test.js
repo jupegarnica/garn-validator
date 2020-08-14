@@ -11,7 +11,7 @@ import mustBe, {
 describe("composable", () => {
   describe("basics", () => {
     test("should work", () => {
-      expect(mustBe(mustBe(Number))(1)).toBe(true);
+      expect(isValid(mustBe(Number))(1)).toBe(true);
     });
     test("should fail", () => {
       let validator = mustBe(Number);
