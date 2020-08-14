@@ -389,7 +389,7 @@ hasErrors(/[a-z]/, Number)("G"); // [TypeValidationError, TypeValidationError]
 
 ### mustBe vs mustBeOrThrowAll
 
-`mustBe` returns `true` or it throws the first error found.
+`mustBe` returns the value evaluated or it throws the first error found.
 
 ```js
 try {
@@ -400,7 +400,7 @@ try {
 }
 ```
 
-`mustBeOrThrowAll` returns `true` or it throws an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
+`mustBeOrThrowAll` returns the value evaluated or it throws an [`AggregateError`](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/AggregateError) with all errors found.
 
 ```js
 try {
