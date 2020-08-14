@@ -387,6 +387,10 @@ describe("mustBe", () => {
     test("should apply transformer if fails", () => {
       expect(mustBe(Number).or((val) => Number(val))("2")).toBe(2);
     });
+    test("should attach and or to validation", () => {
+      const isNumber = mustBe(Number)
+      expect(isNumber.or(0)(2)).toBe(2);
+    });
     test("should return a function", () => {
       let input = "i am not a function";
       let noop = () => {};
