@@ -23,6 +23,9 @@
 [![Node Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Node%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Node+Tests+CI%22)
 [![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Deno+Tests+CI%22)
 
+
+> DEPRECATION WARNING: `isValidOrThrow` behavior has been deprecated in favor of `mustBe`.  Learn more at [mustBe](#mustbe)
+
 <h2>Example</h2>
 
 ```js
