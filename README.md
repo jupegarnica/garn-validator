@@ -3,12 +3,13 @@
 <h2>Features</h2>
 
 - Supports checking primitives or objects with **schemas**
+- Apply default value if validation fails.
 - Easy to use and learn but **powerful**
 - It's totally **composable**
 - **Fast** and **without dependencies**
 - **Six behaviors**:
   - `mustBe` returns the value evaluated or it throws. (default export)
-  - `isValid` returns `true` or `false`,  never throws
+  - `isValid` returns `true` or `false`, never throws
   - `isValidOrLog` returns `true` or `false` and log error, never throws
   - `hasErrors` returns null or Array of errors, never throws
   - `mustBeOrThrowAll` returns the value evaluated or throws AggregateError
@@ -28,19 +29,19 @@
 import mustBe from "garn-validator";
 
 const isValidPassword = mustBe(
-  String,
-  (str) => str.length >= 8,
-  /[a-z]/,
-  /[A-Z]/,
-  /[0-9]/,
-  /[-_/!¡?¿$%&/()]/
+  String, //  must be String
+  (str) => str.length >= 8, // and length >= 8
+  /[a-z]/, // and have at least one lowercase
+  /[A-Z]/, // and have at least one uppercase
+  /[0-9]/, // and have at least one digit
+  /[-_/!¡?¿$%&/()]/ // and have at least one especial character
 );
 
 isValidPassword("12345Aa?"); // returns "12345Aa?"
 
-const isValidName = mustBe(String, (name) => name.length >= 3);
+const isValidName = mustBe(String, (name) => name.length > 3).or("anonymous"); // will auto correct to 'anonymous' if fails
 
-isValidName("qw"); // fails
+// isValidName("qw"); // fails
 
 const isValidAge = mustBe(
   Number,
@@ -48,7 +49,7 @@ const isValidAge = mustBe(
   (age) => age < 40
 );
 
-isValidAge(15); // fails
+// isValidAge(15); // fails
 
 // composition
 
@@ -59,12 +60,20 @@ const isValidUser = mustBe({
   country: ["ES", "UK"], // 'ES' or 'UK'
 });
 
-isValidUser({
+const newUser = isValidUser({
+  name: "g", // will be fixed
+  age: 38,
+  password: "12345zZ?",
+  country: "ES",
+}); // returns { name: 'anonymous', age: 38, password: '12345zZ?', country: 'ES' }
+
+
+const anotherUser = isValidUser({
   name: "garn",
   age: 38,
   password: "1234", // incorrect
   country: "ES",
-}); // it throws
+}); // it throws --> TypeValidationError: At path /password "1234" do not match validator (str) => str.length >= 8
 ```
 
 <h1>Contents</h1>
@@ -264,7 +273,7 @@ There are six behaviors that can be divided in two categories:
 - It stops in first error (bail):
 
   - `mustBe` returns the value evaluated or it throws. (default export)
-  - `isValid` returns `true` or `false`,  never throws
+  - `isValid` returns `true` or `false`, never throws
   - `isValidOrLog` returns `true` or `false` and log error, never throws
 
 - It collects all Errors:
@@ -323,22 +332,21 @@ It can work nested in a schema
 let input = { name: "Garn" };
 let isValidName = mustBe(String, (val) => val.length > 4).or("anonymous");
 
-let user = mustBe({name: isValidName })(input);  // { name:'anonymous' }
+let user = mustBe({ name: isValidName })(input); // { name:'anonymous' }
 ```
 
 If the .or() fails the whole validation will fail
 
 ```js
 let input = "not a valid number";
-let transformToNumberIfPosible = maybeNumber => {
+let transformToNumberIfPosible = (maybeNumber) => {
   let number = Number(maybeNumber);
   if (number == maybeNumber) return number;
-  else throw new TypeError('not valid number')
-}
+  else throw new TypeError("not valid number");
+};
 let asNumber = mustBe(Number).or(transformToNumberIfPosible);
 let number = asNumber(input); //  it throws TypeError: not valid number
 ```
-
 
 ### isValid, isValidOrLog and isValidOrLogAll
 
