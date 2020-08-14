@@ -20,6 +20,7 @@ export const le = (limit) => (value) => value <= limit;
 export const between = (min, max) => and(ge(min), le(max));
 
 export const Integer = and(Number, Number.isInteger);
+
 export const Numeric = and(
   [Number, String, BigInt],
   (num) => num == Number(num),

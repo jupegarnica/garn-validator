@@ -219,7 +219,7 @@ const validMainValidatorOrThrow = (data) => {
     } else {
       let overrideBehavior = {
         ...data.behavior,
-        onValid: onValidDefault,
+        onValid: val => val,
         onInvalid: onInvalidDefault,
       };
       return fn(value, { [configurationSymbol]: overrideBehavior });
@@ -251,8 +251,13 @@ const validSeriesOrThrow = (behavior, types, value) => {
   const errors = [];
   let valueTransformed = value;
   for (const type of types) {
+    value !== valueTransformed;
     try {
-      valueTransformed = isValidTypeOrThrow({ behavior, type, value });
+      valueTransformed = isValidTypeOrThrow({
+        behavior,
+        type,
+        value: valueTransformed,
+      });
     } catch (error) {
       errors.push(error);
       if (!behavior.collectAllErrors) break;
@@ -293,7 +298,6 @@ const isValidTypeOrThrow = (data) => {
     case "primitive":
       validPrimitiveOrThrow(data);
       return data.value;
-
     case "constructor":
       validConstructorOrThrow(data);
       return data.value;
@@ -302,7 +306,8 @@ const isValidTypeOrThrow = (data) => {
     case "schema":
       return validSchemaOrThrow(data);
     case "validator":
-      return validCustomValidatorOrThrow(data);
+      validCustomValidatorOrThrow(data);
+      return data.value;
     case "main-validator":
       return validMainValidatorOrThrow(data);
     case "invalid":
@@ -312,11 +317,11 @@ const isValidTypeOrThrow = (data) => {
   }
 };
 
-function createValidator(types, behavior) {
-  function validator(value, secretArg) {
+const createValidator = (types, behavior) => {
+  const validator = (value, overrideBehavior) => {
     let currentBehavior = behavior;
-    if (secretArg && secretArg[configurationSymbol]) {
-      currentBehavior = secretArg[configurationSymbol];
+    if (overrideBehavior && overrideBehavior[configurationSymbol]) {
+      currentBehavior = overrideBehavior[configurationSymbol];
     }
     let newValue = value;
     try {
@@ -326,17 +331,17 @@ function createValidator(types, behavior) {
     }
 
     return currentBehavior.onValid(newValue);
-  }
+  };
   validator[validatorSymbol] = true;
   validator.displayName = `${behavior.name}(${types.map(stringify)})`;
   if (behavior.name === "mustBe") {
-    validator.or = createOr(types, { ...behavior });
+    validator.or = createOr(types, behavior);
   }
   if (behavior.name === "applyDefault") {
     validator.applyDefault = true;
   }
   return validator;
-}
+};
 
 const applyDefault = (defaultValue) => (error, value) => {
   if (defaultValue instanceof Function) return defaultValue(value, error);
@@ -373,6 +378,7 @@ const config = ({
 
 export const mustBe = config({
   onValid: returnValue,
+  // collectAllErrors: false, // default
   name: "mustBe",
 });
 
@@ -412,14 +418,12 @@ export const isValidOrLogAll = config({
 
   collectAllErrors: true,
 });
-export const isValidOrLogAllErrors = isValidOrLogAll;
 
 export const isValidOrThrowAll = config({
   collectAllErrors: true,
   name: "isValidOrThrowAll",
 });
-export const isValidOrThrowAllErrors = isValidOrThrowAll;
 
 export const isValidOrThrow = config({});
 
-export default isValidOrThrow;
+export default mustBe;

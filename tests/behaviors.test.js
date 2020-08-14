@@ -416,6 +416,24 @@ describe("mustBe", () => {
 
       expect(globalThis.console.log).not.toHaveBeenCalled();
     });
+    test("should work in series passing de default value to the next validation", () => {
+
+      const NumberOrZero = mustBe(Number).or(0);
+
+      expect(mustBe(NumberOrZero, Number)(null)).toBe(0);
+    });
+    test("should work in enums applying default", () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      expect(mustBe([ NumberOrZero, String])(null)).toBe(0);
+    });
+    test("should work in enums NOT applying default", () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      expect(mustBe([ NumberOrZero, String])(1)).toBe(1);
+    });
+    test("should work in enums", () => {
+      const NumberOrZero = mustBe(Number).or(0);
+      expect(mustBe([ null, NumberOrZero])(null)).toBe(null);
+    });
 
     test("should work nested", () => {
       const NumberOrZero = mustBe(Numeric).or(0);

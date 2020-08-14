@@ -7,17 +7,22 @@ import {
   isValidOrLogAll,
   TypeValidationError,
   Integer,
-  Numeric,
+  // Numeric,
   SafeNumber,
   mustBe,
+  Positive,
+  and
 } from "garn-validator";
 
-const isString = isValidOrLog(String);
-const asNumber = mustBe(Number).or(0)
-;
+export const Numeric = and(
+  [Number, String, BigInt],
+  (num) => num == Number(num),
+);
+// const asNumber = mustBe(isPositive).or(0);
 
+const isPositive = and(Numeric, num => num > 0);
 try {
-  console.log(mustBe(asNumber).or(3)(2));
+  console.log(mustBe(isPositive)(-1));
 } catch (error) {
   console.log(error.message);
 }
