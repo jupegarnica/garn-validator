@@ -636,7 +636,7 @@ let obj = {
 mustBe(schema)(obj); // returns obj
 ```
 
-> **Only the keys in the schema will be checked. Any key not present in the schema won't be checked**
+> **Only the keys in the schema will be checked. Any key not present in the schema won't be checked  (under consideration to be changed)**
 
 ```js
 mustBe({})({ a: 1 }); // returns { a: 1 } , a is not in the schema
