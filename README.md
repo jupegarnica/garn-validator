@@ -44,7 +44,7 @@ isValidPassword("12345Aa?"); // returns "12345Aa?"
 
 const isValidName = mustBe(String, (name) => name.length > 3).or("anonymous"); // will auto correct to 'anonymous' if fails
 
-// isValidName("qw"); // fails
+isValidName("qw"); // return 'anonymous'
 
 const isValidAge = mustBe(
   Number,
@@ -64,7 +64,7 @@ const isValidUser = mustBe({
 });
 
 const newUser = isValidUser({
-  name: "g", // will be fixed
+  name: "", // will be fixed
   age: 38,
   password: "12345zZ?",
   country: "ES",
