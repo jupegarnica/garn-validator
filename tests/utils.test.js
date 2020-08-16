@@ -22,7 +22,9 @@ import {
   startsWith,
   endsWith,
   asNumber,
-  CastError
+  CastError,
+  asString,
+  cast,
 } from "garn-validator";
 
 describe("utils", () => {
@@ -519,7 +521,27 @@ describe("utils", () => {
     });
   });
   describe("casting", () => {
-    describe('asNumber', () => {
+    describe("cast()", () => {
+      test("should cast", () => {
+        expect(cast(() => "hello")(null)).toBe("hello");
+      });
+      test("should cast nested", () => {
+        expect(mustBe({ a: cast(() => "hello") })({ a: "hello" })).toEqual({
+          a: "hello",
+        });
+      });
+      test("should fail", () => {
+        try {
+          cast(() => {
+            throw new Error("ups");
+          })(null);
+        } catch (error) {
+          expect(error.message).toMatch("Imposible to cast with");
+          expect(error.raw).toBeDefined();
+        }
+      });
+    });
+    describe("asNumber", () => {
       test("should work", () => {
         expect(mustBe(asNumber)(2)).toBe(2);
         expect(mustBe(asNumber)(2n)).toBe(2);
@@ -539,7 +561,30 @@ describe("utils", () => {
           mustBe(asNumber)(new Date());
         }).toThrow(CastError);
         expect(() => {
-          mustBe(asNumber)(NaN)
+          mustBe(asNumber)(NaN);
+        }).toThrow(CastError);
+      });
+    });
+    describe("asString", () => {
+      test("should work", () => {
+        expect(mustBe(asString)(1)).toBe("1");
+        expect(mustBe(asString)(1n)).toBe("1");
+        expect(mustBe(asString)(0b1)).toBe("1");
+        expect(mustBe(asString)("1")).toBe("1");
+        expect(mustBe(asString)(true)).toBe("true");
+      });
+      test("should throw", () => {
+        expect(() => {
+          mustBe(asString)([1, 2]);
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asString)({ a: 2 });
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asString)(function () {});
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asString)(Symbol());
         }).toThrow(CastError);
       });
     });

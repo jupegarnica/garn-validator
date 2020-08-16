@@ -2,7 +2,7 @@ import mustBe from "garn-validator";
 import { massiveObj1Mb } from "./data.js";
 
 
-describe("speed tests", () => {
+describe.skip("speed tests", () => {
   describe("check primitives", () => {
     test("check with constructor", () => {
       const start = Date.now();

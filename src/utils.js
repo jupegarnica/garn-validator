@@ -71,8 +71,12 @@ export const cast = (caster) =>
   mustBe(() => false).or((val, error) => {
     try {
       return caster(val, error);
-    } catch (error) {
-      throw new CastError("Imposible to cast with: " + stringify(caster), error.raw);
+    } catch (err) {
+      throw new CastError(
+        `Imposible to cast with ${stringify(caster)}:
+ ${err}`,
+        error.raw
+      );
     }
   });
 
@@ -81,4 +85,7 @@ const castToNumberIfPosible = (maybeNumber, error) => {
   if (number == maybeNumber) return number;
   else throw error;
 };
+
 export const asNumber = cast(castToNumberIfPosible);
+
+export const asString = mustBe([BigInt, Number, String, Boolean], cast(String));
