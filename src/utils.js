@@ -1,6 +1,6 @@
 import { isValid, mustBe } from "./lib.js";
 import { stringify } from "./helpers.js";
-import { CastError } from "./constructors";
+import { CastError } from "./constructors.js";
 // LOGICAL
 
 // TODO Rethink to collect all errors if posible
@@ -59,7 +59,12 @@ export const Uppercase = /^(([A-Z\W\d]))+$/;
 export const insensitiveCase = (str) => new RegExp(str, "i");
 
 // TODO DateString
+function isValidDate(d) {
+  return d instanceof Date && !Number.isNaN(Date.parse(d));
+}
+export const DateString = (string) => string && isValidDate(new Date(string));
 
+// Objects
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
 

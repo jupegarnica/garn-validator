@@ -25,6 +25,7 @@ import {
   CastError,
   asString,
   cast,
+  DateString,
 } from "garn-validator";
 
 describe("utils", () => {
@@ -520,6 +521,26 @@ describe("utils", () => {
       }).toThrow();
     });
   });
+  describe("Date", () => {
+    describe("DateString", () => {
+      test("should work", () => {
+        expect(mustBe(DateString)("2020-01-02")).toBe("2020-01-02");
+        expect(mustBe(DateString)("2020-01-02 10:02:03")).toBe("2020-01-02 10:02:03");
+      });
+      test("should throw", () => {
+        expect(() => {
+          mustBe(DateString)("2020-13-32");
+        }).toThrow();
+        expect(() => {
+          mustBe(DateString)("");
+        }).toThrow();
+        expect(() => {
+          mustBe(DateString)(null);
+        }).toThrow();
+      });
+    });
+  });
+
   describe("casting", () => {
     describe("cast()", () => {
       test("should cast", () => {
