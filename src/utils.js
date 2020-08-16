@@ -62,7 +62,12 @@ export const insensitiveCase = (str) => new RegExp(str, "i");
 function isValidDate(d) {
   return d instanceof Date && !Number.isNaN(Date.parse(d));
 }
-export const DateString = (string) => string && isValidDate(new Date(string));
+export const DateString = and(String, (string) =>
+  isValidDate(new Date(string))
+);
+
+export const after = (min) => (date) => new Date(date) > new Date(min);
+export const before = (max) => (date) => new Date(date) < new Date(max);
 
 // Objects
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });

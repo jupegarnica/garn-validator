@@ -26,6 +26,8 @@ import {
   asString,
   cast,
   DateString,
+  after,
+  before,
 } from "garn-validator";
 
 describe("utils", () => {
@@ -525,17 +527,54 @@ describe("utils", () => {
     describe("DateString", () => {
       test("should work", () => {
         expect(mustBe(DateString)("2020-01-02")).toBe("2020-01-02");
-        expect(mustBe(DateString)("2020-01-02 10:02:03")).toBe("2020-01-02 10:02:03");
+        expect(mustBe(DateString)("2020-01-02 10:02:03")).toBe(
+          "2020-01-02 10:02:03"
+        );
       });
       test("should throw", () => {
         expect(() => {
           mustBe(DateString)("2020-13-32");
         }).toThrow();
         expect(() => {
+          mustBe(DateString)(new Date("2020-1-3"));
+        }).toThrow();
+        expect(() => {
           mustBe(DateString)("");
         }).toThrow();
         expect(() => {
           mustBe(DateString)(null);
+        }).toThrow();
+      });
+    });
+    describe("after() and before()", () => {
+      test("should work with Date instance", () => {
+        const date = new Date("2020-01-02");
+        expect(mustBe(after(new Date("2020-01-01")))(date)).toEqual(date);
+        expect(mustBe(before(new Date("2021-01-01")))(date)).toEqual(date);
+      });
+      test("should work with DateString", () => {
+        const date = "2020-01-02";
+        expect(mustBe(after("2020-01-01"))(date)).toEqual(date);
+        expect(mustBe(before("2021-01-01"))(date)).toEqual(date);
+      });
+      test("should fail with DateString", () => {
+        const date = "2019-01-02";
+        expect(() => {
+          mustBe(after("2020-01-01"))(date);
+        }).toThrow();
+
+        expect(() => {
+          mustBe(before("2018-01-01"))(date);
+        }).toThrow();
+      });
+      test("should fail with Date", () => {
+        const date = "2019-01-02";
+        expect(() => {
+          mustBe(after(new Date("2020-01-01")))(date);
+        }).toThrow();
+
+        expect(() => {
+          mustBe(before(new Date("2018-01-01")))(date);
         }).toThrow();
       });
     });
