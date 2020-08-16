@@ -717,7 +717,7 @@ mustBe({
 })({
   x: "x", // not checked as Number, checked as String
   y: "y", // checked as String
-  z: 1, // checked as Number, fails
+  z: "z", // checked as Number, fails
 }); // throw
 ```
 
