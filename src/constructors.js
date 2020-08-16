@@ -16,6 +16,15 @@ export class TypeValidationError extends TypeError {
     Object.defineProperty(this, "raw", descriptor(data));
   }
 }
+
+export class CastError extends TypeError {
+  constructor(msg, data) {
+    super(msg);
+    this.name = "CastError";
+    Object.defineProperty(this, "raw", descriptor(data));
+  }
+}
+
 export class EnumValidationError extends AggregateError {
   constructor(errors, msg, data) {
     super(errors, msg);

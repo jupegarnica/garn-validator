@@ -2,8 +2,6 @@ import {
   mustBe,
   arrayOf,
   objectOf,
-  mustBeOrThrowAll,
-  hasErrors,
   not,
   or,
   and,
@@ -23,6 +21,8 @@ import {
   Uppercase,
   startsWith,
   endsWith,
+  asNumber,
+  CastError
 } from "garn-validator";
 
 describe("utils", () => {
@@ -433,9 +433,7 @@ describe("utils", () => {
         mustBe(SafeNumber)(Number.MIN_SAFE_INTEGER - 1);
       }).toThrow();
       expect(() => {
-        mustBe(SafeNumber)(
-          999999999999999999999999999999999999999999999999
-        );
+        mustBe(SafeNumber)(999999999999999999999999999999999999999999999999);
       }).toThrow();
       expect(() => {
         mustBe(SafeNumber)(Number.MAX_SAFE_INTEGER + 1);
@@ -518,6 +516,32 @@ describe("utils", () => {
       expect(() => {
         mustBe(endsWith("HELLO"))("Lorem ipsum hello 33");
       }).toThrow();
+    });
+  });
+  describe("casting", () => {
+    describe('asNumber', () => {
+      test("should work", () => {
+        expect(mustBe(asNumber)(2)).toBe(2);
+        expect(mustBe(asNumber)(2n)).toBe(2);
+        expect(mustBe(asNumber)("2")).toBe(2);
+      });
+      test("should throw", () => {
+        expect(() => {
+          mustBe(asNumber)("a2");
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asNumber)(null);
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asNumber)("2n");
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asNumber)(new Date());
+        }).toThrow(CastError);
+        expect(() => {
+          mustBe(asNumber)(NaN)
+        }).toThrow(CastError);
+      });
     });
   });
 });
