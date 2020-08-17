@@ -127,12 +127,14 @@ export const insensitiveCase = (query) => {
 };
 
 // DATES
-function isValidDate(d) {
-  return d instanceof Date && !Number.isNaN(Date.parse(d));
+function isValidDate(date) {
+  isValidDate.displayName = `isValidDate(${stringify(date)})`;
+  if (!(date instanceof Date)) {
+    date = new Date(date);
+  }
+  return date instanceof Date && !Number.isNaN(Date.parse(date));
 }
-export const DateString = mustBe(String, (string) =>
-  isValidDate(new Date(string))
-);
+export const DateString = mustBe(String, isValidDate);
 DateString.displayName = "DateString";
 
 export const DateValid = mustBe(Date, isValidDate);

@@ -5,21 +5,20 @@ import {
   isValidOrLogAll,
   TypeValidationError,
   Integer,
-  // Numeric,
+  Numeric,
+  Negative,
   SafeNumber,
   mustBe,
   Positive,
   and,
   DateString,
-  cast
+  mustBeOrThrowAll,
 } from "garn-validator";
 
 try {
 
   console.log(
-    mustBe(cast(()=>{
-      throw 'ups'
-    }))("2020-13-32")
+    isValidOrLogAll({a:DateString, b:Negative, c:Numeric})({a:"2020-13-32",b:2})
 
   );
 
