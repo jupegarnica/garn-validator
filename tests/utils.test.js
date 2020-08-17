@@ -664,7 +664,7 @@ describe("utils", () => {
         let str = "2020-10-31";
         expect(mustBe(asDateString)(str)).toEqual(str);
         expect(mustBe(asDateString)(new Date(str))).toMatch(
-          "Sat Oct 31 2020 01:00:00"
+          "Sat Oct 31 2020"
         );
       });
       test("should work nested", () => {
