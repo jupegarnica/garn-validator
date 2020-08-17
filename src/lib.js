@@ -19,6 +19,7 @@ import {
   SerieValidationError,
   EnumValidationError,
   SchemaValidationError,
+  CastError,
 } from "./constructors.js";
 
 const onValidDefault = (val) => val;
@@ -344,7 +345,18 @@ const createValidator = (types, behavior) => {
 };
 
 const applyDefault = (defaultValue) => (error, value) => {
+//   try {
+//     if (defaultValue instanceof Function) return defaultValue(value, error);
+//   } catch (err) {
+//     throw new CastError(
+//       [error],
+//       `Imposible to cast with ${stringify(defaultValue)}:
+// ${err}`,
+//       error.raw
+//     );
+//   }
   if (defaultValue instanceof Function) return defaultValue(value, error);
+
   return defaultValue;
 };
 
@@ -424,6 +436,5 @@ export const mustBeOrThrowAll = config({
   collectAllErrors: true,
   name: "mustBeOrThrowAll",
 });
-
 
 export default mustBe;

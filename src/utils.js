@@ -77,18 +77,6 @@ export const objectOf = (type) => isValid(Object, { [/./]: type });
 export const noExtraKeys = (schema) => ({ ...schema, [/./]: () => false });
 
 // cast
-export const cast = (caster) =>
-  mustBe(() => false).or((val, error) => {
-    try {
-      return caster(val, error);
-    } catch (err) {
-      throw new CastError(
-        `Imposible to cast with ${stringify(caster)}:
- ${err}`,
-        error.raw
-      );
-    }
-  });
 
 const castToNumberIfPosible = (maybeNumber, error) => {
   let number = Number(maybeNumber);
@@ -96,6 +84,6 @@ const castToNumberIfPosible = (maybeNumber, error) => {
   else throw error;
 };
 
-export const asNumber = cast(castToNumberIfPosible);
+export const asNumber = mustBe(Numeric, mustBe(Number).or(castToNumberIfPosible));
 
-export const asString = mustBe([BigInt, Number, String, Boolean], cast(String));
+export const asString = mustBe([BigInt, Number, String, Boolean, Date], mustBe(String).or(String))

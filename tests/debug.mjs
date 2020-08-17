@@ -10,15 +10,19 @@ import {
   mustBe,
   Positive,
   and,
-  DateString
+  DateString,
+  cast
 } from "garn-validator";
 
 try {
 
   console.log(
-    mustBe(DateString)("2020-13-32")
+    mustBe(cast(()=>{
+      throw 'ups'
+    }))("2020-13-32")
 
   );
+
 
 } catch (error) {
   console.log(error);

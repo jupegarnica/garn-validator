@@ -17,9 +17,9 @@ export class TypeValidationError extends TypeError {
   }
 }
 
-export class CastError extends TypeError {
-  constructor(msg, data) {
-    super(msg);
+export class CastError extends AggregateError {
+  constructor(errors, msg, data) {
+    super(errors, msg);
     this.name = "CastError";
     Object.defineProperty(this, "raw", descriptor(data));
   }

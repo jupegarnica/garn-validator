@@ -107,7 +107,7 @@ const parser = () => {
       return addStripMark(value.name);
     }
     if (typeof value === "function") {
-      return addStripMark(value.toString());
+      return addStripMark(value.displayName || value.toString());
     }
     if (checkConstructor(RegExp, value)) {
       return addStripMark(value.toString());

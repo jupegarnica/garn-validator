@@ -24,7 +24,6 @@ import {
   asNumber,
   CastError,
   asString,
-  cast,
   DateString,
   after,
   before,
@@ -581,26 +580,7 @@ describe("utils", () => {
   });
 
   describe("casting", () => {
-    describe("cast()", () => {
-      test("should cast", () => {
-        expect(cast(() => "hello")(null)).toBe("hello");
-      });
-      test("should cast nested", () => {
-        expect(mustBe({ a: cast(() => "hello") })({ a: "hello" })).toEqual({
-          a: "hello",
-        });
-      });
-      test("should fail", () => {
-        try {
-          cast(() => {
-            throw new Error("ups");
-          })(null);
-        } catch (error) {
-          expect(error.message).toMatch("Imposible to cast with");
-          expect(error.raw).toBeDefined();
-        }
-      });
-    });
+
     describe("asNumber", () => {
       test("should work", () => {
         expect(mustBe(asNumber)(2)).toBe(2);
