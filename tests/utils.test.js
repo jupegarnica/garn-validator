@@ -22,7 +22,7 @@ import {
   startsWith,
   endsWith,
   asNumber,
-  CastError,
+  noExtraKeys,
   asString,
   DateString,
   after,
@@ -30,24 +30,34 @@ import {
 } from "garn-validator";
 
 describe("utils", () => {
-  test("ArrayOf", () => {
-    expect(() => {
-      mustBe(arrayOf(Number))([1, 2]);
-    }).not.toThrow();
-    expect(() => {
-      mustBe(arrayOf(Number))([1, 2, "3"]);
-    }).toThrow();
-    expect(() => {
-      mustBe(arrayOf(Number))(["1", 2, 3]);
-    }).toThrow();
-  });
-  test("objectOf", () => {
-    expect(() => {
-      mustBe(objectOf(Number))({ a: 1 });
-    }).not.toThrow();
-    expect(() => {
-      mustBe(objectOf(Number))({ a: 1, b: "b" });
-    }).toThrow();
+  describe('objects', () => {
+    test("ArrayOf", () => {
+      expect(() => {
+        mustBe(arrayOf(Number))([1, 2]);
+      }).not.toThrow();
+      expect(() => {
+        mustBe(arrayOf(Number))([1, 2, "3"]);
+      }).toThrow();
+      expect(() => {
+        mustBe(arrayOf(Number))(["1", 2, 3]);
+      }).toThrow();
+    });
+    test("objectOf", () => {
+      expect(() => {
+        mustBe(objectOf(Number))({ a: 1 });
+      }).not.toThrow();
+      expect(() => {
+        mustBe(objectOf(Number))({ a: 1, b: "b" });
+      }).toThrow();
+    });
+    test("noExtraKeys", () => {
+      expect(() => {
+        mustBe(noExtraKeys({ a: Number }))({ a: 1, b: 1 });
+      }).toThrow();
+      expect(() => {
+        mustBe(noExtraKeys({ a: Number }))({ a: 1 });
+      }).not.toThrow();
+    });
   });
 
   describe("not()", () => {
@@ -590,19 +600,19 @@ describe("utils", () => {
       test("should throw", () => {
         expect(() => {
           mustBe(asNumber)("a2");
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asNumber)(null);
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asNumber)("2n");
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asNumber)(new Date());
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asNumber)(NaN);
-        }).toThrow(CastError);
+        }).toThrow();
       });
     });
     describe("asString", () => {
@@ -616,16 +626,16 @@ describe("utils", () => {
       test("should throw", () => {
         expect(() => {
           mustBe(asString)([1, 2]);
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asString)({ a: 2 });
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asString)(function () {});
-        }).toThrow(CastError);
+        }).toThrow();
         expect(() => {
           mustBe(asString)(Symbol());
-        }).toThrow(CastError);
+        }).toThrow();
       });
     });
   });

@@ -405,7 +405,7 @@ describe("mustBe", () => {
       });
       expect(() => {
         mustBe(NumberOrZero)(null);
-      }).toThrow("ups");
+      }).toThrow();
     });
 
     test("should stop collecting errors if OR fails", () => {

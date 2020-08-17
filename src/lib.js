@@ -345,18 +345,16 @@ const createValidator = (types, behavior) => {
 };
 
 const applyDefault = (defaultValue) => (error, value) => {
-//   try {
-//     if (defaultValue instanceof Function) return defaultValue(value, error);
-//   } catch (err) {
-//     throw new CastError(
-//       [error],
-//       `Imposible to cast with ${stringify(defaultValue)}:
-// ${err}`,
-//       error.raw
-//     );
-//   }
-  if (defaultValue instanceof Function) return defaultValue(value, error);
-
+  try {
+    if (defaultValue instanceof Function) return defaultValue(value, error);
+  } catch (err) {
+    throw new CastError(
+      [err],
+      `Imposible to cast with ${stringify(defaultValue)}:
+${err}`,
+      error.raw
+    );
+  }
   return defaultValue;
 };
 

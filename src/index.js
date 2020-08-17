@@ -8,6 +8,7 @@ export {
   SerieValidationError,
   EnumValidationError,
   SchemaValidationError,
+  CastError,
 } from "./constructors.js";
 
 export * from "./utils.js";
