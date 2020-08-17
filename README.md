@@ -348,7 +348,7 @@ let transformToNumberIfPosible = (maybeNumber) => {
   else throw new TypeError("not valid number");
 };
 let asNumber = mustBe(Number).or(transformToNumberIfPosible);
-let number = asNumber(input); //  it throws TypeError: not valid number
+let number = asNumber(input); //  it throws CastError (aggregateError) with TypeError: not valid number within its array of errors
 ```
 
 ### isValid, isValidOrLog and isValidOrLogAll
