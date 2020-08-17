@@ -1,9 +1,8 @@
 import { isValid, mustBe } from "./lib.js";
-import { stringify } from "./helpers.js";
-import { CastError } from "./constructors.js";
+
 // LOGICAL
 
-// TODO Rethink to collect all errors if posible
+// TODO RETHINK TO COLLECT ALL ERRORS IF POSIBLE
 export const not = (...args) => (val) => !isValid(...args)(val);
 export const or = (...args) => args;
 export const and = (...args) => isValid(...args);
@@ -45,6 +44,7 @@ export const SafeNumber = and(
 export const min = ge;
 export const max = le;
 
+// STRINGS
 export const contains = (query) => new RegExp(query);
 export const startsWith = (query) => (value) => value.search(query) === 0;
 
@@ -53,37 +53,52 @@ export const endsWith = (query) => (value) =>
 export const Lowercase = /^(([a-z\W\d]))+$/;
 export const Uppercase = /^(([A-Z\W\d]))+$/;
 
-// TODO insensitiveAccents
+// TODO INSENSITIVEACCENTS
 
-// export const insensitiveAccents = null;
+// EXPORT CONST INSENSITIVEACCENTS = NULL;
 export const insensitiveCase = (str) => new RegExp(str, "i");
 
-// TODO DateString
+// DATES
 function isValidDate(d) {
   return d instanceof Date && !Number.isNaN(Date.parse(d));
 }
-export const DateString = and(String, (string) =>
+export const DateString = mustBe(String, (string) =>
   isValidDate(new Date(string))
 );
+
+export const DateValid = mustBe(Date, isValidDate);
 
 export const after = (min) => (date) => new Date(date) > new Date(min);
 export const before = (max) => (date) => new Date(date) < new Date(max);
 
-// Objects
+// OBJECTS
 export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
 export const objectOf = (type) => isValid(Object, { [/./]: type });
 
-// TODO test noExtraKeys
 export const noExtraKeys = (schema) => ({ ...schema, [/./]: () => false });
 
-// cast
-
+// CASTING
 const castToNumberIfPosible = (maybeNumber, error) => {
   let number = Number(maybeNumber);
   if (number == maybeNumber) return number;
   else throw error;
 };
 
-export const asNumber = mustBe(Numeric, mustBe(Number).or(castToNumberIfPosible));
+export const asNumber = mustBe(
+  Numeric,
+  mustBe(Number).or(castToNumberIfPosible)
+);
 
-export const asString = mustBe([BigInt, Number, String, Boolean, Date], mustBe(String).or(String))
+export const asString = mustBe(
+  [BigInt, Number, String, Boolean, Date],
+  mustBe(String).or(String)
+);
+
+export const asDate = mustBe(
+  [DateValid, DateString],
+  mustBe(Date).or((str) => new Date(str))
+);
+export const asDateString = mustBe(
+  [DateValid, DateString],
+  mustBe(DateString).or(String)
+);

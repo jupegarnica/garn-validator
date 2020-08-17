@@ -27,10 +27,12 @@ import {
   DateString,
   after,
   before,
+  asDate,
+  asDateString,
 } from "garn-validator";
 
 describe("utils", () => {
-  describe('objects', () => {
+  describe("objects", () => {
     test("ArrayOf", () => {
       expect(() => {
         mustBe(arrayOf(Number))([1, 2]);
@@ -590,7 +592,6 @@ describe("utils", () => {
   });
 
   describe("casting", () => {
-
     describe("asNumber", () => {
       test("should work", () => {
         expect(mustBe(asNumber)(2)).toBe(2);
@@ -635,6 +636,53 @@ describe("utils", () => {
         }).toThrow();
         expect(() => {
           mustBe(asString)(Symbol());
+        }).toThrow();
+      });
+    });
+    describe("asDate", () => {
+      test("should work", () => {
+        let str = "2020-10-31";
+        expect(mustBe(asDate)(str)).toEqual(new Date(str));
+        expect(mustBe(asDate)(new Date(str))).toEqual(new Date(str));
+      });
+      test("should throw", () => {
+        let str = "2020-10-32";
+        expect(() => {
+          mustBe(asDate)(str);
+        }).toThrow();
+
+        expect(() => {
+          mustBe(asDate)(new Date(str));
+        }).toThrow();
+        expect(() => {
+          mustBe(asDate)(null);
+        }).toThrow();
+      });
+    });
+    describe("asDateString", () => {
+      test("should work", () => {
+        let str = "2020-10-31";
+        expect(mustBe(asDateString)(str)).toEqual(str);
+        expect(mustBe(asDateString)(new Date(str))).toMatch(
+          "Sat Oct 31 2020 01:00:00"
+        );
+      });
+      test("should work nested", () => {
+        let str = "2020-10-31";
+        expect(mustBe({ date: asDateString })({ date: str })).toEqual({
+          date: str,
+        });
+      });
+      test("should throw", () => {
+        let str = "2020-10-32";
+        expect(() => {
+          mustBe(asDateString)(str);
+        }).toThrow();
+        expect(() => {
+          mustBe(asDateString)(new Date(str));
+        }).toThrow();
+        expect(() => {
+          mustBe(asDateString)(null);
         }).toThrow();
       });
     });
