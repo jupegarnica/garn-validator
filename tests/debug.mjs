@@ -18,7 +18,7 @@ import {
 try {
 
   console.log(
-    isValidOrLogAll({a:DateString, b:Negative, c:Numeric})({a:"2020-13-32",b:2})
+    isValidOrLogAll({a:1, c:mustBe(Number).or(0)})({a:0})
 
   );
 

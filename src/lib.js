@@ -358,12 +358,18 @@ ${err}`,
   return defaultValue;
 };
 
-const createOr = (types, behavior) => (defaultValue) =>
-  createValidator(types, {
+const createOr = (types, behavior) => (defaultValue) => {
+  let v = createValidator(types, {
     ...behavior,
     onInvalid: applyDefault(defaultValue),
     name: "applyDefault",
   });
+  v.displayName = `mustBe(${types.map(stringify)}).or(${stringify(
+    defaultValue
+  )})`;
+
+  return v;
+};
 
 const run = (behavior) => (...types) => createValidator(types, behavior);
 
