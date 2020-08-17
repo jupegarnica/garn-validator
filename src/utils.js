@@ -1,6 +1,15 @@
 import { isValid, mustBe } from "./lib.js";
 import { stringify } from "./helpers.js";
 
+
+
+const addDisplayName = (name,fn) => (...args) => {
+  let r = fn(...args);
+  r.displayName = `${name}(${args.map(stringify)})`;
+  return r;
+}
+
+
 // LOGICAL
 
 // TODO RETHINK TO COLLECT ALL ERRORS IF POSIBLE
@@ -9,6 +18,9 @@ export const not = (...args) => {
   v.displayName = `not(${args.map(stringify)})`;
   return v;
 };
+
+
+
 export const or = (...args) => {
   let v = args;
   v.displayName = `or(${args.map(stringify)})`;
@@ -23,23 +35,23 @@ export const and = (...args) => {
 // NUMBERS
 export const gt = (limit) => {
   let v = (value) => value > limit;
-  v.displayName = `gt(${limit})`;
+  v.displayName = `gt(${stringify(limit)})`;
   return v;
 };
 export const ge = (limit) => {
   let v = (value) => value >= limit;
-  v.displayName = `ge(${limit})`;
+  v.displayName = `ge(${stringify(limit)})`;
   return v;
 };
 
 export const lt = (limit) => {
   let v = (value) => value < limit;
-  v.displayName = `lt(${limit})`;
+  v.displayName = `lt(${stringify(limit)})`;
   return v;
 };
 export const le = (limit) => {
   let v = (value) => value <= limit;
-  v.displayName = `le(${limit})`;
+  v.displayName = `le(${stringify(limit)})`;
   return v;
 };
 
@@ -89,10 +101,8 @@ export const SafeNumber = and(
 SafeNumber.displayName = "SafeNumber";
 
 export const min = ge;
-min.displayName = "min";
 
 export const max = le;
-max.displayName = "max";
 
 // STRINGS
 export const contains = (query) => {
@@ -140,13 +150,29 @@ DateString.displayName = "DateString";
 export const DateValid = mustBe(Date, isValidDate);
 DateValid.displayName = "DateValid";
 
-export const after = (min) => (date) => new Date(date) > new Date(min);
-export const before = (max) => (date) => new Date(date) < new Date(max);
+export const after = (min) => {
+  let v = (date) => new Date(date) > new Date(min);
+  v.displayName = `after(${stringify(min)})`;
+  return v;
+};
+export const before = (max) => {
+  let v =  (date) => new Date(date) < new Date(max);
+  v.displayName = `before(${stringify(max)})`;
+  return v;
+}
 
 // OBJECTS
-export const arrayOf = (type) => isValid(Array, { [/^\d$/]: type });
-export const objectOf = (type) => isValid(Object, { [/./]: type });
+export const arrayOf = (type) => {
+  let v = isValid(Array, { [/^\d$/]: type });
+  v.displayName = `arrayOf(${stringify(type)})`;
+  return v;
+}
 
+
+
+export const objectOf = addDisplayName('objectOf', (type) => isValid(Object, { [/./]: type }));
+
+// export const objectOf = (type) => isValid(Object, { [/./]: type });
 export const noExtraKeys = (schema) => ({ ...schema, [/./]: () => false });
 
 // CASTING

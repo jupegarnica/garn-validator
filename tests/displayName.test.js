@@ -9,6 +9,8 @@ import {
   and,
   not,
   or,
+  arrayOf,
+  objectOf,
 } from "garn-validator";
 
 describe("displayName", () => {
@@ -42,7 +44,7 @@ describe("displayName", () => {
   test("should show dynamic displayName", () => {
     expect(stringify(mustBe(between(1, 3)))).toBe("mustBe(between(1,3))");
   });
-  test("should for and", () => {
+  test("should work for and()", () => {
     expect(stringify(mustBe(and(Number, String)))).toBe(
       "mustBe(and(Number,String))"
     );
@@ -50,7 +52,7 @@ describe("displayName", () => {
       stringify(mustBe(and(mustBe(null), isValid(String, Lowercase))))
     ).toBe("mustBe(and(mustBe(null),isValid(String,Lowercase)))");
   });
-  test("should for not", () => {
+  test("should work for not()", () => {
     expect(stringify(mustBe(not(Number)))).toBe(
       "mustBe(not(Number))"
     );
@@ -58,12 +60,18 @@ describe("displayName", () => {
       stringify(mustBe(not(isValid(String, Lowercase))))
     ).toBe("mustBe(not(isValid(String,Lowercase)))");
   });
-  test("should for or", () => {
+  test("should work for or()", () => {
     expect(stringify(or(Number,String))).toBe(
       "or(Number,String)"
     );
     expect(
       stringify(mustBe(or(isValid(String, Lowercase))))
     ).toBe("mustBe(or(isValid(String,Lowercase)))");
+  });
+  test('should arrayOf', () => {
+    expect(stringify(arrayOf(Numeric))).toBe("arrayOf(Numeric)");
+  });
+  test('should objectOf', () => {
+    expect(stringify(objectOf(Numeric))).toBe("objectOf(Numeric)");
   });
 });
