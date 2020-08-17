@@ -1,6 +1,6 @@
 {
   "name": "garn-validator",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "Create validations with ease",
   "main": "src/index.js",
   "type": "commonjs",
