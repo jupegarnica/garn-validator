@@ -84,6 +84,9 @@ const addStripMark = (str) => `__strip__${str}__strip__`;
 const parser = () => {
   const seen = new WeakMap();
   return (key, value) => {
+    if (value && value.displayName) {
+      return addStripMark(value.displayName);
+    }
     if (typeof value === "object" && value !== null) {
       if (seen.has(value)) {
         const oldKey = seen.get(value);
@@ -98,7 +101,7 @@ const parser = () => {
       return addStripMark(value);
     }
     if (typeof value === "function" && value[validatorSymbol]) {
-      return addStripMark(value.displayName || value.name);
+      return addStripMark(value.name);
     }
     if (typeof value === "bigint") {
       return addStripMark(Number(value) + "n");
@@ -107,7 +110,7 @@ const parser = () => {
       return addStripMark(value.name);
     }
     if (typeof value === "function") {
-      return addStripMark(value.displayName || value.toString());
+      return addStripMark(value.toString());
     }
     if (checkConstructor(RegExp, value)) {
       return addStripMark(value.toString());
