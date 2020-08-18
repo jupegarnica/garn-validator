@@ -99,6 +99,7 @@ const anotherUser = isValidUser({
     - [isValid, isValidOrLog and isValidOrLogAll](#isvalid-isvalidorlog-and-isvalidorlogall)
     - [hasErrors](#haserrors)
     - [mustBe vs mustBeOrThrowAll](#mustbe-vs-mustbeorthrowall)
+  - [Utils](#utils)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -258,7 +259,7 @@ const schema = { a: Number, b: Number }; // a and b are required
 const obj = { a: 1, b: 2 };
 mustBe(schema)(obj); // returns obj
 
-mustBe({ a: 1 })({ a: 1, b: 2 }); // returns { a: 1, b: 2 }, a must be 1
+mustBe({ a: 1 })({ a: 1, b: 2 }); // returns { a: 1, b: 2 },  because b is not checked
 mustBe({ c: Number })({ a: 1, b: 2 }); // it throws (c is missing)
 
 // Optional keys
@@ -442,10 +443,8 @@ try {
 
 Learn more at [Errors](#errors)
 
-<!-- TODO
-
 ## Utils
- -->
+
 
 # In depth
 
