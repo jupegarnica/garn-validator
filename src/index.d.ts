@@ -1,7 +1,14 @@
 export const AsyncFunction: Function;
 export const GeneratorFunction: Function;
 
-// TODO TypeValidationError
+export declare class TypeValidationError {
+  constructor(errors: any[], message: string);
+  name: string;
+  message: string;
+  stack: string;
+  raw: Object;
+}
+
 export declare class AggregateError {
   constructor(errors: any[], message: string);
   name: string;
@@ -17,6 +24,7 @@ export declare class SchemaValidationError extends AggregateError {
 
 export declare class SerieValidationError extends AggregateError {
 }
+export declare class CastError extends AggregateError{}
 
 export function arrayOf(type: any): Function;
 export function objectOf(type: any): Function;
