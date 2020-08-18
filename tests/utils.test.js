@@ -490,6 +490,9 @@ describe("utils", () => {
       expect(() => {
         mustBe(Lowercase)("Lorem ipsum hello 33 & $  ?");
       }).toThrow();
+      expect(() => {
+        mustBe(Lowercase)(1);
+      }).toThrow();
     });
   });
   describe("Uppercase", () => {

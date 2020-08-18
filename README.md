@@ -23,8 +23,7 @@
 [![Node Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Node%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Node+Tests+CI%22)
 [![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Deno+Tests+CI%22)
 
-
-> DEPRECATION WARNING: `isValidOrThrow` behavior has been deprecated in favor of `mustBe`.  Learn more at [mustBe](#mustbe)
+> DEPRECATION WARNING: `isValidOrThrow` behavior has been deprecated in favor of `mustBe`. Learn more at [mustBe](#mustbe)
 
 <h2>Example</h2>
 
@@ -69,7 +68,6 @@ const newUser = isValidUser({
   password: "12345zZ?",
   country: "ES",
 }); // returns { name: 'anonymous', age: 38, password: '12345zZ?', country: 'ES' }
-
 
 const anotherUser = isValidUser({
   name: "garn",
@@ -445,6 +443,35 @@ Learn more at [Errors](#errors)
 
 ## Utils
 
+The library has a bunch of pre-made validations (and growing), which makes easier validations of stings, numbers, objects or dates.
+
+Learn more at [utils test](https://github.com/jupegarnica/garn-validator/blob/1cd727ae647a7a79ffe4ba49312513193d683bdb/tests/utils.test.js)
+
+```js
+import {  mustBe,  arrayOf,  and,  Integer,  Numeric, Positive, Lowercase,   before} from "garn-validator";
+
+let Schema = {
+    name: Lowercase,
+    birthday: before(new Date()),
+    height: and(Number, Positive, Integer),
+    creditCard: Numeric,
+    books_id: arrayOf(String)
+}
+
+let data = {
+  name: 'garn',
+  birthday: '1982-03-16',
+  height: 170,
+  creditCard:'42424242424242',
+  books_id:['123','321']
+}
+
+let user = mustBe(Schema).or(null)(data);
+```
+
+<!-- TODO LOGICAL UTILS -->
+<!-- TODO NUMBER UTILS -->
+<!-- TODO STRING UTILS -->
 
 # In depth
 
@@ -635,7 +662,7 @@ let obj = {
 mustBe(schema)(obj); // returns obj
 ```
 
-> **Only the keys in the schema will be checked. Any key not present in the schema won't be checked  (under consideration to be changed)**
+> **Only the keys in the schema will be checked. Any key not present in the schema won't be checked (under consideration to be changed)**
 
 ```js
 mustBe({})({ a: 1 }); // returns { a: 1 } , a is not in the schema
