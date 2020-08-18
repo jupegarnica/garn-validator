@@ -1,4 +1,4 @@
-<h1>garn-validator:  <strong>Create validations with ease</strong> </h1>
+<h1>garn-validator:  <i>Create validations with ease</i> </h1>
 
 <h2>Features</h2>
 
