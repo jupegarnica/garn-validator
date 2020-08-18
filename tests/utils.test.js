@@ -29,6 +29,7 @@ import {
   before,
   asDate,
   asDateString,
+  size,
 } from "garn-validator";
 
 describe("utils", () => {
@@ -666,9 +667,7 @@ describe("utils", () => {
       test("should work", () => {
         let str = "2020-10-31";
         expect(mustBe(asDateString)(str)).toEqual(str);
-        expect(mustBe(asDateString)(new Date(str))).toMatch(
-          "Sat Oct 31 2020"
-        );
+        expect(mustBe(asDateString)(new Date(str))).toMatch("Sat Oct 31 2020");
       });
       test("should work nested", () => {
         let str = "2020-10-31";
@@ -688,6 +687,35 @@ describe("utils", () => {
           mustBe(asDateString)(null);
         }).toThrow();
       });
+    });
+  });
+
+  describe("size()", () => {
+    test("should work with strings", () => {
+      expect(mustBe(size(1))("a")).toBe("a");
+    });
+    test("should work with arrays", () => {
+      expect(mustBe(size(1))([0])).toEqual([0]);
+    });
+    test("should work with Sets", () => {
+      const set = new Set([0]);
+      expect(mustBe(size(1))(set)).toBe(set);
+    });
+    test("should throw with strings", () => {
+      expect(() => {
+        mustBe(size(2))("a")
+      }).toThrow();
+    });
+    test("should throw with arrays", () => {
+      expect(() => {
+        mustBe(size(2))([0])
+      }).toThrow();
+    });
+    test("should throw with Sets", () => {
+      const set = new Set([0]);
+      expect(() => {
+        mustBe(size(2))(set)
+      }).toThrow();
     });
   });
 });

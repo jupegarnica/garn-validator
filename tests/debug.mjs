@@ -1,21 +1,29 @@
-import {  mustBe,  arrayOf,  and,  Integer,  Numeric, Positive, Lowercase,   before} from "garn-validator";
+import {
+  hasErrors,
+  isValid,
+  isValidOrLog,
+  isValidOrLogAll,
+  TypeValidationError,
+  Integer,
+  Numeric,
+  Negative,
+  SafeNumber,
+  mustBe,
+  Positive,
+  and,
+  DateString,
+  mustBeOrThrowAll,
+  noExtraKeys,
+  size
+} from "garn-validator";
 
-let Schema = {
-    name: Lowercase,
-    birthday: before(new Date()),
-    height: and(Number, Positive, Integer),
-    creditCard: Numeric,
-    books_id: arrayOf(String)
+try {
+  // console.log(
+  //   isValidOrLogAll(noExtraKeys({a:1, c:mustBe(Number).or(0)}))({a:0})
+
+  // );
+  const set = new Set([0]);
+  console.log(mustBe(size(1))(set));
+} catch (error) {
+  console.log(error);
 }
-
-let data = {
-  name: 'garn',
-  birthday: '1982-03-16',
-  height: 170,
-  creditCard:'42424242424242',
-  books_id:['123','321']
-}
-
-let user = mustBe(Schema).or(null)(data);
-
-console.log(user);
