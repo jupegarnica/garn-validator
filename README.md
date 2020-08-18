@@ -100,7 +100,6 @@ const anotherUser = isValidUser({
   - [Utils](#utils)
     - [Logical utils](#logical-utils)
       - [or()](#or)
-    - [Logical utils](#logical-utils-1)
       - [and()](#and)
       - [not()](#not)
 - [In depth](#in-depth)
@@ -487,7 +486,7 @@ let user = mustBe(Schema).or(null)(data);
 
 #### or()
 
-`or()` is just a shortcut to an enum.
+Just a shortcut to an enum.
 
 > Not to be confused with `mustBe().or()`
 
@@ -498,8 +497,6 @@ mustBe(or(Number, String));
 // same as:
 mustBe([Number, String]);
 ```
-
-### Logical utils
 
 #### and()
 
