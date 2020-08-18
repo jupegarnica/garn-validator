@@ -22,6 +22,7 @@
     "test:prod": "jest tests",
     "test:prod:dom": "jest tests --config=jest.config.dom.js",
     "test:deno": "deno test --importmap=import_map.json --allow-all --unstable tests/run-deno-tests.js",
+    "test:deno:watch":"nodemon --exec npm run test:deno",
     "test:raw:deno": "deno run --importmap=import_map.json --unstable tests/deno.raw.js",
     "test:raw:deno:ts": "deno run --importmap=import_map.json --unstable tests/deno.raw.ts",
     "test:coverage": "jest tests --coverage --watch",
