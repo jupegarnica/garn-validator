@@ -17,13 +17,24 @@ import {
   size
 } from "garn-validator";
 
-try {
-  // console.log(
-  //   isValidOrLogAll(noExtraKeys({a:1, c:mustBe(Number).or(0)}))({a:0})
+const color = /#(?:[a-f\d]{3}){1,2}\b|rgb\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)|hsl\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*){2}\)|(?:rgba\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){3}|(?:\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*,){3})|hsla\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*){2},)\s*0*(?:1|0(?:\.\d+)?)\s*\)/ig
+const regexp = /ee/i
 
-  // );
-  const set = new Set([0]);
-  console.log(mustBe(size(1))(set));
+try {
+
+
+  let res = mustBeOrThrowAll({
+    // [/[0-9]/]:String,
+    [color]:String,
+  })({
+    '#ff22aa': 2,
+    '#ffEEaa': 2,
+    // '#ff22zz': 2,
+  });
+  // var matches = new RegExp('hola \S+').exec('Esto es un hola mundo!');
+  // console.log(matches[1]);
+
+  console.log(res);
 } catch (error) {
   console.log(error);
 }

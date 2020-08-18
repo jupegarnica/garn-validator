@@ -135,6 +135,35 @@ describe("check schema", () => {
       }); // will throw (a is not 2)
     }).toThrow();
   });
+  test("match key with complex regex", () => {
+    expect(() => {
+      mustBe({
+        [/\d/]:String
+      })({
+        a: 1,
+        '2': '2',
+      });
+    }).not.toThrow();
+    const colorHex = /#(?:[a-f\d]{3}){1,2}\b|rgb\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){2}\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)|\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%(?:\s*,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%){2})\s*\)|hsl\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*){2}\)|(?:rgba\((?:(?:\s*0*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,){3}|(?:\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*,){3})|hsla\(\s*0*(?:360|3[0-5]\d|[12]?\d?\d)\s*(?:,\s*0*(?:100(?:\.0+)?|\d?\d(?:\.\d+)?)%\s*){2},)\s*0*(?:1|0(?:\.\d+)?)\s*\)/ig
+
+    expect(() => {
+      mustBe({
+        [colorHex]:String,
+      })({
+        '#ff22AA': 2,
+      });
+    }).toThrow();
+    expect(() => {
+      mustBe({
+        [colorHex]:Number,
+      })({
+        '#ff22aa': 2,
+        '#ff22AA': 2,
+        '#ffaaZZ': '2',
+      });
+    }).not.toThrow();
+
+  });
 });
 
 describe("check objects recursively", () => {

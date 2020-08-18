@@ -130,9 +130,15 @@ export const stringify = (val) => {
 };
 
 export const checkRegExp = (regExp, value) => regExp.test(value);
-// export const stringToRegExp = (string) =>isRegExp(string) && new RegExp(eval(string));
-export const stringToRegExp = (string) => new RegExp(eval(string));
-export const isRegExp = (value) => value && /^\/.+\/$/.test(value);
+
+const matchExpAndFlags = /^\/([\d\D]*)\/([iugmy]*)$/g
+export const stringToRegExp = (string) => {
+  const matches = matchExpAndFlags.exec(string);
+  const expression = matches && matches[1] || undefined;
+  const flags = matches && matches[2] || undefined
+  return new RegExp(expression,flags)
+};
+export const isRegExp = (value) => value && /^\/.+(\/[iugmy]*)$/.test(value);
 export const notIsRegExp = (value) => !isRegExp(value);
 
 // export const isError = (e) => e && e.stack && e.message;

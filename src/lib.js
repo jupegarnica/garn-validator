@@ -186,7 +186,7 @@ const validSchemaOrThrow = (data) => {
           type: schema[regexpString],
           value: clonedObject[keyName],
           root,
-          keyName,
+          keyName:keyName,
           path: [...path, keyName],
         });
         mustUpdateRef && updateRef(clonedObject, keyName, newValue);
