@@ -30,9 +30,18 @@ import {
   asDate,
   asDateString,
   size,
+  any,
 } from "garn-validator";
 
 describe("utils", () => {
+  describe('any', () => {
+    test('should work if present', () => {
+        expect(mustBe({a:any})({a:1}).a).toBe(1);
+    });
+    test('should work if present', () => {
+      expect(mustBe({a:any})({}).a).toBe(undefined);
+    });
+  });
   describe("objects", () => {
     test("ArrayOf", () => {
       expect(() => {

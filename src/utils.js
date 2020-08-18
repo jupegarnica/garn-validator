@@ -13,6 +13,9 @@ const addDisplayName = (fn) => (...args) => {
   return r;
 };
 
+export const any = () => true;
+any.displayName = 'any';
+
 // LOGICAL
 
 const _not = (...args) => (val) => !isValid(...args)(val);
