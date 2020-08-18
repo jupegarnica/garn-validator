@@ -23,7 +23,7 @@ const _not = (...args) => (val) => !isValid(...args)(val);
 export const not = addDisplayName(_not);
 const _or = (...args) => args;
 export const or = addDisplayName(_or);
-const _and = (...args) => isValid(...args);
+const _and = (...args) => mustBe(...args);
 export const and = addDisplayName(_and);
 
 // NUMBERS

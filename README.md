@@ -98,6 +98,11 @@ const anotherUser = isValidUser({
     - [hasErrors](#haserrors)
     - [mustBe vs mustBeOrThrowAll](#mustbe-vs-mustbeorthrowall)
   - [Utils](#utils)
+    - [Logical utils](#logical-utils)
+      - [or()](#or)
+    - [Logical utils](#logical-utils-1)
+      - [and()](#and)
+      - [not()](#not)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -448,28 +453,78 @@ The library has a bunch of pre-made validations (and growing), which makes easie
 Learn more at [utils test](https://github.com/jupegarnica/garn-validator/blob/1cd727ae647a7a79ffe4ba49312513193d683bdb/tests/utils.test.js)
 
 ```js
-import {  mustBe,  arrayOf,  and,  Integer,  Numeric, Positive, Lowercase,   before} from "garn-validator";
+import {
+  mustBe,
+  arrayOf,
+  and,
+  Integer,
+  Numeric,
+  Positive,
+  Lowercase,
+  before,
+} from "garn-validator";
 
 let Schema = {
-    name: Lowercase,
-    birthday: before(new Date()),
-    height: and(Number, Positive, Integer),
-    creditCard: Numeric,
-    books_id: arrayOf(String)
-}
+  name: Lowercase,
+  birthday: before(new Date()),
+  height: and(Number, Positive, Integer),
+  creditCard: Numeric,
+  books_id: arrayOf(String),
+};
 
 let data = {
-  name: 'garn',
-  birthday: '1982-03-16',
+  name: "garn",
+  birthday: "1982-03-16",
   height: 170,
-  creditCard:'42424242424242',
-  books_id:['123','321']
-}
+  creditCard: "42424242424242",
+  books_id: ["123", "321"],
+};
 
 let user = mustBe(Schema).or(null)(data);
 ```
 
-<!-- TODO LOGICAL UTILS -->
+### Logical utils
+
+#### or()
+
+`or()` is just a shortcut to an enum.
+
+> Not to be confused with `mustBe().or()`
+
+```js
+import { mustBe, or } from "garn-validator";
+
+mustBe(or(Number, String));
+// same as:
+mustBe([Number, String]);
+```
+
+### Logical utils
+
+#### and()
+
+`and(...validations)` is a shortcut to an `mustBe(...args)`, but semantically useful.
+
+
+```js
+import { mustBe, and } from "garn-validator";
+
+mustBe({age: and(Number, num => num > 18)});
+// same as:
+mustBe({age: mustBe(Number, num => num > 18)});
+```
+#### not()
+
+`not(...validations)` it negates the validations
+
+```js
+import { mustBe, not } from "garn-validator";
+
+// anything but Number
+mustBe(not(Number))('qwerty'); // valid, return 'qwerty'
+
+```
+
 <!-- TODO NUMBER UTILS -->
 <!-- TODO STRING UTILS -->
 
