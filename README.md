@@ -99,9 +99,6 @@ const anotherUser = isValidUser({
     - [mustBe vs mustBeOrThrowAll](#mustbe-vs-mustbeorthrowall)
   - [Utils](#utils)
     - [Logical utils](#logical-utils)
-      - [or()](#or)
-      - [and()](#and)
-      - [not()](#not)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -484,9 +481,7 @@ let user = mustBe(Schema).or(null)(data);
 
 ### Logical utils
 
-#### or()
-
-Just a shortcut to an enum.
+**`or(...validations)`** Is just a shortcut to an enum.
 
 > Not to be confused with `mustBe().or()`
 
@@ -498,9 +493,7 @@ mustBe(or(Number, String));
 mustBe([Number, String]);
 ```
 
-#### and()
-
-`and(...validations)` is a shortcut to an `mustBe(...args)`, but semantically useful.
+**`and(...validations)`** is a shortcut to an `mustBe(...args)`, but semantically useful.
 
 
 ```js
@@ -510,9 +503,8 @@ mustBe({age: and(Number, num => num > 18)});
 // same as:
 mustBe({age: mustBe(Number, num => num > 18)});
 ```
-#### not()
 
-`not(...validations)` it negates the validations
+**`not(...validations)`** it negates the validations passed
 
 ```js
 import { mustBe, not } from "garn-validator";
@@ -521,6 +513,7 @@ import { mustBe, not } from "garn-validator";
 mustBe(not(Number))('qwerty'); // valid, return 'qwerty'
 
 ```
+<!-- TODO ### Numeric utils -->
 
 <!-- TODO NUMBER UTILS -->
 <!-- TODO STRING UTILS -->

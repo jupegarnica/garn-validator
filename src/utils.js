@@ -40,7 +40,9 @@ export const le = addDisplayName(_le);
 
 const _between = (min, max) => and(ge(min), le(max));
 export const between = addDisplayName(_between);
+
 export const Integer = and(Number, Number.isInteger);
+Integer.displayName = "Integer";
 
 export const Numeric = and(
   [Number, String, BigInt],
