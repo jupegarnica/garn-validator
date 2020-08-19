@@ -75,7 +75,7 @@
     "type-checker"
   ],
   "author": "jupegarnica",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jupegarnica/garn-validator/issues"
   },
