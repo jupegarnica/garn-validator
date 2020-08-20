@@ -18,8 +18,8 @@
 - Works in all modern browsers
 - Works in all frontend frameworks: **React, Angular, Vue,** etc...
 
-[![npm version](https://badge.fury.io/js/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
-[![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg)](https://www.npmjs.com/package/garn-validator)
+[![npm version](https://img.shields.io/npm/v/garn-validator?logo=npm)](https://www.npmjs.com/package/garn-validator)
+[![npm downloads](https://img.shields.io/npm/dm/garn-validator.svg?logo=npm&color=blue)](https://www.npmjs.com/package/garn-validator)
 [![Node Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Node%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Node+Tests+CI%22)
 [![Deno Tests CI](https://github.com/jupegarnica/garn-validator/workflows/Deno%20Tests%20CI/badge.svg?branch=master)](https://github.com/jupegarnica/garn-validator/actions?query=workflow%3A%22Deno+Tests+CI%22)
 
@@ -514,8 +514,6 @@ mustBe(not(Number))('qwerty'); // valid, return 'qwerty'
 
 ```
 <!-- TODO ### Numeric utils -->
-
-<!-- TODO NUMBER UTILS -->
 <!-- TODO STRING UTILS -->
 
 # In depth
