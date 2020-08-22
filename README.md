@@ -28,9 +28,9 @@
 <h2>Example</h2>
 
 ```js
-import mustBe from "garn-validator";
+import mustBe, { isValid, isValidOrLog } from "garn-validator";
 
-const isValidPassword = mustBe(
+const isValidPassword = isValid(
   String, //  must be String
   (str) => str.length >= 8, // and length >= 8
   /[a-z]/, // and have at least one lowercase
@@ -39,22 +39,20 @@ const isValidPassword = mustBe(
   /[-_/!¡?¿$%&/()]/ // and have at least one especial character
 );
 
-isValidPassword("12345Aa?"); // returns "12345Aa?"
+isValidPassword("12345Aa?"); // returns true
 
 const isValidName = mustBe(String, (name) => name.length > 3).or("anonymous"); // will auto correct to 'anonymous' if fails
 
-isValidName("qw"); // return 'anonymous'
 
-const isValidAge = mustBe(
+const isValidAge = isValidOrLog(
   Number,
   (age) => age > 18,
   (age) => age < 40
 );
 
-// isValidAge(15); // fails
+isValidAge(15); // false, and logs 15 do not match validator (age) => age > 18
 
-// composition
-
+// Composition
 const isValidUser = mustBe({
   name: isValidName,
   age: isValidAge,
