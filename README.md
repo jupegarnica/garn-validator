@@ -99,6 +99,7 @@ const anotherUser = isValidUser({
     - [mustBe vs mustBeOrThrowAll](#mustbe-vs-mustbeorthrowall)
   - [Utils](#utils)
     - [Logical utils](#logical-utils)
+    - [Numeric utils](#numeric-utils)
 - [In depth](#in-depth)
   - [Types of validations](#types-of-validations)
     - [Primitives](#primitives)
@@ -122,8 +123,6 @@ const anotherUser = isValidUser({
     - [Composition in depth](#composition-in-depth)
   - [Especial cases](#especial-cases)
     - [AsyncFunction & GeneratorFunction](#asyncfunction--generatorfunction)
-    - [arrayOf](#arrayof)
-    - [objectOf](#objectof)
 - [Roadmap](#roadmap)
 
 # Get started
@@ -493,15 +492,14 @@ mustBe(or(Number, String));
 mustBe([Number, String]);
 ```
 
-**`and(...validations)`** is a shortcut to an `mustBe(...args)`, but semantically useful.
-
+**`and(...validations)`** is a shortcut to `mustBe(...args)`, but semantically useful.
 
 ```js
 import { mustBe, and } from "garn-validator";
 
-mustBe({age: and(Number, num => num > 18)});
+mustBe({ age: and(Number, (num) => num > 18) });
 // same as:
-mustBe({age: mustBe(Number, num => num > 18)});
+mustBe({ age: mustBe(Number, (num) => num > 18) });
 ```
 
 **`not(...validations)`** it negates the validations passed
@@ -510,11 +508,115 @@ mustBe({age: mustBe(Number, num => num > 18)});
 import { mustBe, not } from "garn-validator";
 
 // anything but Number
-mustBe(not(Number))('qwerty'); // valid, return 'qwerty'
-
+mustBe(not(Number))("qwerty"); // valid, return 'qwerty'
 ```
-<!-- TODO ### Numeric utils -->
+<!--
+### Numeric utils
+
+In order to validate numbers we have a few pseudo-type as Integer, or Numeric.
+
+```js
+import {
+  mustBe,
+  Integer,
+  Finite,
+  Numeric,
+  Odd,
+  Even,
+  Positive,
+  Negative,
+  SafeInteger,
+  SafeNumber,
+} from "garn-validator";
+
+let schema = {
+  int: Integer,
+  finite: Finite,
+  string: Numeric,
+  bigInt: Numeric,
+  number: Numeric,
+  odd: Odd,
+  even: Even,
+  positive: Positive,
+  Negative: Negative,
+  safeInt: SafeInteger,
+  safeNum: SafeNumber,
+};
+let numbers = {
+  int: 2.1, // will fail
+  finite: Infinity, // will fail
+  string: "42", // ok
+  bigInt: 123456789n, // ok
+  number: 42, // ok
+  odd: 1, // ok
+  even: 2, // ok
+  positive: 1, // ok
+  Negative: -1, // ok
+  safeInt: 1e53, // will fail
+  safeNum: 99999999999999.999999999, // will fail
+};
+mustBe(schema)(numbers);
+```
+
+We also have custom validators as between(), or le().
+
+```js
+import {
+  mustBe,
+  between,
+  le,
+
+} from "garn-validator";
+
+// let schema = {
+//   int: Integer,
+//   finite: Finite,
+
+// };
+// let numbers = {
+//   int: 2.1, // will fail
+
+// };
+// mustBe(schema)(numbers);
+``` -->
 <!-- TODO STRING UTILS -->
+
+### Object utils
+
+**arrayOf()**
+
+As we use the array `[]` as enum, if you need to check the items of an array, you should treat it as an object and check against an schema.
+
+```js
+import mustBe from "garn-validator";
+
+mustBe(Array, { [/\d/]: Number })([1, 2, 3]); // returns [1, 2, 3]
+mustBe(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
+```
+
+In order to not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
+
+`export const arrayOf = type => isValid(Array, {[/^\d$/]: type})`
+
+```js
+import mustBe, { arrayOf } from "garn-validator";
+
+mustBe(arrayOf(Number))([1, 2, 3]); // returns [1, 2, 3]
+mustBe(arrayOf(Number))([1, 2, "3"]); // throws
+```
+
+**objectOf**
+
+You can import `objectOf` from garn-validator as a shortcut to:
+
+`export const objectOf = type => isValid(Object, {[/./]: type})`
+
+```js
+import mustBe, { objectOf } from "garn-validator";
+
+mustBe(objectOf(Number))({ a: 1, b: 2 }); // returns { a: 1, b: 2 }
+mustBe(objectOf(Number))({ a: 1, b: "2" }); // throws
+```
 
 # In depth
 
@@ -1137,41 +1239,6 @@ mustBe(GeneratorFunction)(function* () {}); // ok
 
 mustBe(Function)(function* () {}); // throws
 mustBe(Function)(async function () {}); // throws
-```
-
-### arrayOf
-
-As we use the array `[]` as enum, if you need to check the items of an array, you should treat it as an object and check against an schema.
-
-```js
-import mustBe from "garn-validator";
-
-mustBe(Array, { [/\d/]: Number })([1, 2, 3]); // returns [1, 2, 3]
-mustBe(Array, { [/\d/]: Number })([1, 2, "3"]); // throws
-```
-
-In order to not be so ugly you can import `arrayOf` from garn-validator as a shortcut to:
-
-`export const arrayOf = type => isValid(Array, {[/^\d$/]: type})`
-
-```js
-import mustBe, { arrayOf } from "garn-validator";
-
-mustBe(arrayOf(Number))([1, 2, 3]); // returns [1, 2, 3]
-mustBe(arrayOf(Number))([1, 2, "3"]); // throws
-```
-
-### objectOf
-
-You can import `objectOf` from garn-validator as a shortcut to:
-
-`export const objectOf = type => isValid(Object, {[/./]: type})`
-
-```js
-import mustBe, { objectOf } from "garn-validator";
-
-mustBe(objectOf(Number))({ a: 1, b: 2 }); // returns { a: 1, b: 2 }
-mustBe(objectOf(Number))({ a: 1, b: "2" }); // throws
 ```
 
 # Roadmap
