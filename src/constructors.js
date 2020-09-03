@@ -47,6 +47,7 @@ export class SerieValidationError extends AggregateError {
   }
 }
 
+// TODO FIX WHEN SOME CONSTRUCTORS DO NOT EXIST
 export const constructors = new Proxy([
   Proxy, // intercepted to return the ProxyIntercepted
   Object,
@@ -85,14 +86,13 @@ export const constructors = new Proxy([
   Uint8ClampedArray,
   BigUint64Array,
   BigInt64Array,
-  SharedArrayBuffer,
-  DataView,
-  URL,
-  URLSearchParams,
+  // SharedArrayBuffer,
+  // DataView,
+  // URL,
+  // URLSearchParams,
   GeneratorFunction,
   AsyncFunction,
   // TextEncoder, // in node 10 : ReferenceError: TextEncoder is not defined
-  // TextDecoder, // in node 10 : ReferenceError: TextEncoder is not defined
 ], {
   get(target, key) {
     if (key == 0) {
