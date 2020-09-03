@@ -26,7 +26,6 @@ describe("check with constructors", () => {
 
     [Object, new Proxy({}, {})],
     [Array, new Proxy([], {})],
-    [URL, new URL("https://developer.mozilla.org")],
     [AsyncFunction, async () => {}],
     [GeneratorFunction, function* () {}],
 
@@ -58,8 +57,6 @@ describe("check with constructors", () => {
     [Array, new Proxy({}, {})],
     [Map, new WeakMap()],
     [Set, new WeakSet()],
-    [URL, "https://developer.mozilla.org"],
-    [String, new URL("https://developer.mozilla.org")],
   ])("should throw mustBe(%p)(%p)", (constructor, value) => {
     expect(() => {
       mustBe(constructor)(value);
