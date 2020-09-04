@@ -33,9 +33,8 @@ export const isFunctionHacked = (fn) =>
 
 export const isCustomValidator = (fn) =>
   typeof fn === "function" &&
-  fn instanceof Function &&
-  !isInvalidType(fn) &&
   !isClass(fn) &&
+  !isInvalidType(fn) &&
   !isConstructor(fn);
 
 export const isInvalidType = (fn) =>
