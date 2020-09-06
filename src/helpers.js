@@ -55,8 +55,8 @@ export const whatTypeIs = (type) => {
   if (type instanceof RegExp) return "regex";
   if (isConstructor(type)) return "constructor";
   if (isMainValidator(type)) return "main-validator";
-  // if (isCustomValidator(type)) return "validator";
-  return "validator";
+  if (isCustomValidator(type)) return "validator";
+  return "invalid";
 };
 
 // export const whatTypeIs = (type) => {
