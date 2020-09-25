@@ -44,8 +44,10 @@ export const between = addDisplayName(_between);
 export const Integer = and(Number, Number.isInteger);
 Integer.displayName = "Integer";
 
+const numbersTypes = typeof BigInt !== 'undefined' ? [Number, String, BigInt] : [Number, String];
+
 export const Numeric = and(
-  [Number, String, BigInt],
+  numbersTypes,
   (num) => num == Number(num)
 );
 Numeric.displayName = "Numeric";
@@ -157,8 +159,9 @@ export const asNumber = mustBe(
 );
 asNumber.displayName = "asNumber";
 
+const stringsTypes = typeof BigInt !== 'undefined' ? [BigInt, Number, String, Boolean, Date] :[ Number, String, Boolean, Date];
 export const asString = mustBe(
-  [BigInt, Number, String, Boolean, Date],
+  stringsTypes,
   mustBe(String).or(String)
 );
 asString.displayName = "asString";
