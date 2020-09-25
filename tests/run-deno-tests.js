@@ -1,5 +1,5 @@
-import { expect } from "https://deno.land/x/expect@v0.2.1/mod.ts";
-import * as mock from "https://deno.land/x/expect@v0.2.1/mock.ts";
+import { expect } from "https://deno.land/x/expect@v0.2.5/mod.ts";
+import * as mock from "https://deno.land/x/expect@v0.2.5/mock.ts";
 
 const test = (name, fn) => {
   return Deno.test({ name, fn });
