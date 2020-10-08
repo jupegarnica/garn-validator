@@ -282,8 +282,8 @@ describe("whatTypeIs", () => {
     [isValid(Number), "main-validator"],
     [class Car {}, "constructor"],
 
-    [async () => {}, "invalid"], // noy yet supported
-    [function* () {}, "invalid"], // noy yet supported
+    // [async () => {}, "invalid"], // noy yet supported
+    // [function* () {}, "invalid"], // noy yet supported
   ])("whatTypeIs(%s) is %p", (input, output) => {
     expect(whatTypeIs(input)).toBe(output);
   });

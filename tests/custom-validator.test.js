@@ -43,4 +43,15 @@ describe("Custom validator", () => {
     }
 
   });
+  test("you can throw a custom type of error", () => {
+    try {
+      mustBe(function(e){return(null===e||void 0===e?void 0:e.length)>=2})(33);
+      throw 'mec'
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError)
+      // expect(error).not.toBeInstanceOf(TypeError)
+
+    }
+
+  });
 });

@@ -193,21 +193,21 @@ describe("check errors in serie", () => {
   });
 });
 
-describe("check with invalid validator", () => {
-  test("should detect async functions", () => {
-    try {
-      mustBe(async () => false)(1);
-      throw "mec";
-    } catch (error) {
-      expect(error).toBeInstanceOf(SyntaxError);
-    }
-  });
-  test("should detect generators", () => {
-    try {
-      mustBe(function* () {})(1);
-      throw "mec";
-    } catch (error) {
-      expect(error).toBeInstanceOf(SyntaxError);
-    }
-  });
-});
+// describes("check with invalid validator", () => {
+//   test("should detect async functions", () => {
+//     try {
+//       mustBe(async () => false)(1);
+//       throw "mec";
+//     } catch (error) {
+//       expect(error).toBeInstanceOf(SyntaxError);
+//     }
+//   });
+//   test("should detect generators", () => {
+//     try {
+//       mustBe(function* () {})(1);
+//       throw "mec";
+//     } catch (error) {
+//       expect(error).toBeInstanceOf(SyntaxError);
+//     }
+//   });
+// });
