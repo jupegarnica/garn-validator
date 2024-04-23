@@ -1,5 +1,6 @@
 {
   "name": "@garn/validator",
   "version": "0.0.1",
-  "description": "A simple validator for validating objects"
+  "description": "A simple validator for validating objects",
+  "exports": "./src/index.js"
 }
